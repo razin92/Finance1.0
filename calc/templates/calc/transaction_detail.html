@@ -1,0 +1,32 @@
+{% extends 'index.html' %}
+{% load humanize %}
+{% block body %}
+{% if user.is_authenticated %}
+<div class="modal-body">
+    <h4>Транзакция №<strong> {{ transaction.id }}</strong> | Текущий баланс счета "{{ transaction.money }}": <strong>{{ transaction.money.balance|intcomma }}</strong> (ID счета = {{ transaction.money.id }})</h4>
+    <p><strong>Сумма:</strong> {{ transaction.sum_val|intcomma}}</p>
+    <p><strong>Дата:</strong> {{ transaction.date|date:"d.m.Y в H:i" }}</p>
+    <p><strong>ФИО:</strong> {{ transaction.who_is.firstname }} {{ transaction.who_is.secondname }}</p>
+    <p><strong>Категория:</strong> {{ transaction.category }}</p>
+    <p><strong>Счет:</strong> {{ transaction.money }}</p>
+    <p><strong>Тип:</strong>{% if not transaction.typeof %} Расход{% else %} Приход{% endif %}</p>
+    <p><strong>Комментарий:</strong> {{ transaction.comment }}</p>
+    {% if transaction.checking %}
+        <p>Статус: <text class="text-success">Проведено</text></p>
+    {% else %}
+        <p>Статус: <text class="text-danger">Не проведено</text></p>
+    {% endif %}
+
+<form action="{% url 'calc:changer' transaction.id %}" method="post">
+    {% csrf_token %}
+    {% if transaction.checking %}
+    <input type="submit" value="Отменить" class="btn btn-danger btn-xs"/>
+    {% else %}
+    {% if user.is_superuser %}
+    <input type="submit" value="Провести" class="btn btn-success btn-xs"/>
+    {% endif %}
+    {% endif %}
+</form>
+</div>
+{% endif %}
+{% endblock %}

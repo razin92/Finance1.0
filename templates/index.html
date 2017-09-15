@@ -1,0 +1,79 @@
+{% load staticfiles %}
+<script src="/media/static/static_jquery/js/jquery.js"></script>
+<script src="/media/static/bootstrap/js/bootstrap.js"></script>
+<link href="/media/static/css/bootstrap-datetimepicker.css" rel="stylesheet">
+<script src="/media/static/js/moment-with-locales.js"></script>
+<script src="/media/static/js/bootstrap-datetimepicker.js"></script>
+{% load bootstrap_themes %}
+{% bootstrap_styles theme='spacelab' type='css' %}
+{% block script %}
+{% endblock %}
+{% block head %}
+    {% if user.is_authenticated %}
+    <nav class="navbar navbar-inverse">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{% url 'index' %}">Finans 0.01</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2" aria-expanded="true">
+      <ul class="nav navbar-nav">
+          <li><a href="{% url 'calc:transaction' %}">Транзакции</a></li>
+          <!---
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">Кабельное <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="{% url 'cabletv:result' %}">Результаты</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li class="divider"></li>
+            <li><a href="#">4</a></li>
+            <li class="divider"></li>
+            <li><a href="#">5</a></li>
+          </ul>
+        </li>
+          --->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">Настройки<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="{% url 'lib:person' %}">Люди</a></li>
+            <li><a href="{% url 'lib:pouch' %}">Счета</a></li>
+            <li><a href="{% url 'lib:category' %}">Категории</a> </li>
+             {% if user.is_superuser %}
+            <li><a href="{% url 'telebot:run_bot' %}">Запустить бота</a></li>
+              {% endif %}
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">Зарплата<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="{% url 'salary:calculate' 1 %}">Работники</a></li>
+           {% if user.is_staff %}
+            <li><a href="{% url 'salary:workcalc' %}">Список работ / стоимость</a></li>
+            <li><a href="{% url 'salary:bonuswork' %}">Бонусы</a></li>
+            <li><a href="{% url 'salary:accountchange' %}">Бонусы без фиксы</a></li>
+            <li><a href="{% url 'salary:categoryofchange' %}">Основания начислений / удержаний</a></li>
+            <li><a href="{% url 'salary:calculate' 2 %}">Расчет ЗП</a></li>
+           {% endif %}
+          </ul>
+        </li>
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">Отчеты<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+              <li><a href="{% url 'report:report_transaction' %}">По транзакциям</a></li>
+              {% if user.is_staff %}
+              <li><a href="{% url 'report:report_workers' %}">По работам</a></li>
+              {% endif %}
+          </ul>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'logout' %}">{{ user.username }}:Выйти</a></li>
+        </ul>
+    </div>
+    </nav>
+    {% endif %}
+{% endblock %}
+{% block body %}
+    <h4 align="center">Привет, {{ user.username }}!</h4>
+{% endblock %}
+{% block footer %}
+{% endblock %}

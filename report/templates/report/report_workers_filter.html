@@ -1,0 +1,36 @@
+{% extends 'salary/base.html' %}
+{% load humanize %}
+{% block body %}
+    <div class="panel-body">
+    {% for x in result %}
+        {% if x|length > 0 %}
+        <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Дата</th>
+                <th>Работа</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Стоимость</th>
+                <th>Мастер</th>
+            </tr>
+        </thead>
+        {% for y in x %}
+            <tbody>
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ y.date|date:"d.m.Y" }}</td>
+                    <td>{{ y.model }}</td>
+                    <td>{{ y.model.cost|intcomma }}</td>
+                    <td>{{ y.quantity }}</td>
+                    <td>{{ y.calculate|intcomma }}</td>
+                    <td>{{ y.worker }}</td>
+                </tr>
+            </tbody>
+         {% endfor %}
+        </table>
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endblock %}

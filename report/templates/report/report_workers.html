@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+{% block body %}
+      <link rel="stylesheet" type="text/css" href="/media/static/js/theme.blue.css">
+      <link rel="stylesheet" type="text/css" href="/media/static/js/theme.dropbox.css">
+      <link rel="stylesheet" type="text/css" href="/media/static/js/jquery.tablesorter.pager.css">
+      <link rel="stylesheet" type="text/css" href="/media/static/js/jquery-ui.css">
+      <script type="text/javascript" src="/media/static/js/jquery.tablesorter.js"></script>
+      <script type="text/javascript" src="/media/static/js/jquery.tablesorter.widgets.js"></script>
+      <link rel="stylesheet" type="text/css" href="/media/static/js/theme.jui.css">
+      <script type="text/javascript" src="/media/static/js/widget-pager.js"></script>
+      <script type='text/javascript' src="/media/static/js/settings.tablesorter.js"></script>
+{% load bootstrap %}
+<div class="panel-body" style="width: 30%; margin-left: 35%">
+<form method="post" action="{% url 'report:workers_filter' %}">
+    {% csrf_token %}
+{{ form|bootstrap }}
+<input type="submit" value="Показать" class="btn btn-success"/>
+</form>
+</div>
+{% endblock %}

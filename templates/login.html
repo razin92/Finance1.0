@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<script src="/media/static/static_jquery/js/jquery.js"></script>
+<script src="/media/static/bootstrap/js/bootstrap.js"></script>
+{% load bootstrap_themes %}
+{% bootstrap_styles theme='spacelab' type='css' %}
+{% block body %}
+    <div class="panel-body" align="center">
+    <form action="{% url 'login-redirect' %}" method="post">
+    {% csrf_token %}
+        <p class="text-danger" style="margin-top: 20%;">{{ error }}</p>
+        <input title="Имя пользователя" type="text" name="username"><br>
+        <input title="Пароль" type="password" name="password" style="margin: 3px"><br>
+        <input type="submit" value="вход" class="btn btn-success" style="width: 100px; text-align: center">
+    </form>
+    </div>
+{% endblock %}

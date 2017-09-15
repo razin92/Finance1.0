@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="panel-body">
+<form method="post">
+{% csrf_token %}
+Работа: {{ form.name }}<br>
+Ед. измерения: {{ form.time_range }}
+Стоимость: {{ form.cost }}
+<input type="submit" value="Сохранить"/>
+</form>
+</div>
+{% endblock %}

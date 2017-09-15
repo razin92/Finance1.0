@@ -1,0 +1,16 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="panel-body">
+<form method="post">{% csrf_token %}
+    <h3>Вы действительно хотите удалить"{{ object }}" ?</h3>
+    <input type="submit" value="Подтвердить" class="btn btn-danger btn-sm"/>
+    {% if person %}
+        <a href="{% url 'lib:person' %}" class="btn btn-success btn-sm">Отмена</a>
+    {% elif pouch %}
+        <a href="{% url 'lib:pouch' %}" class="btn btn-success btn-sm">Отмена</a>
+    {% elif category %}
+        <a href="{% url 'lib:category' %}" class="btn btn-default btn-sm">Отмена</a>
+    {% endif %}
+</form>
+</div>
+{% endblock %}

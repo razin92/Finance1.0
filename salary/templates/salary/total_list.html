@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+{% load humanize %}
+{% block body %}
+    <a href="{% url 'salary:total_create' %}" class="btn btn-success">Заполнить</a>
+    <div class="panel-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th>ID</th>
+                <th>Месяц</th>
+                <th>Работник</th>
+                <th>Сальдо</th>
+                <th>Начисления</th>
+                <th>Бонусы</th>
+                <th>Удержания</th>
+                <th>К выдаче</th>
+                <th>Выдано</th>
+                <th>Текущий баланс</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for each in total %}
+                <tr>
+                <td>{{ each.id }}</td>
+                <td>{{ each.date|date:"M-Y" }}</td>
+                <td>{{ each.worker }}</td>
+                <td {% if each.balance_before < 0 %}class="text-danger"{% endif %}>{{ each.balance_before|intcomma }}</td>
+                <td><a href="{% url 'salary:accrual' each.worker.id %}">{{ each.accrual|intcomma }}</a></td>
+                <td><a href="{% url 'salary:bonus' each.worker.id each.id %}">{{ each.bonus|intcomma }}</a></td>
+                <td><a href="{% url 'salary:withholding' each.worker.id each.id %}">{{ each.withholding|intcomma }}</a></td>
+                <td>{{ each.balance_after|intcomma }}</td>
+                <td><a href="{% url 'salary:issued' each.worker.id each.id %}">{{ each.issued|intcomma }}</a></td>
+                <td {% if each.balance_now < 0 %}class="text-danger"{% endif %}>{{ each.balance_now|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>    
+    </div>
+{% endblock %}

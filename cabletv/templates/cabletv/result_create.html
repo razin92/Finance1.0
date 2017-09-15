@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="panel-body">
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            <thead>
+            <tr>
+                <th>Год</th>
+                <th>Месяц</th>
+                <th>Сумма</th>
+                <th>Счет</th>
+                <th>Комментарий</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ form.date_year }}</td>
+                <td>{{ form.date_month }}</td>
+                <td>{{ form.sum }}</td>
+                <td>{{ form.account }}</td>
+                <td>{{ form.comment }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="submit" value="Сохранить" class="btn btn-success btn-sm"/>
+        <a href="{% url 'cabletv:result' %}" class="btn btn-default btn-sm">Отмена</a>
+    </form>
+</div>
+{% endblock %}

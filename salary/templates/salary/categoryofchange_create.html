@@ -1,0 +1,10 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="panel-body">
+<form method="post">
+{% csrf_token %}
+    Основание: {{ form.name }}
+<input type="submit" value="Сохранить"/>
+</form>
+</div>
+{% endblock %}
