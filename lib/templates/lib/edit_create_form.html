@@ -1,0 +1,22 @@
+{% extends 'index.html' %}
+{% block body %}
+<div class="panel-body">
+<form method="post">{% csrf_token %}
+    {% for element in form %}
+        <table class="table">
+            <tr>
+                <td class="form-control">{{ element.name }}:{{ element }}</td>
+            </tr>
+        </table>
+    {% endfor %}
+    <input type="submit" value="Сохранить" class="btn btn-success btn-sm"/>
+    {% if person %}
+        <a href="{% url 'lib:person' %}" class="btn btn-default btn-sm">Отмена</a>
+    {% elif pouch %}
+        <a href="{% url 'lib:pouch' %}" class="btn btn-default btn-sm">Отмена</a>
+    {% elif category %}
+        <a href="{% url 'lib:category' %}" class="btn btn-default btn-sm">Отмена</a>
+    {% endif %}
+</form>
+</div>
+{% endblock %}

@@ -94,7 +94,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -195,5 +194,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/django,python,pycharm,windows
-Finans001/settings.py
-Finans001/settings.py

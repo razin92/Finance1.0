@@ -1,0 +1,33 @@
+{% extends 'index.html' %}
+{% load humanize %}
+{% block body %}
+{% if pouch %}
+<div class="panel-body">
+    <table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Название</th>
+        <th>Баланс</th>
+        <th>Начальный баланс</th>
+        <th>Валюта</th>
+        <th>Описание</th>
+    </tr>
+    </thead>
+    {% for element in pouch %}
+        <tr>
+        <td>{{ element.name }}</td>
+        <td>{{ element.balance|intcomma }}</td>
+        <td>{{ element.starting_balance|intcomma }}</td>
+        <td>{{ element.type }}</td>
+        <td>{{ element.comment }}</td>
+        <td><a href="{% url 'lib:pouch_edit' element.id %}" class="btn btn-primary btn-xs">Редактировать</a></td>
+        <td><a href="{% url 'lib:pouch_delete' element.id %}" class="btn btn-danger btn-xs">Удалить</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+<a href="{% url 'lib:pouch_create' %}" class="btn btn-primary btn-sm">Добавить</a>
+</div>
+{% else %}
+    <p>Здесь нет никого!</p>
+{% endif %}
+{% endblock %}
