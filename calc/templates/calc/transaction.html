@@ -22,7 +22,7 @@
             </tr>
             <tr>
         {% endif %}
-        <td>{{ element.name }} ({{ element.comment }}): <strong>{{ element.balance|intcomma }}</strong></td>
+        <td>{{ element.name }} {% if element.comment %}({{ element.comment }}){% endif %}: <strong>{{ element.balance|intcomma }}</strong></td>
         {% endfor %}
     </tr>
     </table>
