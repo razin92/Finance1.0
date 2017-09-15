@@ -51,7 +51,7 @@ class PouchCreate(generic.CreateView):
     model = Pouch
     template_name = 'lib/edit_create_form.html'
     success_url = reverse_lazy('lib:pouch')
-    fields = ['name', 'balance', 'type', 'comment']
+    fields = ['name', 'type', 'comment']
 
 class PouchDelete(generic.DeleteView):
     model = Pouch

@@ -2,10 +2,10 @@ from calc.models import Transaction
 from salary.models import Total, BonusWork, Worker, AccountChange
 from lib.models import Person, Pouch, Category, Staff
 from django.template import loader
-from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.shortcuts import render, get_object_or_404, render_to_response
+from django.http import HttpResponse
+from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
+from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
 from .forms import WorkerFilter
 from django.utils import timezone
 import datetime
@@ -57,10 +57,13 @@ def report_transaction_filter(request):
     ).order_by('-date', 'money', 'who_is')
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     error = 'Не верные данные'
+    period = 'Период отчета c %s по %s' % (date_start.strftime('%d-%m-%Y'), date_end.strftime('%d-%m-%Y'))
+
     context = {
         'transaction': filter,
         'error': error,
-        'user': user
+        'user': user,
+        'period': period
     }
     return render_to_response(template, context)
 
