@@ -54,6 +54,9 @@
             <th>Комментарий</th>
             <th>Управление</th>
             <th>Тип</th>
+            {% if user.is_superuser %}
+                <th>Статус</th>
+            {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -68,6 +71,9 @@
                 <td>{{ position.comment }}</td>
                 <td><a href="{% url 'calc:transaction_detail' position.id %}" class="bnt btn-success btn-xs">Подробно</a></td>
                     <td>{% if not position.typeof %}<p class="text-danger">Расход</p>{% else %}<p class="text-success">Приход</p>{% endif %}</td>
+                {% if user.is_superuser %}
+                    <td>{% if position.checking %}ПРОВЕДЕНО{% else %}ОТМЕНЕНО{% endif %}</td>
+                {% endif %}
                 </tr>
         {% endfor %}
         </tbody>
