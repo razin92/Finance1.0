@@ -53,7 +53,8 @@ def report_transaction_filter(request):
         category__name__in=category,
         money__name__in=money,
         typeof__in=typeof,
-        date__range=[date_start, date_end]
+        date__range=[date_start, date_end],
+        checking=True,
     ).order_by('-date', 'money', 'who_is')
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     error = 'Не верные данные'
