@@ -13,7 +13,7 @@ import datetime
 @login_required()
 def report_transaction(request):
     person = Person.objects.order_by('firstname')
-    staff_pouches = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all()]
+    staff_pouches = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all().order_by('name')]
     pouch = Pouch.objects.filter(name__in=staff_pouches)
     template = loader.get_template('report/report_transaction.html')
     category = Category.objects.order_by('name')
@@ -59,6 +59,13 @@ def report_transaction_filter(request):
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     error = 'Не верные данные'
     period = 'Период отчета c %s по %s' % (date_start.strftime('%d-%m-%Y'), date_end.strftime('%d-%m-%Y'))
+    pouches = [
+        ReportTransactionPouch.objects.create(
+
+        )
+    ]
+    persons = []
+    categories = []
 
     context = {
         'transaction': filter,
