@@ -25,8 +25,12 @@ function ShowHideContent(spoiler)
 <a href="{% url 'calc:transaction_create' 0 %}" class="btn btn-danger">Добавить РАСХОД</a>
 <a href="{% url 'calc:transaction_create' 1 %}" class="btn btn-success">Добавить ПРИХОД</a>
 <div class="panel-body">
-    <h3>Баланс счетов</h3>
-<a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))"> -> Показать <- </a>
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Баланс счетов</h3>
+  </div>
+  <div class="panel-body">
+<a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs">Показать / скрыть </a>
     <div id="id1" style="display: none;">
     <table class="table table-bordered">
     <tr>
@@ -40,6 +44,9 @@ function ShowHideContent(spoiler)
     </tr>
     </table>
     </div>
+  </div>
+</div>
+
  <!-- pager -->
 <div class="pager">
     <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first" />
