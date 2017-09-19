@@ -20,4 +20,8 @@ class Transaction(models.Model):
     def __unicode__(self):
         return self.date
 
+    class Meta():
+        unique_together = ['date', 'sum_val', 'category', 'who_is', 'comment', 'money', 'typeof']
+
+
 

@@ -66,7 +66,6 @@ def TransactionCreate(request, kind):
 #Проводка/отмена транзакции
 @login_required()
 def changer(request, transaction_id):
-    template = 'calc/transaction.html'
     transaction = get_object_or_404(Transaction, pk=transaction_id)
     pouch = get_object_or_404(Pouch, pk=transaction.money.id)
     #проверка на проведение транзакции, запись баланса в текущий кошелек
