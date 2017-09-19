@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block body %}
 
-    <link rel="stylesheet" type="text/css" href="/media/static/js/theme.blue.css">
+    <link rel="stylesheet" type="text/css" href="/media/static/js/theme.blue.css" xmlns="http://www.w3.org/1999/html">
       <link rel="stylesheet" type="text/css" href="/media/static/js/theme.dropbox.css">
       <link rel="stylesheet" type="text/css" href="/media/static/js/jquery.tablesorter.pager.css">
       <link rel="stylesheet" type="text/css" href="/media/static/js/jquery-ui.css">
@@ -25,13 +25,13 @@ function ShowHideContent(spoiler)
 <a href="{% url 'calc:transaction_create' 0 %}" class="btn btn-danger">Добавить РАСХОД</a>
 <a href="{% url 'calc:transaction_create' 1 %}" class="btn btn-success">Добавить ПРИХОД</a>
 <div class="panel-body">
-<div class="panel panel-info">
+<div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title">Баланс счетов</h3>
   </div>
   <div class="panel-body">
-<a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs">Показать / скрыть </a>
-    <div id="id1" style="display: none;">
+<a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
+      <div id="id1" style="display: none;">
     <table class="table table-bordered">
     <tr>
     {% for element in pouch %}
