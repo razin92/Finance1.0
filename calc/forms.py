@@ -19,7 +19,7 @@ class TransactionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
-        self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all()
+        self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
 
 class TranscationEdit:
     pass
