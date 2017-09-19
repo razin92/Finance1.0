@@ -1,33 +1,44 @@
 {% extends 'index.html' %}
 {% block body %}
+    <style>
+    .block-select {
+        float: left;
+        margin: 2%;
+        width: 165px;
+        height: 400px;
+        overflow: auto;
+
+    }
+    </style>
+
     <div class="panel-body" style="margin-left: 10%;" xmlns="http://www.w3.org/1999/html">
     <form action="{% url 'report:transaction_filter' %}" method="post">
     {% csrf_token %}
-    <div style="float: left; margin: 2%">
+    <div class="block-select">
 
     <p>Выберите людей</p>
     {% for each in person %}
         <input title="Персона" type="checkbox" value="{{ each.firstname }}" name="who_is">{{ each.firstname }} {{ each.secondname }}<br/>
     {% endfor %}
     </div>
-    <div style="float: left; margin: 2%">
+    <div class="block-select">
     <p>Выберите счета</p>
     {% for each in pouch %}
         <input title="Счет" type="checkbox" value="{{ each.name }}" name="money">{{ each.name }}<br>
     {% endfor %}
     </div>
-    <div style="float: left; margin: 2%">
+    <div class="block-select">
     <p>Выберите категории</p>
     {% for each in category %}
         <input title="Категория" type="checkbox" value="{{ each.name }}" name="category">{{ each.name }}<br>
     {% endfor %}
     </div>
-    <div style="float: left; margin: 2%">
+    <div class="block-select">
     <p>Тип</p>
         <input title="Тип" type="checkbox" value="True" name="typeof">Приход<br>
         <input title="Тип" type="checkbox" value="False" name="typeof">Расход<br>
     </div>
-    <div style="float: left; margin: 2%">
+    <div class="block-select">
         <input title="Дата на начало" type="date" name="date_start">
         <input title="Дата на конец" type="date" name="date_end">
     </div>
