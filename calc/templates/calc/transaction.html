@@ -11,10 +11,23 @@
       <link rel="stylesheet" type="text/css" href="/media/static/js/theme.jui.css">
       <script type="text/javascript" src="/media/static/js/widget-pager.js"></script>
 
+<script type="text/javascript">
+function ShowHideContent(spoiler)
+{
+    if (spoiler.style.display != 'none')
+        spoiler.style.display = 'none';
+    else
+        spoiler.style.display = 'block';
+
+}
+</script>
+
 <a href="{% url 'calc:transaction_create' 0 %}" class="btn btn-danger">Добавить РАСХОД</a>
 <a href="{% url 'calc:transaction_create' 1 %}" class="btn btn-success">Добавить ПРИХОД</a>
 <div class="panel-body">
     <h3>Баланс счетов</h3>
+<a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))"> -> Показать <- </a>
+    <div id="id1" style="display: none;">
     <table class="table table-bordered">
     <tr>
     {% for element in pouch %}
@@ -26,7 +39,7 @@
         {% endfor %}
     </tr>
     </table>
-
+    </div>
  <!-- pager -->
 <div class="pager">
     <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first" />
