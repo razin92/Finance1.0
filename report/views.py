@@ -10,6 +10,27 @@ from .forms import WorkerFilter
 from django.utils import timezone
 import datetime
 
+
+def get_filter(who_is, category, money, typeof, date_start, date_end):
+    result = Transaction.objects.filter(
+        who_is__firstname__in=who_is,
+        category__name__in=category,
+        money__name__in=money,
+        typeof__in=typeof,
+        date__range=[date_start, date_end],
+        checking=True,
+    ).order_by('-date', 'money', 'who_is')
+    return result
+
+def report_by_category(category, date_start, date_end):
+    transactions = Transaction.objects.filter(
+        category__name__in=category,
+        date__range=[date_start, date_end],
+        checking=True
+    ).all()
+    return transactions
+
+
 @login_required()
 def report_transaction(request):
     person = Person.objects.order_by('firstname')
@@ -48,31 +69,24 @@ def report_transaction_filter(request):
     money = rqst.getlist('money', money_set)
     typeof = rqst.getlist('typeof', ['True', 'False'])
     #Фильтр транзакций
-    filter = Transaction.objects.filter(
-        who_is__firstname__in=who_is,
-        category__name__in=category,
-        money__name__in=money,
-        typeof__in=typeof,
-        date__range=[date_start, date_end],
-        checking=True,
-    ).order_by('-date', 'money', 'who_is')
+    filter = get_filter(who_is, category, money, typeof, date_start, date_end)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     error = 'Не верные данные'
-    period = 'Период отчета c %s по %s' % (date_start.strftime('%d-%m-%Y'), date_end.strftime('%d-%m-%Y'))
-    pouches = [
-        ReportTransactionPouch.objects.create(
-
-        )
-    ]
-    persons = []
-    categories = []
-
+    period = 'Период отчета c %s по %s' % (date_start, date_end)
+    result_set = {report_by_category([category], date_start, date_end) for category in category_set}
+    balancing = [
+    for transaction_set in result_set\
+        for transaction in transaction_set.object.all()\
+            if transaction.checking and transaction.typeof\
+                ]
     context = {
         'transaction': filter,
         'error': error,
         'user': user,
-        'period': period
+        'period': period,
+        'result': result_set,
     }
+
     return render_to_response(template, context)
 
 @login_required()
