@@ -167,17 +167,17 @@ def report_transaction_filter(request):
     error = 'Не верные данные'
     period = 'Период отчета c %s по %s' % (date_start, date_end)
     #Сводный отчет по категориям
-    result_set_category = {report_by_category([category], date_start, date_end) for category in category_set}
+    result_set_category = {report_by_category([category], date_start, date_end) for category in category}
     ReportTransactionCategory.objects.all().delete()
     create_report_by_category(result_set_category, date_start, date_end)
     by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
     #Сводный отчет по персонам
-    result_set_person = {report_by_person([firstname], date_start, date_end) for firstname in firstname_set}
+    result_set_person = {report_by_person([firstname], date_start, date_end) for firstname in who_is}
     ReportTransactionPerson.objects.all().delete()
     create_report_by_person(result_set_person, date_start, date_end)
     by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
     #Сводный отчет по счетам
-    result_set_pouch = {report_by_pouch([pouch], date_start, date_end) for pouch in money_set}
+    result_set_pouch = {report_by_pouch([pouch], date_start, date_end) for pouch in money}
     ReportTransactionPouch.objects.all().delete()
     create_report_by_pouch(result_set_pouch, date_start, date_end)
     by_pouch = ReportTransactionPouch.objects.filter(date_start=date_start, date_end=date_end).order_by('pouch__name')
