@@ -39,7 +39,7 @@ function ShowHideContent(spoiler)
             </tr>
             <tr>
         {% endif %}
-        <td>{{ element.name }} {% if element.comment %}({{ element.comment }}){% endif %}: <strong>{{ element.balance|intcomma }}</strong></td>
+        <td><text style="color: #109c0e; font-weight: bold;">{{ element.name }}</text> {% if element.comment %}({{ element.comment }}){% endif %}: <strong>{{ element.balance|intcomma }}</strong></td>
         {% endfor %}
     </tr>
     </table>
