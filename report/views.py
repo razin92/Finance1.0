@@ -30,6 +30,99 @@ def report_by_category(category, date_start, date_end):
     ).all()
     return transactions
 
+def report_by_person(person, date_start, date_end):
+    transactions = Transaction.objects.filter(
+        who_is__firstname__in=person,
+        date__range=[date_start, date_end],
+        checking=True
+    ).all()
+    return transactions
+
+def report_by_pouch(pouch, date_start, date_end):
+    transactions = Transaction.objects.filter(
+        money__name__in=pouch,
+        date__range=[date_start, date_end],
+        checking=True
+    ).all()
+    return transactions
+
+def create_report_by_category(result_set, start, end):
+    def calculate(transaction, report):
+        if transaction.typeof:
+            report.income += transaction.sum_val
+        else:
+            report.outcome += transaction.sum_val
+        report.save()
+
+    for transaction_set in result_set:
+        if len(transaction_set) != 0:
+            for transaction in transaction_set:
+                if transaction.money.type == 'SUM':
+                    try:
+                        report = ReportTransactionCategory.objects.get(
+                            date_start=start,
+                            date_end=end,
+                            category=transaction.category
+                        )
+                    except:
+                        report = ReportTransactionCategory.objects.create(
+                            date_start=start,
+                            date_end=end,
+                            category=transaction.category
+                        )
+                    calculate(transaction, report)
+
+def create_report_by_person(result_set, start, end):
+    def calculate(transaction, report):
+        if transaction.typeof:
+            report.income += transaction.sum_val
+        else:
+            report.outcome += transaction.sum_val
+        report.save()
+
+    for transaction_set in result_set:
+        if len(transaction_set) != 0:
+            for transaction in transaction_set:
+                if transaction.money.type == 'SUM':
+                    try:
+                        report = ReportTransactionPerson.objects.get(
+                            date_start=start,
+                            date_end=end,
+                            person=transaction.who_is
+                        )
+                    except:
+                        report = ReportTransactionPerson.objects.create(
+                            date_start=start,
+                            date_end=end,
+                            person=transaction.who_is
+                        )
+                    calculate(transaction, report)
+
+def create_report_by_pouch(result_set, start, end):
+    def calculate(transaction, report):
+        if transaction.typeof:
+            report.income += transaction.sum_val
+        else:
+            report.outcome += transaction.sum_val
+        report.save()
+
+    for transaction_set in result_set:
+        if len(transaction_set) != 0:
+            for transaction in transaction_set:
+                if transaction.money.type == 'SUM':
+                    try:
+                        report = ReportTransactionPouch.objects.get(
+                            date_start=start,
+                            date_end=end,
+                            pouch=transaction.money
+                        )
+                    except:
+                        report = ReportTransactionPouch.objects.create(
+                            date_start=start,
+                            date_end=end,
+                            pouch=transaction.money
+                        )
+                    calculate(transaction, report)
 
 @login_required()
 def report_transaction(request):
@@ -53,7 +146,7 @@ def report_transaction_filter(request):
     # Генераторы списков (для значений по-умолчанию)
     firstname_set = [x.firstname for x in Person.objects.all()]
     money_set = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all()]
-    category_set = [x.name for x in Category.objects.all()]
+    category_set = [x.name for x in Category.objects.all().order_by('name')]
     #Проверка вводных данных по дате, выставление значения по-умолчанию
     if 'date_start' in rqst and rqst['date_start']:
         date_start = rqst['date_start']
@@ -73,18 +166,30 @@ def report_transaction_filter(request):
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     error = 'Не верные данные'
     period = 'Период отчета c %s по %s' % (date_start, date_end)
-    result_set = {report_by_category([category], date_start, date_end) for category in category_set}
-    balancing = [
-    for transaction_set in result_set\
-        for transaction in transaction_set.object.all()\
-            if transaction.checking and transaction.typeof\
-                ]
+    #Сводный отчет по категориям
+    result_set_category = {report_by_category([category], date_start, date_end) for category in category_set}
+    ReportTransactionCategory.objects.all().delete()
+    create_report_by_category(result_set_category, date_start, date_end)
+    by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
+    #Сводный отчет по персонам
+    result_set_person = {report_by_person([firstname], date_start, date_end) for firstname in firstname_set}
+    ReportTransactionPerson.objects.all().delete()
+    create_report_by_person(result_set_person, date_start, date_end)
+    by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
+    #Сводный отчет по счетам
+    result_set_pouch = {report_by_pouch([pouch], date_start, date_end) for pouch in money_set}
+    ReportTransactionPouch.objects.all().delete()
+    create_report_by_pouch(result_set_pouch, date_start, date_end)
+    by_pouch = ReportTransactionPouch.objects.filter(date_start=date_start, date_end=date_end).order_by('pouch__name')
+
     context = {
         'transaction': filter,
         'error': error,
         'user': user,
         'period': period,
-        'result': result_set,
+        'by_category': by_category,
+        'by_person': by_person,
+        'by_pouch': by_pouch
     }
 
     return render_to_response(template, context)
