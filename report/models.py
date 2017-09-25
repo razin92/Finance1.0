@@ -4,22 +4,22 @@ from lib.models import Pouch, Person, Category
 # Create your models here.
 
 class ReportTransactionPouch(models.Model):
-    income = models.CharField
-    outcome = models.CharField
-    date_start = models.DateTimeField
-    date_end = models.DateTimeField
-    pouch = models.ForeignKey(Pouch)
+    income = models.IntegerField(default=0)
+    outcome = models.IntegerField(default=0)
+    date_start = models.DateTimeField(auto_now=False, null=True)
+    date_end = models.DateTimeField(auto_now=False, null=True)
+    pouch = models.ForeignKey(Pouch, null=True)
 
 class ReportTransactionPerson(models.Model):
-    income = models.CharField
-    outcome = models.CharField
-    date_start = models.DateTimeField
-    date_end = models.DateTimeField
-    person = models.ForeignKey(Person)
+    income = models.IntegerField(default=0)
+    outcome = models.IntegerField(default=0)
+    date_start = models.DateTimeField(auto_now=False, null=True)
+    date_end = models.DateTimeField(auto_now=False, null=True)
+    person = models.ForeignKey(Person, null=True)
 
 class ReportTransactionCategory(models.Model):
-    income = models.CharField
-    outcome = models.CharField
-    date_start = models.DateTimeField
-    date_end = models.DateTimeField
-    category = models.ForeignKey(Category)
+    income = models.IntegerField(default=0)
+    outcome = models.IntegerField(default=0)
+    date_start = models.DateTimeField(auto_now=False, null=True)
+    date_end = models.DateTimeField(auto_now=False, null=True)
+    category = models.ForeignKey(Category, null=True)
