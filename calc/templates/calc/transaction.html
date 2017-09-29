@@ -32,7 +32,6 @@ function ShowHideContent(spoiler)
   <div class="panel-body">
 <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
       <div id="id1" style="display: none;">
-      <h4>Внимание! Здесь отображаются последние 50 транзакций</h4>
     <table class="table table-bordered">
     <tr>
     {% for element in pouch %}
@@ -47,7 +46,7 @@ function ShowHideContent(spoiler)
     </div>
   </div>
 </div>
-
+ <h4>Внимание! Здесь отображаются последние 50 транзакций</h4>
  <!-- pager -->
 <div class="pager">
     <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first" />
