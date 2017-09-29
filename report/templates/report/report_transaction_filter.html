@@ -134,7 +134,7 @@ function ShowHideContent(spoiler)
                     <td>
                         <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
                         {% csrf_token %}
-                            <input type="hidden" name="category" value="{{ report.pouch.name }}">
+                            <input type="hidden" name="money" value="{{ report.pouch.name }}">
                             <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
                             <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
                         <input type="submit" title="{{ report.pouch }}" value="{{ report.pouch }}">
