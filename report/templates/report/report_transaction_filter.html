@@ -33,7 +33,7 @@ function ShowHideContent(spoiler)
   <div class="panel-body">
     <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
       <div id="id1" class="block-report">
-      <table class="table table-bordered">
+      <table class="table-bordered" style="width: 100%;">
                 <thead>
                 <tr>
                     <th>Категория</th>
@@ -45,7 +45,15 @@ function ShowHideContent(spoiler)
                 <tbody>
           {% for report in by_category %}
                 <tr>
-                    <td>{{ report.category }}</td>
+                    <td>
+                        <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
+                        {% csrf_token %}
+                            <input type="hidden" name="category" value="{{ report.category.name }}">
+                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                        <input type="submit" title="{{ report.category }}" value="{{ report.category }}">
+                        </form>
+                    </td>
                     <td>{{ report.income|intcomma }}</td>
                     <td>{{ report.outcome|intcomma }}</td>
                     <td>
@@ -68,7 +76,7 @@ function ShowHideContent(spoiler)
   <div class="panel-body">
     <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id2'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
       <div id="id2" class="block-report">
-      <table class="table table-bordered">
+      <table class="table-bordered" style="width: 100%;">
                 <thead>
                 <tr>
                     <th>Персона</th>
@@ -80,7 +88,15 @@ function ShowHideContent(spoiler)
                 <tbody>
           {% for report in by_person %}
                 <tr>
-                    <td>{{ report.person }}</td>
+                    <td>
+                        <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
+                        {% csrf_token %}
+                            <input type="hidden" name="who_is" value="{{ report.person.firstname }}">
+                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                        <input type="submit" title="{{ report.person }}" value="{{ report.person }}">
+                        </form>
+                    </td>
                     <td>{{ report.income|intcomma }}</td>
                     <td>{{ report.outcome|intcomma }}</td>
                     <td>
@@ -103,7 +119,7 @@ function ShowHideContent(spoiler)
   <div class="panel-body">
     <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id3'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
       <div id="id3" class="block-report">
-      <table class="table table-bordered">
+      <table class="table-bordered" style="width: 100%;">
                 <thead>
                 <tr>
                     <th>Счет</th>
@@ -115,7 +131,15 @@ function ShowHideContent(spoiler)
                 <tbody>
           {% for report in by_pouch %}
                 <tr>
-                    <td>{{ report.pouch }}</td>
+                    <td>
+                        <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
+                        {% csrf_token %}
+                            <input type="hidden" name="category" value="{{ report.pouch.name }}">
+                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                        <input type="submit" title="{{ report.pouch }}" value="{{ report.pouch }}">
+                        </form>
+                    </td>
                     <td>{{ report.income|intcomma }}</td>
                     <td>{{ report.outcome|intcomma }}</td>
                     <td>

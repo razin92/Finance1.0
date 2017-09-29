@@ -3,7 +3,7 @@ from salary.models import Total, BonusWork, Worker, AccountChange
 from lib.models import Person, Pouch, Category, Staff
 from django.template import loader
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.contrib.auth.decorators import login_required
 from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
 from .forms import WorkerFilter
@@ -140,7 +140,6 @@ def report_transaction_filter(request):
     #Фильтр транзакций
     filter = get_filter(who_is, category, money, typeof, date_start, date_end)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
-    error = 'Не верные данные'
     period = 'Период отчета c %s по %s' % (date_start, date_end)
     #Сводный отчет по категориям
     result_set_category = {get_filter(who_is, [category], money, typeof, date_start, date_end) for category in category}
@@ -160,15 +159,19 @@ def report_transaction_filter(request):
 
     context = {
         'transaction': filter,
-        'error': error,
         'user': user,
         'period': period,
         'by_category': by_category,
         'by_person': by_person,
-        'by_pouch': by_pouch
+        'by_pouch': by_pouch,
+        'date_start': date_start,
+        'date_end': date_end,
     }
 
-    return render_to_response(template, context)
+    return render(request, template, context)
+
+def report_transaction_detail(request):
+    pass
 
 @login_required()
 def report_salary_total(request):

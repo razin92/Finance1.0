@@ -4,10 +4,50 @@
 {{ form.media }}
 {% load bootstrap_themes %}
 {% bootstrap_styles theme='spacelab' type='css' %}
+<style>
+#p_prldr{
+position: fixed;
+left: 0;
+top: 0;
+right: 0;
+bottom: 0;
+/*background: #9A12B3;*/
+z-index: 30;}
+
+.contpre small{font-size:25px;}
+
+.contpre{
+width: 250px;
+height: 100px;
+position: absolute;
+left: 50%;top: 48%;
+margin-left:-125px;
+margin-top:-75px;
+color: #030303;
+font-size:40px;
+letter-spacing:-2px;
+text-align:center;
+line-height:35px;}
+
+#p_prldr .svg_anm {
+position: absolute;
+width: 41px;
+height: 41px;
+background: url(https://loading.io/assets/img/landing/curved-bars.svg) center center no-repeat;
+background-size:41px;
+margin: -16px 0 0 -16px;}
+</style>
+    <script type="text/javascript">$(window).on('load', function () {
+    var $preloader = $('#p_prldr'),
+        $svg_anm   = $preloader.find('.svg_anm');
+    $svg_anm.fadeOut();
+    $preloader.delay(500).fadeOut('slow');
+});</script>
 {% block script %}
 {% endblock %}
 {% block head %}
     {% if user.is_authenticated %}
+        <div id="p_prldr"><div class="contpre"><span class="svg_anm"></span></div></div>
     <nav class="navbar navbar-inverse">
     <div class="navbar-header">
       <a class="navbar-brand" href="{% url 'index' %}">Finans 0.02</a>
