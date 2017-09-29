@@ -20,7 +20,7 @@ def get_filter(who_is, category, money, typeof, date_start, date_end):
         date__range=[date_start, date_end],
         checking=True,
     ).order_by('-date', 'money', 'who_is')
-    return result
+    return result, render_to_response('index.html')
 
 def create_report_by_category(result_set, start, end):
     def calculate(transaction, report):
@@ -138,21 +138,21 @@ def report_transaction_filter(request):
     money = rqst.getlist('money', money_set)
     typeof = rqst.getlist('typeof', ['True', 'False'])
     #Фильтр транзакций
-    filter = get_filter(who_is, category, money, typeof, date_start, date_end)
+    filter = get_filter(who_is, category, money, typeof, date_start, date_end)[0]
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     period = 'Период отчета c %s по %s' % (date_start, date_end)
     #Сводный отчет по категориям
-    result_set_category = {get_filter(who_is, [category], money, typeof, date_start, date_end) for category in category}
+    result_set_category = {get_filter(who_is, [category], money, typeof, date_start, date_end)[0] for category in category}
     ReportTransactionCategory.objects.all().delete()
     create_report_by_category(result_set_category, date_start, date_end)
     by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
     #Сводный отчет по персонам
-    result_set_person = {get_filter([firstname], category, money, typeof, date_start, date_end) for firstname in who_is}
+    result_set_person = {get_filter([firstname], category, money, typeof, date_start, date_end)[0] for firstname in who_is}
     ReportTransactionPerson.objects.all().delete()
     create_report_by_person(result_set_person, date_start, date_end)
     by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
     #Сводный отчет по счетам
-    result_set_pouch = {get_filter(who_is, category, [pouch], typeof, date_start, date_end) for pouch in money}
+    result_set_pouch = {get_filter(who_is, category, [pouch], typeof, date_start, date_end)[0] for pouch in money}
     ReportTransactionPouch.objects.all().delete()
     create_report_by_pouch(result_set_pouch, date_start, date_end)
     by_pouch = ReportTransactionPouch.objects.filter(date_start=date_start, date_end=date_end).order_by('pouch__name')
