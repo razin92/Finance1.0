@@ -10,6 +10,49 @@
       <script type="text/javascript" src="/media/static/js/jquery.tablesorter.js"></script>
       <script type="text/javascript" src="/media/static/js/jquery.tablesorter.widgets.js"></script>
       <link rel="stylesheet" type="text/css" href="/media/static/js/theme.jui.css">
+<style>
+#p_prldr{
+position: fixed;
+left: 0;
+top: 0;
+right: 0;
+bottom: 0;
+/*background: #9A12B3;*/
+z-index: 30;}
+
+.contpre small{font-size:25px;}
+
+.contpre{
+width: 250px;
+height: 100px;
+position: absolute;
+left: 50%;top: 48%;
+margin-left:-125px;
+margin-top:-75px;
+color: #030303;
+font-size:40px;
+letter-spacing:-2px;
+text-align:center;
+line-height:35px;}
+
+#p_prldr .svg_anm {
+position: absolute;
+width: 41px;
+height: 41px;
+background: url(https://loading.io/assets/img/landing/curved-bars.svg) center center no-repeat;
+background-size:41px;
+margin: -16px 0 0 -16px;}
+</style>
+    <script type="text/javascript">function Loading () {
+        $(window).on('load', function () {
+    var $preloader = $('#p_prldr'),
+        $svg_anm   = $preloader.find('.svg_anm');
+    /*$svg_anm.fadeOut();*/
+    $preloader.delay(500);
+});
+
+    } </script>
+
     <script type="text/javascript">
 function ShowHideContent(spoiler)
 {
@@ -20,6 +63,7 @@ function ShowHideContent(spoiler)
 
 }
 </script>
+
 <style>
 .block-report{
     display: none;
@@ -28,7 +72,7 @@ function ShowHideContent(spoiler)
     margin: 10px;
 }
 </style>
-
+    <!--<div id="p_prldr"><div class="contpre"><span class="svg_anm"></span></div></div>-->
     <div class="panel-body">
         <a href="{% url 'report:report_transaction' %}" class="btn btn-default">Сброс</a>
     <h4>{{ period }}</h4>
@@ -58,7 +102,7 @@ function ShowHideContent(spoiler)
                             <input type="hidden" name="category" value="{{ report.category.name }}">
                             <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
                             <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
-                        <input type="submit" title="{{ report.category }}" value="{{ report.category }}">
+                        <input type="submit" title="{{ report.category }}" value="{{ report.category }}" onclick="Loading()">
                         </form>
                     </td>
                     <td>{{ report.income|intcomma }}</td>
