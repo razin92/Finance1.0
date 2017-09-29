@@ -22,12 +22,12 @@ def TransactionView(request):
     if user.is_superuser:
         transaction = Transaction.objects.filter(
             money__in=permitted_pouches,
-        ).order_by('-date')
+        ).order_by('-date')[0:50]
     else:
         transaction = Transaction.objects.filter(
             money__in=permitted_pouches,
             checking=True
-        ).order_by('-date')
+        ).order_by('-date')[0:50]
     pouch = Pouch.objects.filter(
         name__in=permitted_pouches
     ).order_by('name')
