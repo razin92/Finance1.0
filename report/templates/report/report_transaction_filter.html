@@ -58,8 +58,8 @@ function ShowHideContent(spoiler)
                         <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
                         {% csrf_token %}
                             <input type="hidden" name="category" value="{{ report.category.name }}">
-                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
-                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_start" value="{{ date_start }}">
+                            <input type="hidden" name="date_end" value="{{ date_end }}">
                         <input type="submit" title="{{ report.category }}" value="{{ report.category }}">
                         </form>
                     </td>
@@ -101,8 +101,8 @@ function ShowHideContent(spoiler)
                         <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
                         {% csrf_token %}
                             <input type="hidden" name="who_is" value="{{ report.person.firstname }}">
-                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
-                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_start" value="{{ date_start }}">
+                            <input type="hidden" name="date_end" value="{{ date_end }}">
                         <input type="submit" title="{{ report.person }}" value="{{ report.person }}">
                         </form>
                     </td>
@@ -144,8 +144,8 @@ function ShowHideContent(spoiler)
                         <form action="{% url 'report:transaction_filter' %}" method="post" target="_blank">
                         {% csrf_token %}
                             <input type="hidden" name="money" value="{{ report.pouch.name }}">
-                            <input type="hidden" name="date_start" value="{{ date_start|date:"Y-m-d H:i:s" }}">
-                            <input type="hidden" name="date_end" value="{{ date_end|date:"Y-m-d H:i:s" }}">
+                            <input type="hidden" name="date_start" value="{{ date_start }}">
+                            <input type="hidden" name="date_end" value="{{ date_end }}">
                         <input type="submit" title="{{ report.pouch }}" value="{{ report.pouch }}">
                         </form>
                     </td>
