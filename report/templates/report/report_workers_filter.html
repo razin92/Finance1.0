@@ -4,7 +4,7 @@
     <div class="panel-body">
     {% for x in result %}
         {% if x|length > 0 %}
-        <table class="table table-hover table-bordered">
+        <table class="table table-hover table-bordered tablesorter">
         <thead>
             <tr>
                 <th>№</th>
@@ -16,8 +16,8 @@
                 <th>Мастер</th>
             </tr>
         </thead>
-        {% for y in x %}
             <tbody>
+                {% for y in x %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ y.date|date:"d.m.Y" }}</td>
@@ -27,8 +27,8 @@
                     <td>{{ y.calculate|intcomma }}</td>
                     <td>{{ y.worker }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
-         {% endfor %}
         </table>
         {% endif %}
     {% endfor %}
