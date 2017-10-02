@@ -126,10 +126,11 @@ def TotalCreate(request):
     workers = Worker.objects.all()
     total = Total.objects.filter(date__month=datetime.datetime.now().month)
     total_workers = [each.worker for each in total.all()]
+    month_now = datetime.datetime.now().replace(day=1)
 
     for each in workers:
         if each not in total_workers:
-            Total.objects.create(worker=each)
+            Total.objects.create(worker=each, date=month_now)
 
     return HttpResponseRedirect(reverse('salary:calculate', args={'2': '2'}))
 

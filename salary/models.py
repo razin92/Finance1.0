@@ -67,7 +67,7 @@ class AccountChange(models.Model):
         return str(self.summ) + ' ' + str(self.worker) + ' ' + str(self.date)
 
 class Total(models.Model):
-    date = models.DateField(default=str(timezone.now().year)+'-'+str(timezone.now().month)+'-'+'1')
+    date = models.DateField(default=timezone.now().replace(day=1))
     worker = models.ForeignKey(Worker)
     balance_before = models.IntegerField(default=0)
     accrual = models.IntegerField(default=0)
