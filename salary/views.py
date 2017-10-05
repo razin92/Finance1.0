@@ -198,7 +198,6 @@ def issued(request, worker_id, total_id):
     issued = Transaction.objects.filter(
         who_is=worker.name,
         category=worker.category,
-        typeof=False,
         date__range=(
             datetime.datetime(year, month, 1),
             datetime.datetime(year, month + 1, 1)
