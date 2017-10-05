@@ -91,7 +91,7 @@ def report_transaction_filter(request):
     if 'date_end' in rqst and rqst['date_end']:
         date_end = rqst['date_end']
     else:
-        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59).date()
+        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
     #Обработка данных из POST запроса
     who_is = rqst.getlist('who_is', firstname_set)
     category = rqst.getlist('category', category_set)
