@@ -24,7 +24,7 @@
                     <td>{{ element.category }}</td>
                     <td>{{ element.money }}</td>
                     <td>{{ element.comment }}</td>
-                    <td>{% if not position.typeof %}Расход{% else %}Приход{% endif %}</td>
+                    <td>{% if position.typeof %}Возврат{% else %}Выдача{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
