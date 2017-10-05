@@ -160,7 +160,6 @@ class Total(models.Model):
         issued = Transaction.objects.filter(
             who_is=total.worker.name,
             category=total.worker.category,
-            typeof=False,
             date__range=(
                 datetime.datetime(year, month, 1),
                 datetime.datetime(year, month + 1, 1)
@@ -169,7 +168,10 @@ class Total(models.Model):
         )
         total.issued = 0
         for x in issued.all():
-            total.issued += x.sum_val
+            if x.typeof:
+                total.issued -= x.sum_val
+            else:
+                total.issued += x.sum_val
         total.save()
 
     def balance_now_calc(self):
