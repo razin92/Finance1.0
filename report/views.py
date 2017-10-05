@@ -40,7 +40,7 @@ def report_transaction_filter(request):
         ).order_by('-date', 'money', 'who_is')
         return result
 
-    def create_report_by_category(result_set, start, end):
+    def create_report(result_set, start, end):
         def calculate(transaction, report):
             if transaction.typeof:
                 report.income += transaction.sum_val
@@ -48,75 +48,50 @@ def report_transaction_filter(request):
                 report.outcome += transaction.sum_val
             report.save()
 
-        for transaction_set in result_set:
-            if len(transaction_set) != 0:
-                for transaction in transaction_set:
-                    if transaction.money.type == 'SUM':
-                        try:
-                            report = ReportTransactionCategory.objects.get(
-                                date_start=start,
-                                date_end=end,
-                                category=transaction.category
-                            )
-                        except:
-                            report = ReportTransactionCategory.objects.create(
-                                date_start=start,
-                                date_end=end,
-                                category=transaction.category
-                            )
-                        calculate(transaction, report)
+        for transaction in result_set:
+            if transaction.money.type == 'SUM':
+                try:
+                    report_by_who_is = ReportTransactionPerson.objects.get(
+                        date_start=start,
+                        date_end=end,
+                        person=transaction.who_is
+                    )
+                except:
+                    report_by_who_is = ReportTransactionPerson.objects.create(
+                        date_start=start,
+                        date_end=end,
+                        person=transaction.who_is
+                    )
+                calculate(transaction, report_by_who_is)
 
-    def create_report_by_person(result_set, start, end):
-        def calculate(transaction, report):
-            if transaction.typeof:
-                report.income += transaction.sum_val
-            else:
-                report.outcome += transaction.sum_val
-            report.save()
+                try:
+                    report_by_category = ReportTransactionCategory.objects.get(
+                        date_start=start,
+                        date_end=end,
+                        category=transaction.category
+                    )
+                except:
+                    report_by_category = ReportTransactionCategory.objects.create(
+                        date_start=start,
+                        date_end=end,
+                        category=transaction.category
+                    )
+                calculate(transaction, report_by_category)
 
-        for transaction_set in result_set:
-            if len(transaction_set) != 0:
-                for transaction in transaction_set:
-                    if transaction.money.type == 'SUM':
-                        try:
-                            report = ReportTransactionPerson.objects.get(
-                                date_start=start,
-                                date_end=end,
-                                person=transaction.who_is
-                            )
-                        except:
-                            report = ReportTransactionPerson.objects.create(
-                                date_start=start,
-                                date_end=end,
-                                person=transaction.who_is
-                            )
-                        calculate(transaction, report)
+                try:
+                    report_by_money = ReportTransactionPouch.objects.get(
+                        date_start=start,
+                        date_end=end,
+                        pouch=transaction.money
+                    )
+                except:
+                    report_by_money = ReportTransactionPouch.objects.create(
+                        date_start=start,
+                        date_end=end,
+                        pouch=transaction.money
+                    )
+                calculate(transaction, report_by_money)
 
-    def create_report_by_pouch(result_set, start, end):
-        def calculate(transaction, report):
-            if transaction.typeof:
-                report.income += transaction.sum_val
-            else:
-                report.outcome += transaction.sum_val
-            report.save()
-
-        for transaction_set in result_set:
-            if len(transaction_set) != 0:
-                for transaction in transaction_set:
-                    if transaction.money.type == 'SUM':
-                        try:
-                            report = ReportTransactionPouch.objects.get(
-                                date_start=start,
-                                date_end=end,
-                                pouch=transaction.money
-                            )
-                        except:
-                            report = ReportTransactionPouch.objects.create(
-                                date_start=start,
-                                date_end=end,
-                                pouch=transaction.money
-                            )
-                        calculate(transaction, report)
     template = 'report/report_transaction_filter.html'
     rqst = request.POST
     user = request.user
@@ -142,20 +117,13 @@ def report_transaction_filter(request):
     filter = get_filter(who_is, category, money, typeof, date_start, date_end)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     period = 'Период отчета c %s по %s' % (date_start, date_end)
-    #Сводный отчет по категориям
-    result_set_category = {get_filter(who_is, [category], money, typeof, date_start, date_end) for category in category}
-    ReportTransactionCategory.objects.all().delete()
-    create_report_by_category(result_set_category, date_start, date_end)
-    by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
-    #Сводный отчет по персонам
-    result_set_person = {get_filter([firstname], category, money, typeof, date_start, date_end) for firstname in who_is}
+    #Сводный отчет
     ReportTransactionPerson.objects.all().delete()
-    create_report_by_person(result_set_person, date_start, date_end)
-    by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
-    #Сводный отчет по счетам
-    result_set_pouch = {get_filter(who_is, category, [pouch], typeof, date_start, date_end) for pouch in money}
     ReportTransactionPouch.objects.all().delete()
-    create_report_by_pouch(result_set_pouch, date_start, date_end)
+    ReportTransactionCategory.objects.all().delete()
+    create_report(filter, date_start, date_end)
+    by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
+    by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
     by_pouch = ReportTransactionPouch.objects.filter(date_start=date_start, date_end=date_end).order_by('pouch__name')
 
     context = {
@@ -208,6 +176,7 @@ def report_workers_filter(request):
         'user': user,
         'workers': workers,
         'result': result,
+        'result2': result2,
     }
 
     return render_to_response(template, context)
