@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
 from .forms import WorkerFilter
 from django.utils import timezone
+from dateutil.parser import parse
 import datetime
 
 
@@ -53,64 +54,44 @@ def report_transaction_filter(request):
 
         for transaction in result_set:
             if transaction.money.type == 'SUM':
-                try:
-                    report_by_who_is = ReportTransactionPerson.objects.get(
+                report_by_who_is = ReportTransactionPerson.objects.get_or_create(
                         date_start=start,
                         date_end=end,
                         person=transaction.who_is
                     )
-                except:
-                    report_by_who_is = ReportTransactionPerson.objects.create(
-                        date_start=start,
-                        date_end=end,
-                        person=transaction.who_is
-                    )
-                calculate(transaction, report_by_who_is)
 
-                try:
-                    report_by_category = ReportTransactionCategory.objects.get(
+                calculate(transaction, report_by_who_is[0])
+
+                report_by_category = ReportTransactionCategory.objects.get_or_create(
                         date_start=start,
                         date_end=end,
                         category=transaction.category
                     )
-                except:
-                    report_by_category = ReportTransactionCategory.objects.create(
+                calculate(transaction, report_by_category[0])
+                report_by_money = ReportTransactionPouch.objects.get_or_create(
                         date_start=start,
                         date_end=end,
-                        category=transaction.category
+                        pouch=transaction.money
                     )
-                calculate(transaction, report_by_category)
 
-                try:
-                    report_by_money = ReportTransactionPouch.objects.get(
-                        date_start=start,
-                        date_end=end,
-                        pouch=transaction.money
-                    )
-                except:
-                    report_by_money = ReportTransactionPouch.objects.create(
-                        date_start=start,
-                        date_end=end,
-                        pouch=transaction.money
-                    )
-                calculate(transaction, report_by_money)
+                calculate(transaction, report_by_money[0])
 
     template = 'report/report_transaction_filter.html'
     rqst = request.POST
     user = request.user
     # Генераторы списков (для значений по-умолчанию)
-    firstname_set = [x.firstname for x in Person.objects.all()]
-    money_set = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all()]
-    category_set = [x.name for x in Category.objects.all().order_by('name')]
+    firstname_set = Person.objects.values_list('firstname')
+    money_set = Staff.objects.get(name__id=request.user.id).pouches.values_list('name')
+    category_set = Category.objects.values_list('name').order_by('name')
     #Проверка вводных данных по дате, выставление значения по-умолчанию
     if 'date_start' in rqst and rqst['date_start']:
         date_start = rqst['date_start']
     else:
-        date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1)
+        date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1).date()
     if 'date_end' in rqst and rqst['date_end']:
         date_end = rqst['date_end']
     else:
-        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
+        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59).date()
     #Обработка данных из POST запроса
     who_is = rqst.getlist('who_is', firstname_set)
     category = rqst.getlist('category', category_set)
