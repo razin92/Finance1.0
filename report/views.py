@@ -85,11 +85,13 @@ def report_transaction_filter(request):
     money_set = Staff.objects.get(name__id=request.user.id).pouches.values_list('name')
     category_set = Category.objects.values_list('name').order_by('name')
     #Проверка вводных данных по дате, выставление значения по-умолчанию
-    if 'date_start' in rqst and rqst['date_start']:
+    print(len(rqst['date_start']))
+    print(len(rqst['date_end']))
+    if 'date_start' in rqst and rqst['date_start'] and len(rqst['date_start']) < 11:
         date_start = rqst['date_start']
     else:
         date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1).date()
-    if 'date_end' in rqst and rqst['date_end']:
+    if 'date_end' in rqst and rqst['date_end'] and len(rqst['date_end']) < 11:
         date_end = rqst['date_end']
     else:
         date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
