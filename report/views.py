@@ -19,9 +19,6 @@ def report_transaction(request):
     pouch = Pouch.objects.filter(name__in=staff_pouches).order_by('name')
     template = loader.get_template('report/report_transaction.html')
     category = Category.objects.order_by('name')
-    ReportTransactionPerson.objects.all().delete()
-    ReportTransactionPouch.objects.all().delete()
-    ReportTransactionCategory.objects.all().delete()
     context = {
         'person': person,
         'pouch': pouch,
@@ -33,6 +30,9 @@ def report_transaction(request):
 def report_transaction_filter(request):
     from lib.models import Person, Category, Staff
     from calc.models import Transaction
+    ReportTransactionPerson.objects.all().delete()
+    ReportTransactionPouch.objects.all().delete()
+    ReportTransactionCategory.objects.all().delete()
     def get_filter(who_is, category, money, typeof, date_start, date_end):
         result = Transaction.objects.filter(
             who_is__firstname__in=who_is,
@@ -103,7 +103,7 @@ def report_transaction_filter(request):
     #Фильтр транзакций
     filter = get_filter(who_is, category, money, typeof, date_start, date_end)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
-    period = 'Период отчета c %s по %s' % (date_start, date_end)
+    period = 'Период отчета c %s по %s. Общее кол-во транзакций по выбранным условиям: %s' % (date_start, date_end, len(filter))
     #Сводный отчет
     create_report(filter, date_start, date_end)
     by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
