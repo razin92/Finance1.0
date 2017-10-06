@@ -1,0 +1,34 @@
+{% block head %}
+    <style>
+#page-preloader {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    z-index: 100500;
+}
+
+#page-preloader .spinner {
+    width: 115px;
+    height: 100px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: url('https://www.mrcrowd.com/images/arts/gears/gear2.gif') no-repeat 50% 50%;
+    margin: -16px 0 0 -16px;
+}
+    </style>
+    <script>
+    $(window).on('load', function () {
+    var $preloader = $('#page-preloader'),
+        $spinner   = $preloader.find('.spinner');
+    $spinner.fadeOut();
+    $preloader.delay(350).fadeOut('slow');
+});
+    </script>
+{% endblock %}
+{% block body %}
+    <div id="page-preloader"><span class="spinner"></span></div>
+{% endblock %}

@@ -2,7 +2,7 @@ from calc.models import Transaction
 from salary.models import Total, BonusWork, Worker, AccountChange
 from lib.models import Person, Pouch, Category, Staff
 from django.template import loader
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, render
 from django.contrib.auth.decorators import login_required
 from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
@@ -28,6 +28,8 @@ def report_transaction(request):
         'category': category,
     }
     return HttpResponse(template.render(context, request))
+
+
 
 @login_required()
 def report_transaction_filter(request):
@@ -119,6 +121,12 @@ def report_transaction_filter(request):
     }
 
     return render(request, template, context)
+
+
+def loading(request):
+    template = 'report/loading.html'
+    report_transaction_filter(request)
+    return render(request, template)
 
 def report_transaction_detail(request):
     pass
