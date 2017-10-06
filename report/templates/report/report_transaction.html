@@ -10,9 +10,29 @@
 
     }
     </style>
+<!-- <script src="jquery.blockUI.js"></script> -->
+<script src="/media/static/js/jquery.blockUI.js"></script>
+
+
+
+    <script language="javascript" type="text/javascript">
+    function submit_form() {
+       $("#search").submit();
+    }
+
+    $(document).ready(function() {
+    $('#demo3').click(function() {
+        $.blockUI({ message: '<h3><img src="/media/static/img/loading.gif" /> Пожалуйста, ждите..</h3>'})
+    });
+});
+
+    </script>
+
+
+
 
     <div class="panel-body" style="margin-left: 10%;" xmlns="http://www.w3.org/1999/html">
-    <form action="{% url 'report:transaction_filter' %}" method="post">
+    <form action="{% url 'report:transaction_filter' %}" method="post" id="search">
     {% csrf_token %}
     <div class="block-select">
 
@@ -43,7 +63,7 @@
         <input title="Дата на конец" type="date" name="date_end">
     </div>
     <br>
-        <a href="{% url 'report:loading' %}"><input type="submit" class="btn btn-default" title="Фильтр"></a>
+    <button type="button" id="demo3" class="btn btn-default" onclick="submit_form()">Фильтр</button>
     </form>
     </div>
 {% endblock %}

@@ -10,6 +10,4 @@ urlpatterns = [
         url(r'^workers/$', views.report_workers, name='report_workers'),
         url(r'^workers/filter/$', views.report_workers_filter, name='workers_filter'),
 
-        url(r'^loading/$', views.loading, name='loading'),
-
         ]
