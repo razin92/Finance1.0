@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, render, reverse
 from django.contrib.auth.decorators import login_required
 from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
-from .forms import WorkerFilter
+from .forms import WorkerFilter, TransactionFilterForm
 from django.utils import timezone
 from dateutil.parser import parse
 import datetime
@@ -15,6 +15,7 @@ import datetime
 @login_required()
 def report_transaction(request):
     person = Person.objects.order_by('firstname')
+    form = TransactionFilterForm(request.POST, user_id=request.user.pk)
     staff_pouches = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all()]
     pouch = Pouch.objects.filter(name__in=staff_pouches).order_by('name')
     template = loader.get_template('report/report_transaction.html')
@@ -23,6 +24,7 @@ def report_transaction(request):
         'person': person,
         'pouch': pouch,
         'category': category,
+        'form': form,
     }
     return HttpResponse(template.render(context, request))
 
@@ -33,9 +35,10 @@ def report_transaction_filter(request):
     ReportTransactionPerson.objects.all().delete()
     ReportTransactionPouch.objects.all().delete()
     ReportTransactionCategory.objects.all().delete()
-    def get_filter(who_is, category, money, typeof, date_start, date_end):
+    def get_filter(who_is, category, money, typeof, date_start, date_end, comment):
         result = Transaction.objects.filter(
             who_is__firstname__in=who_is,
+            comment__icontains=comment,
             category__name__in=category,
             money__name__in=money,
             typeof__in=typeof,
@@ -84,9 +87,8 @@ def report_transaction_filter(request):
     firstname_set = Person.objects.values_list('firstname')
     money_set = Staff.objects.get(name__id=request.user.id).pouches.values_list('name')
     category_set = Category.objects.values_list('name').order_by('name')
+
     #Проверка вводных данных по дате, выставление значения по-умолчанию
-    print(len(rqst['date_start']))
-    print(len(rqst['date_end']))
     if 'date_start' in rqst and rqst['date_start'] and len(rqst['date_start']) < 11:
         date_start = rqst['date_start']
     else:
@@ -95,13 +97,15 @@ def report_transaction_filter(request):
         date_end = rqst['date_end']
     else:
         date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
+
     #Обработка данных из POST запроса
     who_is = rqst.getlist('who_is', firstname_set)
     category = rqst.getlist('category', category_set)
     money = rqst.getlist('money', money_set)
     typeof = rqst.getlist('typeof', ['True', 'False'])
+    comment = rqst['comment']
     #Фильтр транзакций
-    filter = get_filter(who_is, category, money, typeof, date_start, date_end)
+    filter = get_filter(who_is, category, money, typeof, date_start, date_end, comment)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
     period = 'Период отчета c %s по %s. Общее кол-во транзакций по выбранным условиям: %s' % (date_start, date_end, len(filter))
     #Сводный отчет

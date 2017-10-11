@@ -1,5 +1,6 @@
 from django import forms
 from salary.models import Worker, WorkCalc, BonusWork, Total, AccountChange
+from lib.models import Person, Staff, Category
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.forms.widgets import CheckboxSelectMultiple
 import datetime
@@ -11,7 +12,43 @@ date_end = datetime.datetime(dnow.year, dnow.month, dnow.day, hour=23, minute=59
 
 
 class WorkerFilter(forms.Form):
-    date_start = forms.DateField(label="Начало периода", widget=DateTimePicker(options={"format": "YYYY-MM-DD"}), initial=date_begin)
-    date_end = forms.DateField(label="Конец периода", widget=DateTimePicker(options={"format": "YYYY-MM-DD"}), initial=date_end)
-    worker = forms.ModelMultipleChoiceField(label="Работники", queryset=Worker.objects.all().order_by('name'), widget=CheckboxSelectMultiple)
+    date_start = forms.DateField(
+        label = "Начало периода",
+        widget = DateTimePicker(options={"format": "YYYY-MM-DD"}),
+        initial = date_begin
+    )
+    date_end = forms.DateField(
+        label = "Конец периода",
+        widget = DateTimePicker(options={"format": "YYYY-MM-DD"}),
+        initial = date_end
+    )
+    worker = forms.ModelMultipleChoiceField(
+        label = "Работники",
+        queryset = Worker.objects.all().order_by('name'),
+        widget = CheckboxSelectMultiple
+    )
 
+class TransactionFilterForm(forms.Form):
+    who_is = forms.ModelMultipleChoiceField(
+        label = "Персона",
+        queryset = Person.objects.all().order_by('firstname'),
+        widget = CheckboxSelectMultiple
+    )
+    money = forms.ModelMultipleChoiceField(
+        label = "Счета",
+        queryset = Staff.objects.none().order_by('name'),
+        widget = CheckboxSelectMultiple
+    )
+    category = forms.ModelMultipleChoiceField(
+        label = "Категории",
+        queryset = Category.objects.all().order_by('name'),
+        widget = CheckboxSelectMultiple
+    )
+    comment = forms.CharField(
+        label = "Комментарии"
+    )
+
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(TransactionFilterForm, self).__init__(*args, **kwargs)
+        self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
