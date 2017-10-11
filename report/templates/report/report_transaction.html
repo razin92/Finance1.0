@@ -4,7 +4,7 @@
     .block-select {
         float: left;
         margin: 2%;
-        width: 165px;
+        width: 170px;
         height: 400px;
         overflow: auto;
 
@@ -36,7 +36,7 @@
 
 
 
-    <div class="panel-body" style="margin-left: 10%;" xmlns="http://www.w3.org/1999/html">
+    <div class="panel-body" style="margin-left: 4%;" xmlns="http://www.w3.org/1999/html">
     <form action="{% url 'report:transaction_filter' %}" method="post" id="search">
     {% csrf_token %}
         {% for element in form %}
