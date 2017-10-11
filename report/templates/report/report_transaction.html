@@ -4,7 +4,7 @@
     .block-select {
         float: left;
         margin: 1%;
-        width: 180px;
+        width: 14%;
         height: 400px;
         overflow: auto;
 
@@ -49,14 +49,14 @@
         <input title="Дата на начало" type="date" name="date_start">
         <input title="Дата на конец" type="date" name="date_end">
     </div>
-        <div class="block-select">
-    <button type="button" id="demo3" class="btn btn-default btn-xl" onclick="submit_form()">Фильтр</button>
-        </div>
      <div class="block-select">
     <p>Тип</p>
         <input title="Тип" type="checkbox" value="True" name="typeof">Приход<br>
         <input title="Тип" type="checkbox" value="False" name="typeof">Расход<br>
     </div>
+          <div class="block-select">
+    <button type="button" id="demo3" class="btn btn-default btn-xl" onclick="submit_form()">Фильтр</button>
+        </div>
     </form>
     </div>
 {% endblock %}
