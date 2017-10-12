@@ -58,6 +58,7 @@ function ShowHideContent(spoiler)
                             <input type="hidden" name="category" value="{{ report.category.name }}">
                             <input type="hidden" name="date_start" value="{{ date_start }}">
                             <input type="hidden" name="date_end" value="{{ date_end }}">
+                            <input type="hidden" name="comment" value="">
                         <input type="submit" title="{{ report.category }}" value="{{ report.category }}">
                         </form>
                     </td>
@@ -101,6 +102,7 @@ function ShowHideContent(spoiler)
                             <input type="hidden" name="who_is" value="{{ report.person.firstname }}">
                             <input type="hidden" name="date_start" value="{{ date_start }}">
                             <input type="hidden" name="date_end" value="{{ date_end }}">
+                            <input type="hidden" name="comment" value="">
                         <input type="submit" title="{{ report.person }}" value="{{ report.person }}">
                         </form>
                     </td>
@@ -144,6 +146,7 @@ function ShowHideContent(spoiler)
                             <input type="hidden" name="money" value="{{ report.pouch.name }}">
                             <input type="hidden" name="date_start" value="{{ date_start }}">
                             <input type="hidden" name="date_end" value="{{ date_end }}">
+                            <input type="hidden" name="comment" value="">
                         <input type="submit" title="{{ report.pouch }}" value="{{ report.pouch }}">
                         </form>
                     </td>
