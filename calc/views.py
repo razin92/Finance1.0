@@ -6,6 +6,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from lib.models import Pouch, Staff, Category, Person
+from django.utils import timezone
 from .forms import TransactionForm
 from .models import Transaction
 import datetime
@@ -16,21 +17,25 @@ def TransactionView(request):
     template = 'calc/transaction.html'
     user = request.user
     user_id = user.pk
+    date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1).date()
+    date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
     get_permission = Staff.objects.get(
         name__id=user_id
     )
     permitted_pouches = [x for x in get_permission.pouches.all()]
     if user.is_superuser:
         transaction = Transaction.objects.filter(
-            money__in=permitted_pouches,
-        ).order_by('-date')[0:50]
+            money__in = permitted_pouches,
+            date__range=[date_start, date_end],
+        ).order_by('-date')
     else:
         transaction = Transaction.objects.filter(
-            money__in=permitted_pouches,
-            checking=True
-        ).order_by('-date')[0:50]
+            money__in = permitted_pouches,
+            checking = True,
+            date__range = [date_start, date_end]
+        ).order_by('-date')
     pouch = Pouch.objects.filter(
-        name__in=permitted_pouches
+        name__in = permitted_pouches
     ).order_by('name')
     context = {
         'transaction': transaction,
