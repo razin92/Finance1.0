@@ -1,7 +1,8 @@
-from django.shortcuts import render, get_object_or_404, render_to_response
+from django.shortcuts import render, get_object_or_404, render_to_response, redirect
 from django.http import HttpResponse, request, HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
 from Finans002.permissions import admin_required
+from django.views import generic
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from lib.models import Pouch, Staff, Category, Person
@@ -89,6 +90,11 @@ def changer(request, transaction_id):
     return HttpResponseRedirect(reverse('calc:transaction'))
 
 @login_required()
+class TransactionEdit(generic.UpdateView):
+    model = Transaction
+    pass
+
+@login_required()
 def delete_accept(request, transaction_id):
     user = request.user
     template = 'calc/delete_confirm.html'
@@ -132,46 +138,4 @@ def calculate(request, kind):
             'kind': kind,
         }
         return render(request, template, context)
-'''
-Это для пересчета с нуля
-
-def calculate(request, type):
-    form = TransactionForm(request.POST, user_id=request.user.pk)
-
-    def check(type):
-        return type == '1'
-
-    if request.method == 'POST' and form.is_valid():
-        transaction = Transaction.objects.create(**form.cleaned_data)
-
-        if check(type):
-            transaction.typeof = True
-
-        transaction.save()
-        pouch = get_object_or_404(Pouch, pk=transaction.money.id)
-        pouch.balance = pouch.starting_balance
-        transaction_set = Transaction.objects.filter(money=pouch)
-
-        tester = 0
-        for element in transaction_set:
-            print(element.typeof, element.sum_val)
-            if element.typeof:
-                pouch.balance += element.sum_val
-                tester += element.sum_val
-            else:
-                pouch.balance -= element.sum_val
-                tester -= element.sum_val
-        print(tester)
-        pouch.save()
-
-        return HttpResponseRedirect(reverse('calc:transaction'))
-    else:
-        error = 'Проверьте правильность вводимых данных!'
-        context = {
-            'form': form,
-            'error': error,
-            'type': type
-        }
-        return render(request, 'calc/transaction_create.html', context)
-'''
 

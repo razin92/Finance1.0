@@ -14,36 +14,28 @@ import datetime
 
 @login_required()
 def report_transaction(request):
-    person = Person.objects.order_by('firstname')
     form = TransactionFilterForm(request.POST, user_id=request.user.pk)
-    staff_pouches = [x.name for x in Staff.objects.get(name__id=request.user.id).pouches.all()]
-    pouch = Pouch.objects.filter(name__in=staff_pouches).order_by('name')
     template = loader.get_template('report/report_transaction.html')
-    category = Category.objects.order_by('name')
     context = {
-        'person': person,
-        'pouch': pouch,
-        'category': category,
         'form': form,
     }
     return HttpResponse(template.render(context, request))
 
 @login_required()
 def report_transaction_filter(request):
-    from lib.models import Person, Category, Staff
     from calc.models import Transaction
     ReportTransactionPerson.objects.all().delete()
     ReportTransactionPouch.objects.all().delete()
     ReportTransactionCategory.objects.all().delete()
     def get_filter(who_is, category, money, typeof, date_start, date_end, comment):
         result = Transaction.objects.filter(
-            who_is__firstname__in=who_is,
-            comment__icontains=comment,
-            category__name__in=category,
-            money__name__in=money,
-            typeof__in=typeof,
-            date__range=[date_start, date_end],
-            checking=True,
+            who_is__firstname__in = who_is,
+            comment__icontains = comment,
+            category__name__in = category,
+            money__name__in = money,
+            typeof__in = typeof,
+            date__range = [date_start, date_end],
+            checking = True,
         ).order_by('-date', 'money', 'who_is')
         return result
 
@@ -83,6 +75,7 @@ def report_transaction_filter(request):
     template = 'report/report_transaction_filter.html'
     rqst = request.POST
     user = request.user
+
     # Генераторы списков (для значений по-умолчанию)
     firstname_set = Person.objects.values_list('firstname')
     money_set = Staff.objects.get(name__id=request.user.id).pouches.values_list('name')

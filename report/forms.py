@@ -29,19 +29,19 @@ class WorkerFilter(forms.Form):
     )
 
 class TransactionFilterForm(forms.Form):
-    who_is = forms.ModelMultipleChoiceField(
+    who_is = forms.MultipleChoiceField(
         label = "Персона",
-        queryset = Person.objects.all().order_by('firstname'),
+        choices = ((element.firstname, element) for element in Person.objects.all().order_by('firstname')),
         widget = CheckboxSelectMultiple
     )
-    money = forms.ModelMultipleChoiceField(
+    money = forms.MultipleChoiceField(
         label = "Счета",
-        queryset = Staff.objects.none().order_by('name'),
-        widget = CheckboxSelectMultiple
+        choices = (),
+        widget = CheckboxSelectMultiple,
     )
-    category = forms.ModelMultipleChoiceField(
+    category = forms.MultipleChoiceField(
         label = "Категории",
-        queryset = Category.objects.all().order_by('name'),
+        choices = ((element.name, element) for element in Category.objects.all().order_by('name')),
         widget = CheckboxSelectMultiple
     )
     comment = forms.CharField(
@@ -51,4 +51,4 @@ class TransactionFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
         super(TransactionFilterForm, self).__init__(*args, **kwargs)
-        self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
+        self.fields['money'].choices = ((element.name, element) for element in Staff.objects.get(name__id=user_id).pouches.all().order_by('name'))
