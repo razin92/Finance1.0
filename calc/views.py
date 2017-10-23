@@ -1,9 +1,8 @@
 from django.shortcuts import render, get_object_or_404, render_to_response, redirect
 from django.http import HttpResponse, request, HttpResponseRedirect
-from django.core.urlresolvers import reverse, reverse_lazy
-from Finans002.permissions import admin_required
+from django.core.urlresolvers import reverse
 from django.views import generic
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from lib.models import Pouch, Staff, Category, Person
 from django.utils import timezone
@@ -22,7 +21,7 @@ def TransactionView(request):
     get_permission = Staff.objects.get(
         name__id=user_id
     )
-    permitted_pouches = [x for x in get_permission.pouches.all()]
+    permitted_pouches = [x for x in get_permission.pouches.all()] #Разрешенные кошельки (lib.staff.pouches)
     if user.is_superuser:
         transaction = Transaction.objects.filter(
             money__in = permitted_pouches,
@@ -61,7 +60,7 @@ def TransactionDetailView(request, pk):
 def TransactionCreate(request, kind):
     template = 'calc/transaction_create.html'
     form = TransactionForm(request.POST, user_id=request.user.pk)
-    error = '* Поля обязательны к заполнению'
+    error = '* Обязательны к заполнению'
     context = {
         'form': form,
         'kind': kind,
@@ -118,14 +117,17 @@ def delete_accept(request, transaction_id):
 def calculate(request, kind):
     form = TransactionForm(request.POST, user_id=request.user.pk)
 
+    #Проверка на тип транзакции (приход = 1/расход = 0)
     def check(kind):
         return kind == '1'
 
+    #Если форма валидна, заносим транзакцию в базу
     if request.method == 'POST' and form.is_valid():
         transaction = Transaction.objects.create(**form.cleaned_data)
         transaction.creator = request.user
         pouch = get_object_or_404(Pouch, pk=transaction.money.id)
         sum = transaction.sum_val
+        #Калькуляция в зависимости от типа транзакции
         if check(kind):
             transaction.typeof = True
             pouch.balance += sum

@@ -3,22 +3,27 @@
 {% load bootstrap %}
 <style>
 .form-control {
-    width: 50%;
+    width: 60%;
 }
 .date {
-    width: 50%;
+    width: 60%;
 }
 </style>    
  <div class="panel-body">
+ <h4 align="center">
+ {% if kind == '0' %}
+     <text class="text-danger">Расход</text>
+ {% elif kind == '1' %}
+     <text class="text-success">Приход</text>
+ {% endif %}
+ </h4>
 <form method="post" action="{% url 'calc:transaction_calc' kind %}">
     {% csrf_token %}
-    <div class="panel-body" style="width: 46%; margin-left: 24%">
-        {{ form|bootstrap_horizontal }}
-    <h5 class="text-danger">{{ error }}</h5>
-    <div style="margin-left: 24%;">
-        <input type="submit" value="Сохранить" class="btn btn-success"/>
-        <a href="{% url 'calc:transaction' %}" class="btn btn-default">Отмена</a>
-    </div>
+    <div style="margin-left: 15%; width: 70%" align="center">
+        {{ form|bootstrap }}
+        <input type="submit" value="Сохранить" class="btn btn-success" style="margin: 7px"/>
+        <a href="{% url 'calc:transaction' %}" class="btn btn-default" style="margin: 7px">Отмена</a>
+        <p class="text-danger">{{ error }}</p>
     </div>
 </form>
 </div>
