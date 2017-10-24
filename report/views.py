@@ -5,9 +5,10 @@ from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, render, reverse
 from django.contrib.auth.decorators import login_required
-from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson
+from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson, BalanceStamp
 from .forms import WorkerFilter, TransactionFilterForm
 from django.utils import timezone
+from django.views.generic import ListView
 from dateutil.parser import parse
 import datetime
 
@@ -146,18 +147,52 @@ def report_workers(request):
 def report_workers_filter(request):
     user = request.user
     rqst = request.POST
+
     template = 'report/report_workers_filter.html'
-    workers_id = rqst.getlist('worker')
-    job_list1 = BonusWork.objects.filter(worker__id__in=workers_id, date__range=(rqst['date_start'], rqst['date_end']))
-    job_list2 = AccountChange.objects.filter(worker__id__in=workers_id, date__range=(rqst['date_start'], rqst['date_end']))
-    workers = Worker.objects.filter(id__in=workers_id).order_by('name')
-    result = {job_list1.filter(worker=x).order_by('-date', 'worker') for x in workers.all()}
-    result2 = {job_list2.filter(worker=x).order_by('-date', 'worker') for x in workers.all()}
+    workers_id_deafult = Worker.objects.values_list('id')
+
+    if 'date_start' in rqst and rqst['date_start'] and len(rqst['date_start']) < 11:
+        date_start = rqst['date_start']
+    else:
+        date_start = datetime.datetime(
+            timezone.now().year,
+            timezone.now().month,
+            1
+        ).date()
+    if 'date_end' in rqst and rqst['date_end'] and len(rqst['date_end']) < 11:
+        date_end = rqst['date_end']
+    else:
+        date_end = datetime.datetime(
+            timezone.now().year,
+            timezone.now().month,
+            timezone.now().day,
+            hour = 23,
+            minute = 59
+        )
+
+    workers_id = rqst.getlist('worker', workers_id_deafult)
+    job = BonusWork.objects.filter(
+        worker__id__in = workers_id,
+        date__range = [date_start, date_end]
+    )
     context = {
         'user': user,
-        'workers': workers,
-        'result': result,
-        'result2': result2,
+        'job': job,
     }
 
     return render_to_response(template, context)
+
+@login_required()
+def balance_freezer(request):
+    pouches = Pouch.objects.all()
+    for pouch in pouches:
+        BalanceStamp.objects.create(
+            pouch=pouch,
+            balance=pouch.balance
+        )
+    message = 'Операция успешно завершена'
+    context = {
+        'message': message,
+    }
+
+    return render(request, 'index.html', context)
