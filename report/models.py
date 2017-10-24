@@ -1,6 +1,7 @@
 from django.db import models
 from lib.models import Pouch, Person, Category
 
+
 # Create your models here.
 
 class ReportTransactionPouch(models.Model):
@@ -23,3 +24,11 @@ class ReportTransactionCategory(models.Model):
     date_start = models.DateTimeField(auto_now=False, null=True)
     date_end = models.DateTimeField(auto_now=False, null=True)
     category = models.ForeignKey(Category, null=True)
+
+class BalanceStamp(models.Model):
+    date = models.DateTimeField(auto_now=True)
+    pouch = models.ForeignKey(Pouch)
+    balance = models.IntegerField(default=0)
+
+    class Meta():
+        ordering = ['date']
