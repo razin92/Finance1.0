@@ -47,6 +47,7 @@
               <li><a href="{% url 'report:report_transaction' %}">По транзакциям</a></li>
               {% if user.is_staff %}
               <li><a href="{% url 'report:report_workers' %}">По работам</a></li>
+              <li><a href="{% url 'report:freeze' %}">Слепок баланса</a></li>
               {% endif %}
           </ul>
           </li>
@@ -60,6 +61,7 @@
 {% endblock %}
 {% block body %}
     <h4 align="center">Привет, {{ user.username }}!</h4>
+    <h4 class="text-success">{{ message }}</h4>
 {% endblock %}
 {% block footer %}
 {% endblock %}

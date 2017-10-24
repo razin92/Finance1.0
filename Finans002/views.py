@@ -7,8 +7,10 @@ from django.contrib.auth import logout
 
 @login_required()
 def index(request):
-
-    return render(request, "index.html")
+    context = {
+        'message': ""
+    }
+    return render(request, "index.html", context)
 
 def login_page(request):
     error = ''
