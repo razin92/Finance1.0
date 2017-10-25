@@ -93,6 +93,25 @@ def changer(request, transaction_id, number):
     transaction.save()
     pouch.save()
     if number == '1':
+        if not transaction.checking:
+            def get_data():
+                transaction = get_object_or_404(Transaction, pk=transaction_id)
+                data = {
+                    'id': transaction.id,
+                    'date': transaction.date,
+                    'sum_val': transaction.sum_val,
+                    'category': transaction.category.name,
+                    'who_is': '%s %s' % (transaction.who_is.firstname, transaction.who_is.secondname),
+                    'comment': transaction.comment,
+                    'money': '%s %s' % (transaction.money.name, transaction.money.comment),
+                    'typeof': transaction.typeof,
+                    'date_2': transaction.create_date,
+                    'creator': transaction.creator.username,
+                    'changer': request.user.username
+                }
+                return data
+            data = get_data()
+            CreateTransactionChangeHistory(data)
         return HttpResponseRedirect(reverse('calc:transaction_edit', args={transaction_id, }))
     return HttpResponseRedirect(reverse('calc:transaction'))
 
@@ -149,12 +168,10 @@ def TransactionEdit(request, transaction_id):
         }
         return transaction, data
     transaction = get_data()[0]
-    data = get_data()[1]
     #активация отмененной транзакции
     if transaction.checking:
         return HttpResponseRedirect(reverse('calc:changer', kwargs={'transaction_id': transaction_id, 'number': 1, }))
     form = TransactionEditForm(request.POST or None, instance=transaction, user_id=request.user.pk)
-    CreateTransactionChangeHistory(data)
     if form.is_valid():
         form.save()
         data = get_data()[1]
