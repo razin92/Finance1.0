@@ -1,5 +1,7 @@
 from django import forms
+from django.forms import ModelForm
 from lib.models import Category, Person, Staff
+from calc.models import Transaction
 from bootstrap3_datetime.widgets import DateTimePicker
 import datetime
 
@@ -20,6 +22,13 @@ class TransactionForm(forms.Form):
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
 
+class TransactionEditForm(ModelForm):
+    class Meta:
+        model = Transaction
+        fields = ['date', 'sum_val', 'category', 'who_is', 'comment', 'money']
 
-class TranscationEdit:
-    pass
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(TransactionEditForm, self).__init__(*args, **kwargs)
+        self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
+        self.fields['date'] = forms.DateTimeField(label="Дата", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}))

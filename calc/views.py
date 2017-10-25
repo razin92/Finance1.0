@@ -5,8 +5,9 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from lib.models import Pouch, Staff, Category, Person
+from report.models import TransactionChangeHistory
 from django.utils import timezone
-from .forms import TransactionForm
+from .forms import TransactionForm, TransactionEditForm
 from .models import Transaction
 import datetime
 
@@ -70,7 +71,7 @@ def TransactionCreate(request, kind):
 
 #Проводка/отмена транзакции
 @login_required()
-def changer(request, transaction_id):
+def changer(request, transaction_id, number):
     transaction = get_object_or_404(Transaction, pk=transaction_id)
     pouch = get_object_or_404(Pouch, pk=transaction.money.id)
     #проверка на проведение транзакции, запись баланса в текущий кошелек
@@ -91,12 +92,80 @@ def changer(request, transaction_id):
 
     transaction.save()
     pouch.save()
+    if number == '1':
+        return HttpResponseRedirect(reverse('calc:transaction_edit', args={transaction_id, }))
     return HttpResponseRedirect(reverse('calc:transaction'))
 
+def CreateTransactionChangeHistory(data):
+    data_get=data.get
+    #Создается объект истории с текущими данными транзакции
+    TransactionChangeHistory.objects.create(
+        transaction_id=data_get('id'),
+        date_before=data_get('date'),
+        sum_val_before='%s' % data_get('sum_val'),
+        category_before='%s' % data_get('category'),
+        who_is_before='%s' % data_get('who_is'),
+        comment_before='%s' % data_get('comment'),
+        money_before='%s' % data_get('money'),
+        typeof_before=data_get('typeof'),
+        typeof_after=data_get('typeof'),
+        date_of_create=data_get('date_2'),
+        date_of_change=timezone.now(),
+        creator='%s' % data_get('creator'),
+        changer='%s' % data_get('changer'),
+    )
+
+def UpdateTransactionChangeHistory(data):
+    #Обновленные данные транзакции в объект истории
+    data_get = data.get
+    history = TransactionChangeHistory.objects.last()
+    history.date_after = data_get('date')
+    history.sum_val_after = '%s' % data_get('sum_val')
+    history.category_after = '%s' % data_get('category')
+    history.who_is_after = '%s' % data_get('who_is')
+    history.comment_after = '%s' % data_get('comment')
+    history.money_after = '%s' % data_get('money')
+    history.date_of_change = timezone.now()
+    history.save()
+
+
 @login_required()
-class TransactionEdit(generic.UpdateView):
-    model = Transaction
-    pass
+def TransactionEdit(request, transaction_id):
+    template = 'calc/transaction_edit.html'
+    def get_data():
+        transaction = get_object_or_404(Transaction, pk=transaction_id)
+        data = {
+            'id': transaction.id,
+            'date': transaction.date,
+            'sum_val': transaction.sum_val,
+            'category': transaction.category.name,
+            'who_is': '%s %s' % (transaction.who_is.firstname, transaction.who_is.secondname),
+            'comment': transaction.comment,
+            'money': '%s %s' % (transaction.money.name, transaction.money.comment),
+            'typeof': transaction.typeof,
+            'date_2': transaction.create_date,
+            'creator': transaction.creator.username,
+            'changer': request.user.username
+        }
+        return transaction, data
+    transaction = get_data()[0]
+    data = get_data()[1]
+    #активация отмененной транзакции
+    if transaction.checking:
+        return HttpResponseRedirect(reverse('calc:changer', kwargs={'transaction_id': transaction_id, 'number': 1, }))
+    form = TransactionEditForm(request.POST or None, instance=transaction, user_id=request.user.pk)
+    CreateTransactionChangeHistory(data)
+    if form.is_valid():
+        form.save()
+        data = get_data()[1]
+        UpdateTransactionChangeHistory(data)
+        return HttpResponseRedirect(reverse('calc:changer', kwargs={'transaction_id': transaction_id, 'number': 0, }))
+    message = "Внимание! Выход без сохранения удалит транзакцию"
+    context = {
+        'form': form,
+        'message': message
+    }
+    return render(request, template, context)
 
 @login_required()
 def delete_accept(request, transaction_id):

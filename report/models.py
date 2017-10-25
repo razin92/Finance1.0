@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+from calc.models import Transaction
 from lib.models import Pouch, Person, Category
 
 
@@ -32,3 +35,24 @@ class BalanceStamp(models.Model):
 
     class Meta():
         ordering = ['date']
+
+class TransactionChangeHistory(models.Model):
+    transaction_id = models.IntegerField(blank=True, default=0)
+    date_before = models.DateTimeField(blank=True)
+    date_after = models.DateTimeField(blank=True, null=True)
+    sum_val_before = models.IntegerField(blank=True, default=0)
+    sum_val_after = models.IntegerField(blank=True, default=0)
+    category_before = models.CharField(max_length=20, blank=True)
+    category_after = models.CharField(max_length=20, blank=True)
+    who_is_before = models.CharField(max_length=50, blank=True)
+    who_is_after = models.CharField(max_length=50, blank=True)
+    comment_before = models.CharField(max_length=50, blank=True)
+    comment_after = models.CharField(max_length=50, blank=True)
+    money_before = models.CharField(max_length=80, blank=True)
+    money_after = models.CharField(max_length=80, blank=True)
+    typeof_before = models.BooleanField(default=True)
+    typeof_after = models.BooleanField(default=True)
+    date_of_create = models.DateTimeField(blank=True)
+    date_of_change = models.DateTimeField(blank=True)
+    creator = models.CharField(max_length=150, blank=True)
+    changer = models.CharField(max_length=150, blank=True)

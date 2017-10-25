@@ -90,7 +90,14 @@ function ShowHideContent(spoiler)
                 <td>{{ position.who_is }}</td>
                 <td>{{ position.money }}</td>
                 <td>{{ position.comment }}</td>
-                <td><a href="{% url 'calc:transaction_detail' position.id %}" class="bnt btn-success btn-xs">Подробно</a></td>
+                <td>
+                    <div style="margin: 5px">
+                    <a href="{% url 'calc:transaction_detail' position.id %}" class="bnt btn-success btn-xs">Подробно</a>
+                        </div>
+                        <div style="margin: 5px">
+                    <p><a href="{% url 'calc:changer' position.id 1 %}" class="bnt btn-warning btn-xs">Изменить</a></p>
+                        </div>
+                </td>
                     <td>{% if not position.typeof %}<p class="text-danger">Расход</p>{% else %}<p class="text-success">Приход</p>{% endif %}</td>
                 {% if user.is_superuser %}
                     <td>{% if position.checking %}ПРОВЕДЕНО{% else %}ОТМЕНЕНО{% endif %}</td>

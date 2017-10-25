@@ -1,0 +1,15 @@
+{% extends 'index.html' %}
+{% load bootstrap %}
+{% block body %}
+ <div class="panel-body">
+    <h4 class="text-danger" align="center">{{ message }}</h4>
+    <form method="post">
+    {% csrf_token %}
+    <div style="margin-left: 15%; width: 70%" align="center">
+        {{ form|bootstrap }}
+        <input type="submit" value="Сохранить" class="btn btn-success" style="margin: 7px"/>
+        <p class="text-danger">{{ error }}</p>
+    </div>
+</form>
+</div>
+{% endblock %}

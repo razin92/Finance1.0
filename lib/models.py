@@ -6,11 +6,11 @@ class Person(models.Model):
     secondname = models.CharField(max_length=20, verbose_name=(u'Фамилия'), blank=True)
 
     def __str__(self):
-        return self.firstname + ' ' + self.secondname
+        return '%s %s' % (self.firstname, self.secondname)
 
     class Meta():
         unique_together = ('firstname', 'secondname')
-
+        ordering = ['firstname', 'secondname']
 
 class Pouch(models.Model):
     name = models.CharField(max_length=20, unique=True)
@@ -26,11 +26,17 @@ class Pouch(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta():
+        ordering = ['name']
+
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.name
+
+    class Meta():
+        ordering = ['name']
 
 class Staff(models.Model):
     name = models.OneToOneField(User)

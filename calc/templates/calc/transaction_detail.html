@@ -17,7 +17,7 @@
         <p>Статус: <text class="text-danger">Не проведено</text></p>
     {% endif %}
 
-<form action="{% url 'calc:changer' transaction.id %}" method="post">
+<form action="{% url 'calc:changer' transaction.id 0 %}" method="post">
     {% csrf_token %}
     {% if transaction.checking %}
     <input type="submit" value="Отменить" class="btn btn-danger btn-xs"/>

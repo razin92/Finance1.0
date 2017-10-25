@@ -5,7 +5,6 @@ from django.utils import timezone
 
 
 class Transaction(models.Model):
-
     date = models.DateTimeField(verbose_name=(u'Время проведения'), default=timezone.now)
     sum_val = models.IntegerField(verbose_name=(u'Cумма'))
     category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name=(u'Категория'))
