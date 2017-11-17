@@ -31,7 +31,7 @@ class WorkerFilter(forms.Form):
 class TransactionFilterForm(forms.Form):
     who_is = forms.MultipleChoiceField(
         label = "Персона",
-        choices = ((element.firstname, element) for element in Person.objects.all().order_by('firstname')),
+        choices = (),
         widget = CheckboxSelectMultiple
     )
     money = forms.MultipleChoiceField(
@@ -41,7 +41,7 @@ class TransactionFilterForm(forms.Form):
     )
     category = forms.MultipleChoiceField(
         label = "Категории",
-        choices = ((element.name, element) for element in Category.objects.all().order_by('name')),
+        choices = (),
         widget = CheckboxSelectMultiple
     )
     comment = forms.CharField(
@@ -52,3 +52,5 @@ class TransactionFilterForm(forms.Form):
         user_id = kwargs.pop('user_id', None)
         super(TransactionFilterForm, self).__init__(*args, **kwargs)
         self.fields['money'].choices = ((element.name, element) for element in Staff.objects.get(name__id=user_id).pouches.all().order_by('name'))
+        self.fields['who_is'].choices = ((element.firstname, element) for element in Person.objects.all().order_by('firstname'))
+        self.fields['category'].choices = ((element.name, element) for element in Category.objects.all().order_by('name'))
