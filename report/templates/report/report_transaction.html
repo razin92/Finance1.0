@@ -4,17 +4,14 @@
     .block-select {
         float: left;
         margin: 5px;
-        width: 165px;
-        height: 400px;
+        width: 250px;
+        height: 600px;
         overflow: auto;
 
     }
     </style>
 <!-- <script src="jquery.blockUI.js"></script> -->
 <script src="/media/static/js/jquery.blockUI.js"></script>
-
-
-
     <script language="javascript" type="text/javascript">
     function submit_form() {
        $("#search").submit();
@@ -30,13 +27,8 @@
         })
     });
 });
-
     </script>
-
-
-
-
-    <div class="panel-body" style="margin: 1%;" xmlns="http://www.w3.org/1999/html">
+    <div class="panel-body" style="margin: 1%;">
     <form action="{% url 'report:transaction_filter' %}" method="post" id="search">
     {% csrf_token %}
         {% for element in form %}
@@ -45,19 +37,19 @@
         {{ element }}
     </div>
         {% endfor %}
-    <div class="block-select">
+    <div style="margin: 1%;">
         <p>Начало периода</p>
         <input title="Дата на начало" type="date" name="date_start">
         <br>
         <p>Конец периода</p>
         <input title="Дата на конец" type="date" name="date_end">
     </div>
-     <div class="block-select">
+     <div style="margin: 1%;">
     <p>Тип</p>
         <input title="Тип" type="checkbox" value="True" name="typeof">Приход<br>
         <input title="Тип" type="checkbox" value="False" name="typeof">Расход<br>
     </div>
-          <div class="block-select">
+          <div style="margin: 1%;">
     <button type="button" id="demo3" class="btn btn-default btn-xl" onclick="submit_form()">Фильтр</button>
         </div>
     </form>
