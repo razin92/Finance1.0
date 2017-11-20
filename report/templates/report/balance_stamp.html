@@ -9,8 +9,8 @@
                 <th>Дата</th>
                 <th>Счет</th>
                 <th>ID Т-ии</th>
-                <th>На сумму</th>
                 <th>До проведения</th>
+                <th>На сумму</th>
                 <th>После проведения</th>
                 <th>Резон</th>
                 <th>История изменений транзакции</th>
@@ -23,14 +23,14 @@
                 <td>{{ note.id }}</td>
                 <td>{{ note.date|date:"d.m.Y H:i:s" }}</td>
                 <td>{{ note.pouch.name }}</td>
-                <td><a href="{% url 'calc:transaction_detail' note.transaction.id %}">
+                <td><a href="#">
                     {{ note.transaction.id }}
                 </a></td>
+                <td>{{ note.balance_before|intcomma }}</td>
                 <td>
                     {% if not note.transaction.typeof %}-{% endif %}
                     {{ note.sum_val|intcomma }}
                 </td>
-                <td>{{ note.balance_before|intcomma }}</td>
                 <td>{{ note.balance_after|intcomma }}</td>
                 <td>{{ note.reason }}</td>
                 <td>
