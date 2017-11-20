@@ -100,7 +100,7 @@ function ShowHideContent(spoiler)
                 <td style="background: linear-gradient({{ position.category.color }}, white); border-radius: 9px"><strong>{{ position.id }}</strong></td>
                 <td>{{ position.date|date:"d.m.Y"}}</td>
                 <td><strong>{% if not position.typeof %}-{% endif %}{{ position.sum_val|intcomma }}</strong></td>
-                <td style="color: {{ position.category.color }}">{{ position.category }}</td>
+                <td style="color: {{ position.category.color }}; background: rgba(0,0,0,0.58)">{{ position.category }}</td>
                 <td>{{ position.who_is }}</td>
                 <td>{{ position.money }}</td>
                 <td>{{ position.comment }}</td>
