@@ -256,3 +256,9 @@ def calculate(request, kind):
         }
         return render(request, template, context)
 
+def set_default_color(color):
+    category = Category.objects.all()
+    for each in category:
+        each.color = '3E3E3E'
+        each.save()
+    return print('done')
