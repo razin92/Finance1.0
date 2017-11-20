@@ -32,7 +32,10 @@
     <form action="{% url 'report:transaction_filter' %}" method="post" id="search">
     {% csrf_token %}
         {% for element in form %}
-    <div class="block-select">
+    <div class="block-select" id="{{ element.html_name }}">
+        {% if element.html_name != "comment" %}
+        <input title="" type="checkbox" name="checkAll" id="checkAll">
+        {% endif %}
         {{ element.label }}
         {{ element }}
     </div>
@@ -54,4 +57,27 @@
         </div>
     </form>
     </div>
+
+    {% for element in form %}
+    {% if element.html_name != "comment" %}
+        <script>
+$(function () {
+    $("#{{ element.html_name }} #checkAll").click(function () {
+        if ($("#{{ element.html_name }} #checkAll").is(':checked')) {
+            $("#{{ element.html_name }} input[type=checkbox]").each(function () {
+                $(this).prop("checked", true);
+            });
+
+        } else {
+            $("#{{ element.html_name }} input[type=checkbox]").each(function () {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+});
+        </script>
+    {% endif %}
+{% endfor %}
+
+
 {% endblock %}
