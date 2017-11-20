@@ -12,4 +12,6 @@ urlpatterns = [
 
         url(r'^stamp/$', views.balance_freezer, name='freeze'),
 
+        url(r'^history/transactions/$', views.transaction_change_history, name='transaction_history'),
+
         ]

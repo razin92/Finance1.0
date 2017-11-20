@@ -10,6 +10,15 @@
       <script type="text/javascript" src="/media/static/js/jquery.tablesorter.widgets.js"></script>
       <link rel="stylesheet" type="text/css" href="/media/static/js/theme.jui.css">
       <script type="text/javascript" src="/media/static/js/widget-pager.js"></script>
+<style>
+
+.tr_style {
+    font-weight: bold;
+    color: black;
+}
+
+</style>
+
 
 <script type="text/javascript">
 function ShowHideContent(spoiler)
@@ -46,7 +55,12 @@ function ShowHideContent(spoiler)
     </div>
   </div>
 </div>
- <h4>Внимание! Здесь отображаются все транзакции за текущий месяц.</h4>
+    <h4>Внимание! Здесь отображаются все транзакции за месяц: <b>{{ month_name }}</b> </h4>
+<form action="{% url 'calc:transaction' %}" method="post">
+    {% csrf_token %}
+{{ form }}
+    <input type="submit" value="Показать">
+</form>
  <!-- pager -->
 <div class="pager">
     <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first" />
@@ -63,9 +77,9 @@ function ShowHideContent(spoiler)
     <select class="gotoPage" title="Select page number"></select>
 </div>
 
-    <table class="table table-striped table-hover tablesorter">
+    <table class="table table-hover table-striped tablesorter">
         <thead>
-            <tr>
+            <tr class="tr_style">
             <th>ID</th>
             <th>Дата</th>
             <th>Сумма</th>
@@ -82,11 +96,11 @@ function ShowHideContent(spoiler)
         </thead>
         <tbody>
         {% for position in transaction %}
-                <tr>
-                <td><strong>{{ position.id }}</strong></td>
+                <tr class="tr_style">
+                <td style="background: linear-gradient({{ position.category.color }}, white); border-radius: 9px"><strong>{{ position.id }}</strong></td>
                 <td>{{ position.date|date:"d.m.Y"}}</td>
                 <td><strong>{% if not position.typeof %}-{% endif %}{{ position.sum_val|intcomma }}</strong></td>
-                <td>{{ position.category }}</td>
+                <td style="color: {{ position.category.color }}">{{ position.category }}</td>
                 <td>{{ position.who_is }}</td>
                 <td>{{ position.money }}</td>
                 <td>{{ position.comment }}</td>

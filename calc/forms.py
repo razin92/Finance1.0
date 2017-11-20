@@ -32,3 +32,25 @@ class TransactionEditForm(ModelForm):
         super(TransactionEditForm, self).__init__(*args, **kwargs)
         self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
         self.fields['date'] = forms.DateTimeField(label="Дата", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}))
+
+class MonthForm(forms.Form):
+    month = (
+        ('',''),
+        ('1', 'Январь'),
+        ('2', 'Февраль'),
+        ('3', 'Март'),
+        ('4', 'Апрель'),
+        ('5', 'Май'),
+        ('6', 'Июнь'),
+        ('7', 'Июль'),
+        ('8', 'Август'),
+        ('9', 'Сетнябрь'),
+        ('10', 'Октябрь'),
+        ('11', 'Ноябрь'),
+        ('12', 'Декабрь')
+    )
+    year = (
+        ('2017', '2017')
+    )
+    select_month = forms.ChoiceField(choices=month, label="Выбрать другой месяц")
+    #select_year = forms.ChoiceField(choices=year)

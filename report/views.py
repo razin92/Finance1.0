@@ -5,7 +5,7 @@ from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, render, reverse
 from django.contrib.auth.decorators import login_required
-from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson, BalanceStamp
+from .models import ReportTransactionCategory, ReportTransactionPouch, ReportTransactionPerson, BalanceStamp, TransactionChangeHistory
 from .forms import WorkerFilter, TransactionFilterForm
 from django.utils import timezone
 from django.views.generic import ListView
@@ -184,15 +184,22 @@ def report_workers_filter(request):
 
 @login_required()
 def balance_freezer(request):
-    pouches = Pouch.objects.all()
-    for pouch in pouches:
-        BalanceStamp.objects.create(
-            pouch=pouch,
-            balance=pouch.balance
-        )
-    message = 'Операция успешно завершена'
+    template = 'report/balance_stamp.html'
+    stamp = BalanceStamp.objects.all().order_by('-date')[:30]
     context = {
-        'message': message,
+        'stamp': stamp,
+        'user': request.user,
     }
+    return render(request, template, context)
 
-    return render(request, 'index.html', context)
+@login_required()
+def transaction_change_history(request):
+    TransactionChangeHistory.objects.filter(who_is_after='', category_after='', money_after='').delete()
+    history = TransactionChangeHistory.objects.all().order_by('-date_of_change')[:30]
+    user = request.user
+    template = 'report/transaction_history.html'
+    context = {
+        'history': history,
+        'user': user
+    }
+    return render(request, template, context)

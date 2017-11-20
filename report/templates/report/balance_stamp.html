@@ -1,0 +1,106 @@
+{% extends 'index.html' %}
+{% load humanize %}
+{% block body %}
+     <div class="panel-body">
+        <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата</th>
+                <th>Счет</th>
+                <th>ID Т-ии</th>
+                <th>На сумму</th>
+                <th>До проведения</th>
+                <th>После проведения</th>
+                <th>Резон</th>
+                <th>История изменений транзакции</th>
+                <th>User</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for note in stamp %}
+                <tr>
+                <td>{{ note.id }}</td>
+                <td>{{ note.date|date:"d.m.Y H:i:s" }}</td>
+                <td>{{ note.pouch.name }}</td>
+                <td><a href="{% url 'calc:transaction_detail' note.transaction.id %}">
+                    {{ note.transaction.id }}
+                </a></td>
+                <td>
+                    {% if not note.transaction.typeof %}-{% endif %}
+                    {{ note.sum_val|intcomma }}
+                </td>
+                <td>{{ note.balance_before|intcomma }}</td>
+                <td>{{ note.balance_after|intcomma }}</td>
+                <td>{{ note.reason }}</td>
+                <td>
+                    <p>
+                        {% if note.transaction_change.date_before != note.transaction_change.date_after %}
+                            <strong>Дата:</strong>
+                            {{ note.transaction_change.date_before|date:"d.m.Y H:i:s" }}
+                            <strong> ===> </strong>
+                            {{ note.transaction_change.date_after|date:"d.m.Y H:i:s" }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.sum_val_before != note.transaction_change.sum_val_after %}
+                            <strong>Сумма:</strong>
+                            {% if not note.transaction_change.typeof_before %}-{% endif %}
+                            {{ note.transaction_change.sum_val_before|intcomma }}
+                            <strong> ===> </strong>
+                            {% if not note.transaction_change.typeof_after %}-{% endif %}
+                            {{ note.transaction_change.sum_val_after|intcomma }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.category_before != note.transaction_change.category_after %}
+                            <strong>Категория:</strong>
+                            {{ note.transaction_change.category_before }}
+                            <strong> ===> </strong>
+                            {{ note.transaction_change.category_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.who_is_before != note.transaction_change.who_is_after %}
+                            <strong>Персона:</strong>
+                            {{ note.transaction_change.who_is_before }}
+                            <strong> ===> </strong>
+                            {{ note.transaction_change.who_is_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.comment_before != note.transaction_change.comment_after %}
+                            <strong>Комментарий:</strong>
+                            {{ note.transaction_change.comment_before }}
+                            <strong> ===> </strong>
+                            {{ note.transaction_change.comment_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.money_before != note.transaction_change.money_after %}
+                            <strong>Счет:</strong>
+                            {{ note.transaction_change.money_before }}
+                            <strong> ===> </strong>
+                            {{ note.transaction_change.money_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.transaction_change.typeof_before != note.transaction_change.typeof_after %}
+                            <strong>Тип:</strong>
+                            {% if note.transaction_change.typeof_before %}Приход{% else %}Расход{% endif %}
+                            <strong> ===> </strong>
+                            {% if note.transaction_change.typeof_after %}Приход{% else %}Расход{% endif %}
+                        {% endif %}
+                    </p>
+                </td>
+                <td>{{ note.transaction.creator }}
+                    {% if note.transaction_change %}
+                        / {{ note.transaction_change.changer }}
+                    {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+     </div>
+{% endblock %}

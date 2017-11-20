@@ -5,9 +5,9 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from lib.models import Pouch, Staff, Category, Person
-from report.models import TransactionChangeHistory
+from report.models import TransactionChangeHistory, BalanceStamp
 from django.utils import timezone
-from .forms import TransactionForm, TransactionEditForm
+from .forms import TransactionForm, TransactionEditForm, MonthForm
 from .models import Transaction
 import datetime
 
@@ -15,10 +15,14 @@ import datetime
 @login_required()
 def TransactionView(request):
     template = 'calc/transaction.html'
+    form = MonthForm
     user = request.user
     user_id = user.pk
-    date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1).date()
-    date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
+    rqst = request.POST
+    if 'select_month' in rqst and rqst['select_month']:
+        month = rqst['select_month']
+    else:
+        month = str(timezone.now().month)
     get_permission = Staff.objects.get(
         name__id=user_id
     )
@@ -26,23 +30,26 @@ def TransactionView(request):
     if user.is_superuser:
         transaction = Transaction.objects.filter(
             money__in = permitted_pouches,
-            date__range=[date_start, date_end],
+            date__month=month,
         ).order_by('-date')
     else:
         transaction = Transaction.objects.filter(
             money__in = permitted_pouches,
             checking = True,
-            date__range = [date_start, date_end]
+            date__month=month
         ).order_by('-date')
     pouch = Pouch.objects.filter(
         name__in = permitted_pouches
     ).order_by('name')
+    month_name = MonthForm.month[int(month)][1]
     context = {
         'transaction': transaction,
         'pouch': pouch,
-        'user': user
+        'user': user,
+        'form': form,
+        'month_name': month_name
     }
-    return render_to_response(template, context)
+    return render(request, template, context)
 
 #Детально о транзакции
 @login_required()
@@ -115,6 +122,32 @@ def changer(request, transaction_id, number):
         return HttpResponseRedirect(reverse('calc:transaction_edit', args={transaction_id, }))
     return HttpResponseRedirect(reverse('calc:transaction'))
 
+#Метки изменения баланса
+def CreateBalanceStamp(transaction, history, reason):
+    balance_before = transaction.money.balance
+    if transaction.checking:
+        if transaction.typeof:
+            balance_after = balance_before + transaction.sum_val
+        else:
+            balance_after = balance_before - transaction.sum_val
+    else:
+        if transaction.typeof:
+            balance_after = balance_before - transaction.sum_val
+        else:
+            balance_after = balance_before + transaction.sum_val
+
+    stamp = BalanceStamp.objects.create(
+        pouch=transaction.money,
+        sum_val=transaction.sum_val,
+        balance_before=balance_before,
+        balance_after=balance_after,
+        transaction=transaction,
+        reason=reason,
+    )
+    stamp.transaction_change = history
+    stamp.save()
+    return stamp
+
 def CreateTransactionChangeHistory(data):
     data_get=data.get
     #Создается объект истории с текущими данными транзакции
@@ -146,7 +179,7 @@ def UpdateTransactionChangeHistory(data):
     history.money_after = '%s' % data_get('money')
     history.date_of_change = timezone.now()
     history.save()
-
+    return history
 
 @login_required()
 def TransactionEdit(request, transaction_id):
@@ -175,29 +208,19 @@ def TransactionEdit(request, transaction_id):
     if form.is_valid():
         form.save()
         data = get_data()[1]
-        UpdateTransactionChangeHistory(data)
+        transaction = get_data()[0]
+        history = UpdateTransactionChangeHistory(data)
+        transaction.checking = True
+        CreateBalanceStamp(transaction, history, 'Изменение')
         return HttpResponseRedirect(reverse('calc:changer', kwargs={'transaction_id': transaction_id, 'number': 0, }))
+    else:
+        CreateBalanceStamp(transaction, None, '+/-')
     message = "Внимание! Выход без сохранения удалит транзакцию"
     context = {
         'form': form,
         'message': message
     }
     return render(request, template, context)
-
-@login_required()
-def delete_accept(request, transaction_id):
-    user = request.user
-    template = 'calc/delete_confirm.html'
-    transaction = Transaction.objects.get(id=transaction_id)
-    message = 'Вы действительно хотите удалить транзакцию' \
-              'ID = %s' \
-              'Сумма = %s' \
-              'Категория = %s' \
-              % (transaction.id, transaction.sum_val, transaction.category)
-    context = {
-
-    }
-    pass
 
 @login_required()
 def calculate(request, kind):
@@ -221,6 +244,7 @@ def calculate(request, kind):
             pouch.balance -= sum
         transaction.save()
         pouch.save()
+        CreateBalanceStamp(transaction, None, 'Создание')
         return HttpResponseRedirect(reverse('calc:transaction'))
     else:
         template = 'calc/transaction_create.html'

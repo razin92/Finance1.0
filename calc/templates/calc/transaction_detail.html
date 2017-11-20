@@ -5,19 +5,22 @@
 <div class="modal-body">
     <h4>Транзакция №<strong> {{ transaction.id }}</strong> | Текущий баланс счета "{{ transaction.money }}": <strong>{{ transaction.money.balance|intcomma }}</strong> (ID счета = {{ transaction.money.id }})</h4>
     <p><strong>Сумма:</strong> {{ transaction.sum_val|intcomma}}</p>
-    <p><strong>Дата:</strong> {{ transaction.date|date:"d.m.Y в H:i" }}</p>
+    <p><strong>Дата:</strong> {{ transaction.date|date:"d.m.Y в H:i:s" }}</p>
     <p><strong>ФИО:</strong> {{ transaction.who_is.firstname }} {{ transaction.who_is.secondname }}</p>
     <p><strong>Категория:</strong> {{ transaction.category }}</p>
     <p><strong>Счет:</strong> {{ transaction.money }}</p>
     <p><strong>Тип:</strong>{% if not transaction.typeof %} Расход{% else %} Приход{% endif %}</p>
     <p><strong>Комментарий:</strong> {{ transaction.comment }}</p>
+    <p><strong>Создана:</strong> {{ transaction.create_date|date:"d.m.Y в H:i:s" }}</p>
+    <p><strong>Ответственный:</strong> {{ transaction.creator }}</p>
     {% if transaction.checking %}
         <p>Статус: <text class="text-success">Проведено</text></p>
     {% else %}
         <p>Статус: <text class="text-danger">Не проведено</text></p>
     {% endif %}
 
-<form action="{% url 'calc:changer' transaction.id 0 %}" method="post">
+<!--
+<form action="{% url 'calc:changer' transaction.id 0 %}" method="post" style="margin: 5px">
     {% csrf_token %}
     {% if transaction.checking %}
     <input type="submit" value="Отменить" class="btn btn-danger btn-xs"/>
@@ -27,6 +30,10 @@
     {% endif %}
     {% endif %}
 </form>
+-->
+        <div style="margin: 5px">
+            <p><a href="{% url 'calc:changer' transaction.id 1 %}" class="bnt btn-warning btn-xs">Изменить</a></p>
+        </div>
 </div>
 {% endif %}
 {% endblock %}

@@ -28,14 +28,6 @@ class ReportTransactionCategory(models.Model):
     date_end = models.DateTimeField(auto_now=False, null=True)
     category = models.ForeignKey(Category, null=True)
 
-class BalanceStamp(models.Model):
-    date = models.DateTimeField(auto_now=True)
-    pouch = models.ForeignKey(Pouch)
-    balance = models.IntegerField(default=0)
-
-    class Meta():
-        ordering = ['date']
-
 class TransactionChangeHistory(models.Model):
     transaction_id = models.IntegerField(blank=True, default=0)
     date_before = models.DateTimeField(blank=True)
@@ -56,3 +48,18 @@ class TransactionChangeHistory(models.Model):
     date_of_change = models.DateTimeField(blank=True)
     creator = models.CharField(max_length=150, blank=True)
     changer = models.CharField(max_length=150, blank=True)
+
+class BalanceStamp(models.Model):
+    date = models.DateTimeField(auto_now=True)
+    pouch = models.ForeignKey(Pouch)
+    sum_val = models.IntegerField(default=0)
+    balance_before = models.IntegerField(default=0)
+    balance_after = models.IntegerField(default=0)
+    transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, null=True, blank=True)
+    transaction_change = models.ForeignKey(TransactionChangeHistory, on_delete=models.CASCADE, null=True, blank=True)
+    reason = models.CharField(max_length=20)
+
+    class Meta():
+        ordering = ['date']
+
+

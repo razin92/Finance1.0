@@ -9,10 +9,14 @@
 {% endblock %}
 {% block head %}
     {% if user.is_authenticated %}
-
+<style>
+body {
+    background: linear-gradient(rgba(0,0,0,0.08), white);
+}
+</style>
     <nav class="navbar navbar-inverse">
     <div class="navbar-header">
-      <a class="navbar-brand" href="{% url 'index' %}">Finans 0.02</a>
+      <a class="navbar-brand" href="{% url 'index' %}">Finans 0.11</a>
     </div>
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2" aria-expanded="true">
       <ul class="nav navbar-nav">
@@ -48,6 +52,7 @@
               {% if user.is_staff %}
               <li><a href="{% url 'report:report_workers' %}">По работам</a></li>
               <li><a href="{% url 'report:freeze' %}">Слепок баланса</a></li>
+              <li><a href="{% url 'report:transaction_history'%}">Лог изменений тр-ий</a></li>
               {% endif %}
           </ul>
           </li>

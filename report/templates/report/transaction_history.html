@@ -1,0 +1,87 @@
+{% extends 'index.html' %}
+{% load humanize %}
+{% block body %}
+     <div class="panel-body">
+        <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+                <th style="width: 5%;">ID</th>
+                <th style="width: 15%;">Создана / User</th>
+                <th style="width: 15%;">Редактирована / User</th>
+                <th style="width: 65%;">Детализация измененных полей</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for note in history %}
+            <tr>
+                <td><a href="{% url 'calc:transaction_detail' note.transaction_id %}" target="_blank">
+                    {{ note.transaction_id }}
+                </a></td>
+                <td>{{ note.date_of_create|date:"d.m.Y H:i:s" }} / {{ note.creator }}</td>
+                <td>{{ note.date_of_change|date:"d.m.Y H:i:s" }} / {{ note.changer }}</td>
+                <td>
+                    <p>
+                        {% if note.date_before != note.date_after %}
+                            <strong>Дата:</strong>
+                            {{ note.date_before|date:"d.m.Y H:i:s" }}
+                            <strong> ===> </strong>
+                            {{ note.date_after|date:"d.m.Y H:i:s" }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.sum_val_before != note.sum_val_after %}
+                            <strong>Сумма:</strong>
+                            {% if not note.typeof_before %}-{% endif %}
+                            {{ note.sum_val_before|intcomma }}
+                            <strong> ===> </strong>
+                            {% if not note.typeof_after %}-{% endif %}
+                            {{ note.sum_val_after|intcomma }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.category_before != note.category_after %}
+                            <strong>Категория:</strong>
+                            {{ note.category_before }}
+                            <strong> ===> </strong>
+                            {{ note.category_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.who_is_before != note.who_is_after %}
+                            <strong>Персона:</strong>
+                            {{ note.who_is_before }}
+                            <strong> ===> </strong>
+                            {{ note.who_is_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.comment_before != note.comment_after %}
+                            <strong>Комментарий:</strong>
+                            {{ note.comment_before }}
+                            <strong> ===> </strong>
+                            {{ note.comment_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.money_before != note.money_after %}
+                            <strong>Счет:</strong>
+                            {{ note.money_before }}
+                            <strong> ===> </strong>
+                            {{ note.money_after }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if note.typeof_before != note.typeof_after %}
+                            <strong>Тип:</strong>
+                            {% if note.typeof_before %}Приход{% else %}Расход{% endif %}
+                            <strong> ===> </strong>
+                            {% if note.typeof_after %}Приход{% else %}Расход{% endif %}
+                        {% endif %}
+                    </p>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+     </div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from colorfield.fields import ColorField
 
 class Person(models.Model):
     firstname = models.CharField(max_length=20)
@@ -31,6 +32,7 @@ class Pouch(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
+    color = ColorField(default='#F0F0F0')
 
     def __str__(self):
         return self.name
