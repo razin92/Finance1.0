@@ -67,7 +67,8 @@ def TransactionDetailView(request, pk):
 @login_required()
 def TransactionCreate(request, kind):
     template = 'calc/transaction_create.html'
-    form = TransactionForm(request.POST, user_id=request.user.pk)
+    last_transaction = Transaction.objects.filter(creator__id=request.user.pk).order_by('-date')[0]
+    form = TransactionForm(request.POST or None, user_id=request.user.pk)
     error = '* Обязательны к заполнению'
     context = {
         'form': form,
