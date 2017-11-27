@@ -213,7 +213,7 @@ Highcharts.chart('container', {
         type: 'bar'
     },
     title: {
-        text: 'Отчет по категориям'
+        text: 'Отчет по категориям | Приход: {{ income|intcomma }} | Расход: {{ outcome|intcomma }}'
     },
     subtitle: {
         text: '{{ period }}'
@@ -227,7 +227,7 @@ Highcharts.chart('container', {
     yAxis: {
         min: 0,
         title: {
-            text: 'Выбранные счета:{% for element in by_pouch %} {{ element.pouch.name }}|{% endfor %} Выбранные персоны:{% for element in by_person %} {{ element.person.firstname }}|{% endfor %}',
+            text: 'Счета: {% for element in by_pouch %} {{ element.pouch.name }}|{% endfor %}',
             align: 'high'
         },
         labels: {
