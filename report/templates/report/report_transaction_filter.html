@@ -80,7 +80,7 @@ function ShowHideContent(spoiler)
               </script>
 
           {% endfor %}
-                <div id="container" style="min-width: 310px; max-width: 1000px; height: 400px; margin: 0 auto"></div>
+                <div id="container" style="min-width: 310px; max-width: 1000px; height: 600px; margin: 0 auto"></div>
                 </tbody>
             </table>
       </div>
@@ -244,9 +244,9 @@ Highcharts.chart('container', {
     legend: {
         layout: 'vertical',
         align: 'left',
-        verticalAlign: 'top',
-        x: 20,
-        y: 10,
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
         floating: true,
         borderWidth: 1,
         backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
