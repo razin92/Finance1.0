@@ -32,6 +32,8 @@ function ShowHideContent(spoiler)
     <div class="panel-body">
         <a href="{% url 'report:report_transaction' %}" class="btn btn-default">Сброс</a>
     <h4>{{ period }}</h4>
+    <h4>Общий приход: <strong>{{ income|intcomma }}</strong> Общий расход: <strong>{{ outcome|intcomma }}</strong></h4>
+
     {# Сводный по КАТЕГОРИЯМ #}
     <div class="panel panel-primary spoiler">
   <div class="panel-heading">

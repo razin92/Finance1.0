@@ -41,12 +41,16 @@ def report_transaction_filter(request):
         return result
 
     def create_report(result_set, start, end):
-
-        def calculate(transaction, report):
+        allstat = [0, 0]
+        def calculate(transaction, report, *args):
             if transaction.typeof:
                 report.income += transaction.sum_val
+                if args:
+                    allstat[0] += transaction.sum_val
             else:
                 report.outcome += transaction.sum_val
+                if args:
+                    allstat[1] += transaction.sum_val
             report.save()
 
         for transaction in result_set:
@@ -71,7 +75,8 @@ def report_transaction_filter(request):
                         pouch=transaction.money
                     )
 
-                calculate(transaction, report_by_money[0])
+                calculate(transaction, report_by_money[0], 1)
+        return allstat
 
     template = 'report/report_transaction_filter.html'
     rqst = request.POST
@@ -101,12 +106,17 @@ def report_transaction_filter(request):
     #Фильтр транзакций
     filter = get_filter(who_is, category, money, typeof, date_start, date_end, comment)
     # НАДО ДОПИСАТЬ ПОДСЧЕТ ИТОГОВ!
-    period = 'Период отчета c %s по %s. Общее кол-во транзакций по выбранным условиям: %s' % (date_start, date_end, len(filter))
+
     #Сводный отчет
-    create_report(filter, date_start, date_end)
+    stats = create_report(filter, date_start, date_end)
     by_category = ReportTransactionCategory.objects.filter(date_start=date_start, date_end=date_end).order_by('category__name')
     by_person = ReportTransactionPerson.objects.filter(date_start=date_start, date_end=date_end).order_by('person__firstname')
     by_pouch = ReportTransactionPouch.objects.filter(date_start=date_start, date_end=date_end).order_by('pouch__name')
+    period = 'Период отчета c %s по %s. Общее кол-во транзакций по выбранным условиям: %s.' % (
+    date_start, date_end, len(filter)
+    )
+    income = stats[0]
+    outcome = stats[1]
 
     context = {
         'transaction': filter,
@@ -117,6 +127,8 @@ def report_transaction_filter(request):
         'by_pouch': by_pouch,
         'date_start': date_start,
         'date_end': date_end,
+        'income': income,
+        'outcome': outcome,
     }
 
     return render(request, template, context)
