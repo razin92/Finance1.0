@@ -9,9 +9,9 @@ import datetime
 
 
 class TransactionForm(forms.Form):
-    error = {'required': 'Необходимо заполнить'}
+    error = {'': ''}
     date = forms.DateTimeField(label="Дата*", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}), error_messages=error)
-    sum_val = forms.IntegerField(label="Сумма*", max_value=999999999, min_value=1, help_text=error)
+    sum_val = forms.IntegerField(label="Сумма*", max_value=999999999, min_value=1, error_message=error)
     category = forms.ModelChoiceField(label="Категория*", queryset=Category.objects.all().order_by('name'), error_messages=error)
     who_is = forms.ModelChoiceField(label="Персона*", queryset=Person.objects.all().order_by('firstname'), error_messages=error)
     money = forms.ModelChoiceField(label="Счет*", queryset=Staff.objects.none(), error_messages=error)
