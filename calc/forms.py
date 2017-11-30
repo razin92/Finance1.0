@@ -9,9 +9,9 @@ import datetime
 
 
 class TransactionForm(forms.Form):
-    error = {'required': ''}
+    error = {'required': 'Необходимо заполнить'}
     date = forms.DateTimeField(label="Дата*", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}), error_messages=error)
-    sum_val = forms.IntegerField(label="Сумма*", max_value=999999999, min_value=1, error_messages=error)
+    sum_val = forms.IntegerField(label="Сумма*", max_value=999999999, min_value=1, help_text=error)
     category = forms.ModelChoiceField(label="Категория*", queryset=Category.objects.all().order_by('name'), error_messages=error)
     who_is = forms.ModelChoiceField(label="Персона*", queryset=Person.objects.all().order_by('firstname'), error_messages=error)
     money = forms.ModelChoiceField(label="Счет*", queryset=Staff.objects.none(), error_messages=error)
@@ -19,7 +19,7 @@ class TransactionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
-        last_transaction = Transaction.objects.filter(creator__id=user_id).order_by('-date')[0]
+        last_transaction = Transaction.objects.filter(creator__id=user_id).order_by('-create_date')[0]
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
         self.fields['money'].initial = last_transaction.money

@@ -93,9 +93,9 @@ def report_transaction_filter(request):
     else:
         date_start = datetime.datetime(timezone.now().year, timezone.now().month, 1).date()
     if 'date_end' in rqst and rqst['date_end'] and len(rqst['date_end']) < 11:
-        date_end = rqst['date_end']
+        date_end = rqst['date_end'] + ' 23:59:59'
     else:
-        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59)
+        date_end = datetime.datetime(timezone.now().year, timezone.now().month, timezone.now().day, hour=23, minute=59, second=59)
 
     #Обработка данных из POST запроса
     who_is = rqst.getlist('who_is', firstname_set)
