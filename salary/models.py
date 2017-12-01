@@ -157,12 +157,15 @@ class Total(models.Model):
         total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
         year = total.date.year
         month = total.date.month
+        next_month = month + 1
+        if month + 1 == 13:
+            next_month = 1
         issued = Transaction.objects.filter(
             who_is=total.worker.name,
             category=total.worker.category,
             date__range=(
                 datetime.datetime(year, month, 1),
-                datetime.datetime(year, month + 1, 1)
+                datetime.datetime(year, next_month, 1)
             ),
             checking=True
         )
