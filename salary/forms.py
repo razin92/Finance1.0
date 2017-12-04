@@ -18,3 +18,4 @@ class AccountChangeForm(forms.Form):
     reason = forms.ModelChoiceField(label="Основание", queryset=CategoryOfChange.objects.all().order_by('name'))
     comment = forms.CharField(label="Комментарий", max_length=100, required=False)
     withholding = forms.BooleanField(label="Удержание", required=False)
+

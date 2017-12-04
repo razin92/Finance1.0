@@ -1,7 +1,18 @@
 {% extends 'index.html' %}
 {% load humanize %}
+{% load bootstrap %}
 {% block body %}
     <a href="{% url 'salary:total_create' %}" class="btn btn-success">Заполнить</a>
+    <a href="{% url 'salary:get_salary' %}" class="btn btn-success">Выдача</a>
+    <form action="{% url 'salary:total' %}" method="post" class="form-group">
+    {% csrf_token %}
+    <div style="width: 190px; float: left">
+{{ form.select_month|bootstrap }}
+        </div>
+    <div style="margin-top: 30px; margin-left: 4px; float: left">
+    <input type="submit" value="Показать" class="btn-sm btn-default">
+    </div>
+</form>
     <div class="panel-body">
         <table class="table table-striped table-hover">
             <thead>

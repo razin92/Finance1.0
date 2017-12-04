@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from lib.models import Person, Category
+from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
 from calc.models import Transaction
 import datetime
@@ -26,9 +26,25 @@ class Worker(models.Model):
     account = models.IntegerField(default=0)
     position = models.ManyToManyField(WorkCalc)
     category = models.ForeignKey(Category, null=True)
+    salary = models.IntegerField(default=650000)
 
     def __str__(self):
         return str(self.name)
+
+    @property
+    def get_salary(self):
+        date = timezone.now().replace(day=1, hour=15, minute=00, second=00, microsecond=000000)
+        account, created = Pouch.objects.get_or_create(
+            name='System',
+            defaults={'balance': 0},
+        )
+        Transaction.objects.get_or_create(
+            date=date,
+            sum_val=self.salary,
+            category=self.category,
+            who_is=self.name,
+            money=account
+        )
 
 class BonusWork(models.Model):
     model = models.ForeignKey(WorkCalc)
@@ -83,32 +99,56 @@ class Total(models.Model):
     def __str__(self):
         return str(self.date) + ' ' + str(self.worker)
 
-    def balance_before_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
+    def object_filter(self, date):
+        total = Total.objects.get(
+            worker=self.worker,
+            date__month=date['month'],
+            date__year=date['year'],
+        )
+        return total
+
+    def balance_before_calc(self, date):
+        total = self.object_filter(date=date)
+        last_month = total.date.month - 1
+        last_year = date['year']
+        if total.date.month == 0:
+            last_month = 12
+            last_year = date['year'] - 1
         try:
-            total.balance_before = Total.objects.get(worker=self.worker, date__month=total.date.month-1).balance_now
+            total.balance_before = Total.objects.get(
+                worker=self.worker,
+                date__month=last_month,
+                date__year=last_year
+            ).balance_now
             total.save()
         except:
             return "Error"
 
-    def accrual_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
+    def accrual_calc(self, date):
+        total = self.object_filter(date=date)
         total.accrual = 0
         for x in total.worker.position.all():
             total.accrual += x.cost
         total.save()
 
-    def bonus_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
+    def bonus_calc(self, date):
+        total = self.object_filter(date=date)
+        last_month = total.date.month - 1
+        last_year = date['year']
+        if total.date.month == 0:
+            last_month = 12
+            last_year = date['year'] - 1
         bonus = BonusWork.objects.filter(
             worker=total.worker,
-            date__month=total.date.month-1,
+            date__month=last_month,
+            date__year=last_year,
             withholding=False,
             checking=True
         )
         correction = AccountChange.objects.filter(
             worker=total.worker,
-            date__month=total.date.month-1,
+            date__month=last_month,
+            date__year=last_year,
             withholding=False,
             checking=True
         )
@@ -118,21 +158,27 @@ class Total(models.Model):
 
         for each in correction.all():
             total.bonus += each.summ
-
         total.save()
 
+    def withholding_calc(self, date):
+        total = self.object_filter(date=date)
+        last_month = total.date.month - 1
+        last_year = date['year']
+        if total.date.month == 0:
+            last_month = 12
+            last_year = date['year'] - 1
 
-    def withholding_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
         bonus = BonusWork.objects.filter(
             worker=total.worker,
-            date__month=total.date.month - 1,
+            date__month=last_month,
+            date__year=last_year,
             withholding=True,
             checking=True
         )
         correction = AccountChange.objects.filter(
             worker=total.worker,
-            date__month=total.date.month - 1,
+            date__month=last_month,
+            date__year=last_year,
             withholding=True,
             checking=True
         )
@@ -142,30 +188,30 @@ class Total(models.Model):
 
         for each in correction.all():
             total.withholding += each.summ
-
         total.save()
 
-
-    def balance_after_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
+    def balance_after_calc(self, date):
+        total = self.object_filter(date=date)
         total.balance_after = 0
         total.balance_after = total.balance_before + total.accrual + total.bonus - total.withholding
         total.save()
 
 
-    def issued_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
-        year = total.date.year
+    def issued_calc(self, date):
+        total = self.object_filter(date=date)
+        last_year = total.date.year
+        next_year = last_year
         month = total.date.month
         next_month = month + 1
-        if month + 1 == 13:
+        if next_month == 13:
             next_month = 1
+            next_year += 1
         issued = Transaction.objects.filter(
             who_is=total.worker.name,
             category=total.worker.category,
             date__range=(
-                datetime.datetime(year, month, 1),
-                datetime.datetime(year, next_month, 1)
+                datetime.datetime(last_year, month, 1),
+                datetime.datetime(next_year, next_month, 1)
             ),
             checking=True
         )
@@ -177,8 +223,8 @@ class Total(models.Model):
                 total.issued += x.sum_val
         total.save()
 
-    def balance_now_calc(self):
-        total = Total.objects.get(worker=self.worker, date__month=timezone.now().month)
+    def balance_now_calc(self, date):
+        total = self.object_filter(date=date)
         worker = Worker.objects.get(name=total.worker.name)
         worker.account = 0
         total.balance_now = 0

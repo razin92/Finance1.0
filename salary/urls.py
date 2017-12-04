@@ -22,8 +22,9 @@ urlpatterns = [
         url(r'^changeacc/create/$', login_required(views.AccountChangeCreate), name='accountchange_create'),
         url(r'^changeacc/edit/(?P<pk>[0-9]+)$', login_required(views.AccountChangeEdit.as_view()), name='accountchange_edit'),
 
-        url(r'^total/$', login_required(views.TotalView.as_view()), name='total'),
+        url(r'^total/$', login_required(views.TotalView), name='total'),
         url(r'^total/create/$', login_required(views.TotalCreate), name='total_create'),
+        url(r'^total/get_salary/$', login_required(views.get_salary), name='get_salary'),
 
         url(r'^total/calculate/([0-9]{1})/$', views.calculate, name='calculate'),
         url(r'^total/work_detail/(?P<worker_id>[0-9]+)$', views.accrual, name='accrual'),

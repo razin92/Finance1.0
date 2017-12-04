@@ -21,7 +21,7 @@ class Pouch(models.Model):
     )
     balance = models.IntegerField(verbose_name=(u'Balance'), default=0, blank=False)
     starting_balance = models.IntegerField(verbose_name=(u'Начальный баланс'), default=0)
-    type = models.CharField(max_length=3, choices=value, default='(SUM)')
+    type = models.CharField(max_length=3, choices=value, default='SUM')
     comment = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):

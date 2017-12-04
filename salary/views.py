@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect, render_to_resp
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm
+from calc.forms import MonthForm
 import datetime
 # Create your views here.
 global code
@@ -57,7 +58,6 @@ def BonusWorkCreate(request):
         'form': form,
         'user': user
     }
-
     if request.method == 'POST' and form.is_valid():
         BonusWork.objects.create(**form.cleaned_data)
         return HttpResponseRedirect(reverse('salary:bonuswork'))
@@ -114,13 +114,24 @@ class CategoryOfChangeCreate(generic.CreateView):
     template_name = 'salary/categoryofchange_create.html'
 
 
-class TotalView(generic.ListView):
-    template_name = 'salary/total_list.html'
-    context_object_name = 'total'
-
-    def get_queryset(self):
-        total = Total.objects.filter(date__month=timezone.now().month)
+def TotalView(request):
+    rqst = request.POST
+    if 'select_month' in rqst and rqst['select_month']:
+        date = rqst['select_month']
+    else:
+        date = str(timezone.now().month)
+    def get_queryset(date):
+        total = Total.objects.filter(date__month=date)
         return total.all().order_by('worker__name')
+    user = request.user
+    form = MonthForm
+    template = 'salary/total_list.html'
+    context = {
+        'total': get_queryset(date),
+        'user': user,
+        'form': form,
+    }
+    return render(request, template, context)
 
 def TotalCreate(request):
     workers = Worker.objects.all()
@@ -147,16 +158,25 @@ def accrual(request, worker_id):
 @login_required()
 def bonus(request, worker_id, total_id):
     worker = get_object_or_404(Worker, pk=worker_id)
-    date = Total.objects.get(pk=total_id).date.month
+    total = Total.objects.get(pk=total_id)
+    month = total.date.month
+    last_month = month - 1
+    last_year = total.date.year
+    if last_month == 0:
+        last_month = 12
+        last_year -= 1
+
     correction = AccountChange.objects.filter(
         worker=worker,
-        date__month=date - 1,
+        date__month=last_month,
+        date__year=last_year,
         withholding=False,
         checking=True
     ).order_by('-date')
     bonus = BonusWork.objects.filter(
         worker=worker,
-        date__month=date - 1,
+        date__month=last_month,
+        date__year=last_year,
         withholding=False,
         checking=True
     ).order_by('-date')
@@ -170,16 +190,25 @@ def bonus(request, worker_id, total_id):
 @login_required()
 def withholding(request, worker_id, total_id):
     worker = get_object_or_404(Worker, pk=worker_id)
-    date = Total.objects.get(pk=total_id).date.month
+    total = Total.objects.get(pk=total_id)
+    month = total.date.month
+    last_month = month - 1
+    last_year = total.date.year
+    if last_month == 0:
+        last_month = 12
+        last_year -= 1
+
     correction = AccountChange.objects.filter(
         worker=worker,
-        date__month=date - 1,
+        date__month=last_month,
+        date__year=last_year,
         withholding=True,
         checking=True
     ).order_by('-date')
     bonus = BonusWork.objects.filter(
         worker=worker,
-        date__month=date - 1,
+        date__month=last_month,
+        date__year=last_year,
         withholding=True,
         checking=True
     ).order_by('-date')
@@ -193,14 +222,20 @@ def withholding(request, worker_id, total_id):
 @login_required()
 def issued(request, worker_id, total_id):
     worker = get_object_or_404(Worker, pk=worker_id)
-    month = Total.objects.get(pk=total_id).date.month
+    total = Total.objects.get(pk=total_id)
+    month = total.date.month
+    next_year = total.date.year
+    next_month = month + 1
+    if next_month == 13:
+        next_month = 1
+        next_year += 1
     year = Total.objects.get(pk=total_id).date.year
     issued = Transaction.objects.filter(
         who_is=worker.name,
         category=worker.category,
         date__range=(
             datetime.datetime(year, month, 1),
-            datetime.datetime(year, month + 1, 1)
+            datetime.datetime(next_year, next_month, 1)
         ),
         checking=True
     ).order_by('-date')
@@ -212,15 +247,22 @@ def issued(request, worker_id, total_id):
 @login_required()
 def calculate(request, code):
     total_list = Total.objects.filter(date__month=timezone.now().month)
+    date = {'month': timezone.now().month, 'year': timezone.now().year}
     for total in total_list:
-        total.balance_before_calc()
-        total.accrual_calc()
-        total.bonus_calc()
-        total.withholding_calc()
-        total.balance_after_calc()
-        total.issued_calc()
-        total.balance_now_calc()
+        total.balance_before_calc(date=date)
+        total.accrual_calc(date=date)
+        total.bonus_calc(date=date)
+        total.withholding_calc(date=date)
+        total.balance_after_calc(date=date)
+        total.issued_calc(date=date)
+        total.balance_now_calc(date=date)
     if code == '1':
         return HttpResponseRedirect(reverse('salary:worker'))
     elif code == '2':
         return HttpResponseRedirect(reverse('salary:total'))
+
+@login_required()
+def get_salary(request):
+    for each in Worker.objects.all():
+        each.get_salary
+    return HttpResponseRedirect(reverse('salary:calculate', args={'2': '2'}))
