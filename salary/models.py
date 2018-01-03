@@ -45,6 +45,7 @@ class Worker(models.Model):
             who_is=self.name,
             money=account
         )
+        return date
 
 class BonusWork(models.Model):
     model = models.ForeignKey(WorkCalc)
@@ -111,7 +112,7 @@ class Total(models.Model):
         total = self.object_filter(date=date)
         last_month = total.date.month - 1
         last_year = date['year']
-        if total.date.month == 0:
+        if total.date.month == 1:
             last_month = 12
             last_year = date['year'] - 1
         try:
@@ -135,7 +136,7 @@ class Total(models.Model):
         total = self.object_filter(date=date)
         last_month = total.date.month - 1
         last_year = date['year']
-        if total.date.month == 0:
+        if total.date.month == 1:
             last_month = 12
             last_year = date['year'] - 1
         bonus = BonusWork.objects.filter(
@@ -164,7 +165,7 @@ class Total(models.Model):
         total = self.object_filter(date=date)
         last_month = total.date.month - 1
         last_year = date['year']
-        if total.date.month == 0:
+        if total.date.month == 1:
             last_month = 12
             last_year = date['year'] - 1
 
