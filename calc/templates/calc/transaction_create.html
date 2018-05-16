@@ -1,14 +1,6 @@
 {% extends 'index.html' %}
 {% block body %}
 {% load bootstrap %}
-<style>
-.form-control {
-    width: 60%;
-}
-.date {
-    width: 60%;
-}
-</style>
     <!-- <script src="jquery.blockUI.js"></script> -->
 <script src="/media/static/js/jquery.blockUI.js"></script>
     <script language="javascript" type="text/javascript">
@@ -18,7 +10,7 @@
     $(document).ready(function() {
     $('#demo3').click(function() {
         $.blockUI({
-            message: '<img src="/media/static/img/loading.gif" />',
+            message: '<img src="/media/static/img/loading.gif"/>',
             css: {
                 top: '20%'
             }
@@ -27,20 +19,22 @@
 });
     </script>
  <div class="panel-body">
- <h4 align="center">
+ <div class="panel panel-default" style="margin: auto; max-width: 500px;">
+ <div align="center">
  {% if kind == '0' %}
-     <text class="text-danger">Расход</text>
+     <h4 class="text-danger">Расход</h4>
  {% elif kind == '1' %}
-     <text class="text-success">Приход</text>
+     <h4 class="text-success">Приход</h4>
  {% endif %}
- </h4>
-<form method="post" action="{% url 'calc:transaction_calc' kind %}">
+ </div>
+<form method="post" action="{% url 'calc:transaction_calc' kind %}" style="margin: 2%">
     {% csrf_token %}
-    <div style="margin-left: 15%; width: 70%" align="center">
         {{ form|bootstrap }}
+        <div align="center">
         <input type="submit" id="demo3" value="Сохранить" class="btn btn-success" style="margin: 7px" onclick="submit_form()"/>
         <a href="{% url 'calc:transaction' %}" class="btn btn-default" style="margin: 7px">Отмена</a>
-    </div>
+        </div>
 </form>
+</div>
 </div>
 {% endblock %}

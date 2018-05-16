@@ -10,12 +10,12 @@ import datetime
 
 class TransactionForm(forms.Form):
     error = {'required': 'Необходимо заполнить'}
-    date = forms.DateTimeField(label="Дата*", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}), error_messages=error)
-    sum_val = forms.IntegerField(label="Сумма*", max_value=999999999, min_value=1)
-    category = forms.ModelChoiceField(label="Категория*", queryset=Category.objects.all().order_by('name'), error_messages=error)
-    who_is = forms.ModelChoiceField(label="Персона*", queryset=Person.objects.all().order_by('firstname'), error_messages=error)
-    money = forms.ModelChoiceField(label="Счет*", queryset=Staff.objects.none(), error_messages=error)
-    comment = forms.CharField(label="Коммент", max_length=50, required=False)
+    date = forms.DateTimeField(label="Дата", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}), error_messages=error)
+    sum_val = forms.IntegerField(label="Сумма", max_value=999999999, min_value=1)
+    category = forms.ModelChoiceField(label="Категория", queryset=Category.objects.all().order_by('name'), error_messages=error)
+    who_is = forms.ModelChoiceField(label="Персона", queryset=Person.objects.all().order_by('firstname'), error_messages=error)
+    money = forms.ModelChoiceField(label="Счет", queryset=Staff.objects.none(), error_messages=error)
+    comment = forms.CharField(label="Комментарий", max_length=50, required=False, widget=forms.Textarea(attrs={'rows': '3',}))
 
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
@@ -37,6 +37,7 @@ class TransactionEditForm(ModelForm):
         super(TransactionEditForm, self).__init__(*args, **kwargs)
         self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
         self.fields['date'] = forms.DateTimeField(label="Дата", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}))
+        self.fields['comment'].widget = forms.Textarea(attrs={'rows': '3',})
 
 class MonthForm(forms.Form):
     month = (
