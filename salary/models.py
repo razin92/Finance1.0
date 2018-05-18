@@ -27,6 +27,7 @@ class Worker(models.Model):
     position = models.ManyToManyField(WorkCalc)
     category = models.ForeignKey(Category, null=True)
     salary = models.IntegerField(default=650000)
+    user = models.ForeignKey(User, null=True, blank=True)
 
     def __str__(self):
         return str(self.name)
@@ -233,3 +234,26 @@ class Total(models.Model):
         worker.account = total.balance_now
         worker.save()
         total.save()
+
+class Work(models.Model):
+    name = models.CharField(max_length=50, verbose_name="Вид работ")
+
+    def __str__(self):
+        return self.name
+
+class WorkReport(models.Model):
+    filling_date = models.DateField(auto_now=True, verbose_name="Дата заполнения")
+    working_date = models.DateField(verbose_name="Дата выполнения")
+    hours_qty = models.SmallIntegerField(default=1, verbose_name="Кол-во часов")
+    user = models.ForeignKey(User, verbose_name="Ответственный")
+    work = models.ForeignKey(Work, verbose_name="Вид работ")
+    coworker = models.ManyToManyField(Worker, blank=True, verbose_name="Помощники")
+    quarter = models.SmallIntegerField(verbose_name="Квартал")
+    building = models.CharField(max_length=4, verbose_name="Дом")
+    apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Квартира")
+    confirmed = models.BooleanField(default=False, verbose_name="Принята")
+    cost = models.IntegerField(default=0, verbose_name="Стоимость")
+    comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")
+
+    def __str__(self):
+        return '%s %s %s' % (self.working_date, self.work, self.user)

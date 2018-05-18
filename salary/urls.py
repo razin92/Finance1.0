@@ -30,5 +30,9 @@ urlpatterns = [
         url(r'^total/work_detail/(?P<worker_id>[0-9]+)$', views.accrual, name='accrual'),
         url(r'^total/bonus_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.bonus, name='bonus'),
         url(r'^total/withholding_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.withholding, name='withholding'),
-        url(r'^total/issued_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.issued, name='issued')
+        url(r'^total/issued_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.issued, name='issued'),
+
+        url(r'^work_report/create/$', views.WorkerReportUser.as_view(), name='work_report_create'),
+        url(r'^work/$', views.WorkView.as_view(), name='work'),
+        url(r'^work_reports_list/$', views.WorkList.as_view(), name='work_reports_list')
         ]

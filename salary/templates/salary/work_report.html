@@ -1,0 +1,13 @@
+{% extends 'reports.html' %}
+{% load bootstrap %}
+{% block body %}
+    <div class="panel-body">
+    <div class="panel panel-default scroll" style="max-width: 500px;">
+    <form method="post" style="margin: 2%;">
+        {% csrf_token %}
+        {{ form|bootstrap }}
+        <input type="submit" value="Сохранить" class="btn btn-success"/>
+    </form>
+    </div>
+    </div>
+{% endblock %}

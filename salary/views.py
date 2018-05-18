@@ -1,33 +1,34 @@
-from django.views import generic
-from .models import Worker, WorkCalc, BonusWork, AccountChange, CategoryOfChange, Total
+from django.views.generic import View, ListView, CreateView, UpdateView
+from .models import Worker, WorkCalc, BonusWork, AccountChange, CategoryOfChange, Total, WorkReport, Work
 from calc.models import Transaction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.shortcuts import render, get_object_or_404, redirect, render_to_response
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from .forms import BonusWorkForm, AccountChangeForm
+from .forms import BonusWorkForm, AccountChangeForm, WorkReportUserForm, WorkForm
 from calc.forms import MonthForm
+from django.db.models import Count
 import datetime
 # Create your views here.
 global code
 
 
-class WorkerView(generic.ListView):
+class WorkerView(ListView):
     template_name = 'salary/worker_list.html'
     context_object_name = 'worker'
 
     def get_queryset(self):
         return Worker.objects.order_by('name__firstname')
 
-class WorkerCreate(generic.CreateView):
+class WorkerCreate(CreateView):
     model = Worker
     success_url = reverse_lazy('salary:worker')
     fields = ['name', 'position', 'category']
     template_name = 'salary/worker_create.html'
 
 
-class WorkCalcView(generic.ListView):
+class WorkCalcView(ListView):
     template_name = 'salary/workcalc_list.html'
     context_object_name = 'workcalc'
 
@@ -35,14 +36,14 @@ class WorkCalcView(generic.ListView):
         return WorkCalc.objects.order_by('name')
 
 
-class WorkCalcCreate(generic.CreateView):
+class WorkCalcCreate(CreateView):
     model = WorkCalc
     success_url = reverse_lazy('salary:workcalc')
     fields = ['name', 'time_range', 'cost']
     template_name = 'salary/workcalc_create.html'
 
 
-class BonusWorkView(generic.ListView):
+class BonusWorkView(ListView):
     template_name = 'salary/bonuswork_list.html'
     context_object_name = 'bonuswork'
 
@@ -64,14 +65,14 @@ def BonusWorkCreate(request):
     else:
         return render(request, template, context)
 
-class BonusWorkEdit(generic.UpdateView):
+class BonusWorkEdit(UpdateView):
     model = BonusWork
     template_name = 'salary/bonuswork_edit.html'
     success_url = reverse_lazy('salary:bonuswork')
     fields = ['date', 'model', 'worker', 'quantity', 'comment']
 
 
-class AccountChangeView(generic.ListView):
+class AccountChangeView(ListView):
     template_name = 'salary/accountchange_list.html'
     context_object_name = 'accountchange'
 
@@ -93,13 +94,13 @@ def AccountChangeCreate(request):
     else:
         return render(request, template, context)
 
-class AccountChangeEdit(generic.UpdateView):
+class AccountChangeEdit(UpdateView):
     model = AccountChange
     template_name = 'salary/accountchange_edit.html'
     success_url = reverse_lazy('salary:accountchange')
     fields = ['date', 'summ', 'worker', 'reason', 'comment']
 
-class CategoryOfChangeView(generic.ListView):
+class CategoryOfChangeView(ListView):
     template_name = 'salary/categoryofchange_list.html'
     context_object_name = 'categoryofchange'
 
@@ -107,7 +108,7 @@ class CategoryOfChangeView(generic.ListView):
         return CategoryOfChange.objects.order_by('name')
 
 
-class CategoryOfChangeCreate(generic.CreateView):
+class CategoryOfChangeCreate(CreateView):
     model = CategoryOfChange
     success_url = reverse_lazy('salary:categoryofchange')
     fields = ['name']
@@ -264,5 +265,95 @@ def calculate(request, code):
 @login_required()
 def get_salary(request):
     for each in Worker.objects.all():
-        each.get_salary
+        each.get_salary()
     return HttpResponseRedirect(reverse('salary:calculate', args={'2': '2'}))
+
+class WorkerReportUser(View):
+    template = 'salary/work_report.html'
+
+    def get(self, request):
+        form = WorkReportUserForm(None)
+        context = {
+            'form': form,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        form = WorkReportUserForm(request.POST)
+        context = {
+            'form': form,
+        }
+        if form.is_valid():
+            new_object = self.WorkReportCreate(form.data, request.user)
+            coworkers = request.POST.getlist('coworker', '')
+            for x in coworkers:
+                new_object.coworker.add(x)
+        return render(request, self.template, context)
+
+    def WorkReportCreate(self, data, user):
+        result = WorkReport.objects.create(
+            working_date=data['working_date'],
+            hours_qty=data['hours_qty'],
+            user=user,
+            work=Work.objects.get(pk=data['work']),
+            quarter=data['quarter'],
+            building='%s%s' % (data['building'], data['building_litera']),
+            apartment=data['apartment'],
+            comment=self.get_parameter(data, 'comment')
+        )
+        result.save()
+        return result
+
+    def get_parameter(self, data, name):
+        if name in data:
+            return data[name]
+        return ''
+
+class WorkView(View):
+    template = 'salary/work_report.html'
+
+    def get(self, request):
+        form = WorkForm(None)
+        context = {
+            'form': form,
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        form = WorkForm(request.POST)
+        context = {
+            'form': form,
+        }
+        if form.is_valid():
+            form.save()
+        return render(request, self.template, context)
+
+class WorkList(View):
+    template = 'salary/work_list.html'
+
+    def get(self, request):
+        data = WorkReport.objects.all().order_by('-working_date')
+        exclude_list = ['id', 'filling_date']
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        dupes = self.get_duplicate(WorkReport)
+        context = {
+            'header': header,
+            'data': data,
+            'dupes': dupes,
+        }
+        return render(request, self.template, context)
+
+    def get_duplicate(self, data):
+        dupes = data.objects.values('quarter', 'building', 'apartment')\
+            .annotate(Count('id'))\
+            .order_by('working_date')\
+            .filter(working_date__range=[datetime.datetime.date(datetime.datetime.now()).replace(day=1), datetime.datetime.now()])
+        dupes_list = WorkReport.objects.filter(
+            quarter__in=[x['quarter'] for x in dupes],
+            building__in=[x['building'] for x in dupes],
+            apartment__in=[x['apartment'] for x in dupes])\
+            .order_by('quarter', 'building', 'apartment')
+
+        return dupes_list
+
+

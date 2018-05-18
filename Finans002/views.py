@@ -4,20 +4,24 @@ from django.contrib.auth import authenticate, login
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from salary.models import Worker
+from .forms import LoginForm
 
 @login_required()
 def index(request):
-    context = {
-        'message': ""
-    }
-    return render(request, "index.html", context)
+    workers = Worker.objects.filter(user=request.user)
+    if workers.__len__() > 0:
+        return HttpResponseRedirect(reverse('salary:work_reports_list'))
+    return HttpResponseRedirect(reverse('calc:transaction'))
 
 def login_page(request):
     error = ''
-    return render(request, "login.html", {'error': error})
+    form = LoginForm
+    return render(request, "login.html", {'error': error, 'form': form})
 
 
 def login_view(request):
+    form = LoginForm(request.POST or None)
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(username=username, password=password)
@@ -29,6 +33,7 @@ def login_view(request):
             error = 'Аккаунт не активирован!'
             context = {
                 'error': error,
+                'form': form,
             }
             return render(request, "login.html", context)
 
@@ -36,6 +41,7 @@ def login_view(request):
         error = 'Неправильный логин или пароль'
         context = {
             'error': error,
+            'form': form,
         }
         return render(request, "login.html", context)
 

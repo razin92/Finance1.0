@@ -1,0 +1,65 @@
+{% extends 'reports.html' %}
+{% load object_filter %}
+{% load humanize %}
+{% block body %}
+<script type="text/javascript">
+function ShowHideContent(spoiler)
+{
+    if (spoiler.style.display != 'none')
+        spoiler.style.display = 'none';
+    else
+        spoiler.style.display = 'block';
+
+}
+</script>
+
+    <div class="panel-body">
+    <div class="panel panel-default scroll" style="margin: auto;">
+    {% if dupes %}
+    <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-danger btn-xs" style="margin: 5px">Дубликаты!</a>
+      <div id="id1" style="display: none;">
+      <div class="panel panel-default scroll" style="margin: auto;">
+        <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                {% for each in header %}
+                    <th>{{ each.verbose_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for each in dupes %}
+                <tr>
+                    {% for element in header %}
+                    <td>{{ each|value:element.name|intcomma }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+      </div>
+      </div>
+    {% endif %}
+
+
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                {% for each in header %}
+                    <th>{{ each.verbose_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for each in data %}
+                <tr>
+                    {% for element in header %}
+                    <td>{{ each|value:element.name|intcomma }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    </div>
+{% endblock %}

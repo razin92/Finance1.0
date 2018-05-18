@@ -43,7 +43,7 @@ function ShowHideContent(spoiler)
   <div class="panel-body">
 <a href="javascript:void(0)" onclick="ShowHideContent(document.getElementById('id1'))" class="btn btn-info btn-xs" style="margin: 5px">Показать / скрыть </a>
       <div id="id1" style="display: none;">
-    <table class="table table-bordered">
+    <table class="table table-bordered" style="margin: auto;">
     <tr>
     {% for element in pouch %}
         {% if forloop.counter == 7 or forloop.counter == 13 or forloop.counter == 19 or forloop.counter == 25%}
@@ -67,7 +67,7 @@ function ShowHideContent(spoiler)
     <input type="submit" value="Показать" class="btn-sm btn-default">
     </div>
 </form>
-<div class="panel panel-default" style="margin-top: 90px;">
+<div class="panel panel-default" style="margin-top: 90px; overflow: auto;">
  <!-- pager -->
 <div class="pager">
     <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first" />
@@ -84,7 +84,7 @@ function ShowHideContent(spoiler)
     <select class="gotoPage input-sm" title="Select page number"></select>
 </div>
 
-    <table class="table table-hover table-striped tablesorter">
+    <table class="table table-hover table-striped tablesorter" style="margin: auto; max-width: 98%; overflow-scrolling: auto;">
         <thead>
             <tr class="tr_style">
             <th>ID</th>

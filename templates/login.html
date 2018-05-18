@@ -1,16 +1,30 @@
+{% block head %}
 {% load staticfiles %}
 <script src="/media/static/static_jquery/js/jquery.js"></script>
 <script src="/media/static/bootstrap/js/bootstrap.js"></script>
 {% load bootstrap_themes %}
-{% bootstrap_styles theme='spacelab' type='css' %}
+{% load bootstrap %}
+{% bootstrap_styles theme='yeti' type='css' %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <style>
+    .form-control {
+        max-width: 97%;
+        margin-top: 2%;
+    }
+    </style>
+{% endblock %}
 {% block body %}
-    <div class="panel-body" align="center">
+    <div class="panel-body">
+    <p class="text-danger" style="margin-top: 10%;" align="center">{{ error }}</p>
+    <div class="panel panel-default" style="margin: auto; max-width: 300px;">
+    <div align="center" style="margin: auto;">
     <form action="{% url 'login-redirect' %}" method="post">
     {% csrf_token %}
-        <p class="text-danger" style="margin-top: 20%;">{{ error }}</p>
-        <input title="Имя пользователя" type="text" name="username"><br>
-        <input title="Пароль" type="password" name="password" style="margin: 3px"><br>
-        <input type="submit" value="вход" class="btn btn-success" style="width: 100px; text-align: center">
+        {{ form|bootstrap }}
+        <input type="submit" value="вход" class="btn btn-success btn-sm" style="width: 97%;">
     </form>
+    </div>
+    </div>
     </div>
 {% endblock %}
