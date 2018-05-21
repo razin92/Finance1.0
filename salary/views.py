@@ -345,7 +345,7 @@ class MyWorkList(View):
             user=request.user,
             working_date__month=self.today.month
         ).order_by('-working_date')
-        summ = data.values('cost').aggregate(('cost'))
+        #summ = data.values('cost').aggregate(('cost'))
         exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         splitter = Paginator(data, 25)
