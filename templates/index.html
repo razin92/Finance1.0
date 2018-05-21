@@ -54,7 +54,9 @@
             <li><a href="{% url 'salary:bonuswork' %}">Бонусы</a></li>
             <li><a href="{% url 'salary:accountchange' %}">Бонусы без фиксы</a></li>
             <li><a href="{% url 'salary:categoryofchange' %}">Основания начислений / удержаний</a></li>
+               {% if user.is_superuser %}
             <li><a href="{% url 'salary:calculate' 2 %}">Расчет ЗП</a></li>
+               {% endif %}
            {% endif %}
           </ul>
         </li>
@@ -62,7 +64,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">Отчеты<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
               <li><a href="{% url 'report:report_transaction' %}">По транзакциям</a></li>
-              {% if user.is_staff %}
+              {% if user.is_superuser %}
               <li><a href="{% url 'report:report_workers' %}">По работам</a></li>
               <li><a href="{% url 'report:freeze' %}">Слепок баланса</a></li>
               <li><a href="{% url 'report:transaction_history'%}">Лог изменений тр-ий</a></li>

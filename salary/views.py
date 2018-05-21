@@ -423,7 +423,7 @@ class ReportConfirmation(View):
         data, result = '', ''
         if request.user.has_perm('salary.change_workreport'):
             if 'id' in rqst and 'cost' in rqst:
-                result = self.update_report(rqst['id'], rqst['cost'])
+                result = self.update_report(rqst['id'], rqst['cost'], confirmed=True)
             if 'deleted' in rqst:
                 result = self.update_report(rqst['id'],deleted=True)
             data = WorkReport.objects.filter(confirmed=False).order_by(
@@ -437,10 +437,10 @@ class ReportConfirmation(View):
         }
         return render(request, self.template, context)
 
-    def update_report(self, id, cost=0, deleted=False):
+    def update_report(self, id, cost=0, deleted=False, confirmed=False):
         data = WorkReport.objects.get(id=id)
         data.cost = cost
-        data.confirmed = True
+        data.confirmed = confirmed
         data.deleted = deleted
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
