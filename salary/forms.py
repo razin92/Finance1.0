@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.forms.widgets import CheckboxSelectMultiple
 from .models import BonusWork, WorkCalc, Worker, CategoryOfChange, Work, WorkReport
 from bootstrap3_datetime.widgets import DateTimePicker
+import calendar
 import datetime
 
 class BonusWorkForm(forms.Form):
@@ -62,7 +63,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['work'] = forms.ModelChoiceField(
             label='Работа',
-            queryset=Work.objects.all()
+            queryset=Work.objects.all().order_by('name')
         )
         self.fields['hours_qty'] = forms.ChoiceField(
             label='Затрачено часов',
@@ -70,7 +71,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['coworker'] = forms.MultipleChoiceField(
             label='Помощники',
-            choices=((x.id, x.name) for x in Worker.objects.all()),
+            choices=((x.id, x.name) for x in Worker.objects.filter(position=WorkCalc.objects.filter(name='Мастер'))),
             widget=CheckboxSelectMultiple,
             required=False
         )
@@ -94,3 +95,51 @@ class WorkForm(forms.ModelForm):
     class Meta:
         model = Work
         fields = ['name']
+
+class MyWorkFilterForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(MyWorkFilterForm, self).__init__(*args, **kwargs)
+        self.fields['date_start'].initial = self.today.replace(day=1)
+        self.fields['date_end'].initial = self.today.replace(day=self.last_day)
+
+    today = datetime.date.today()
+    last_day = calendar.monthrange(today.year, today.month)[1]
+    confirmed_list = (
+        ('True False', ''),
+        ('True', 'Принята'),
+        ('False', 'НЕ принята')
+    )
+    date_start = forms.DateField(
+        label="Дата начала",
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD"})
+    )
+    date_end = forms.DateField(
+        label="Дата окончания",
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD"})
+    )
+    '''
+    work = forms.ModelChoiceField(
+        Work.objects.all(),
+        label="Работа",
+        required=False
+    )
+    confirmed = forms.ChoiceField(
+        choices=confirmed_list,
+        label="Подтверждена",
+        required=False
+    )
+    '''
+
+class WorkFilterForm(forms.Form):
+
+    working_date = forms.DateField(widget=DateTimePicker(options={"format": "YYYY-MM-DD"}))
+    user = forms.ModelChoiceField(queryset=Worker.objects.filter(user__isnull=False))
+    work = forms.ModelChoiceField(queryset=Work.objects.all())
+    quarter = forms.ModelChoiceField(queryset=WorkReport.objects.all().values('quarter').distinct())
+
+class ReportConfirmationForm(forms.ModelForm):
+
+    class Meta:
+        model = WorkReport
+        fields = ['cost']

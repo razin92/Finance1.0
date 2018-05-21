@@ -1,4 +1,4 @@
-{% extends 'reports.html' %}
+{% extends 'index.html' %}
 {% load object_filter %}
 {% load humanize %}
 {% load bootstrap %}
@@ -20,18 +20,6 @@ function ShowHideContent(spoiler)
 
 }
 </script>
-    <div class="panel-body">
-    <div class="panel panel-default scroll">
-    <form method="post">
-        {% csrf_token %}
-        {{ form|bootstrap }}
-        <div class="form-group">
-            <label class="control-label">Подтвердить</label>
-            <input type="submit" value="Фильтр" class="btn btn-success btn-sm form-control">
-        </div>
-    </form>
-    </div>
-    </div>
 
     {% if dupes %}
     <div class="panel panel-success" style="margin: auto; max-width: 98%;">
@@ -64,6 +52,21 @@ function ShowHideContent(spoiler)
     </div>
     </div>
     {% endif %}
+    <a href="{% url 'salary:report_confirm' %}" class="btn btn-success btn-sm" style="margin: 1%;">Подтверждение заявок</a>
+    {% if form %}
+    <div class="panel-body">
+    <div class="panel panel-default scroll">
+    <form method="post">
+        {% csrf_token %}
+        {{ form|bootstrap }}
+        <div class="form-group">
+            <label class="control-label">Подтвердить</label>
+            <input type="submit" value="Фильтр" class="btn btn-success btn-sm form-control">
+        </div>
+    </form>
+    </div>
+    </div>
+    {% endif %}
 
     <div class="panel-body">
     <div class="panel panel-default scroll">
@@ -88,12 +91,13 @@ function ShowHideContent(spoiler)
     </table>
     </div>
     </div>
+
     {% if pages %}
     <div align="center">
     <ul class="pagination">
         {% if pages.has_previous %}
-            <li><a href="{% url 'salary:my_reports_list' 1 %}">&laquo;</a></li>
-            <li><a href="{% url 'salary:my_reports_list' pages.previous_page_number %}">{{ pages.previous_page_number }}</a></li>
+            <li><a href="{% url 'salary:reports_list' %}?page=1">&laquo;</a></li>
+            <li><a href="{% url 'salary:reports_list' %}?page={{ pages.previous_page_number }}">{{ pages.previous_page_number }}</a></li>
         {% endif %}
 
         <li class="active">
@@ -101,12 +105,11 @@ function ShowHideContent(spoiler)
         </li>
 
         {% if pages.has_next %}
-             <li><a href="{% url 'salary:my_reports_list' pages.next_page_number %}">{{ pages.next_page_number }}</a></li>
-             <li><a href="{% url 'salary:my_reports_list' pages.paginator.num_pages %}">&raquo;</a></li>
+             <li><a href="{% url 'salary:reports_list' %}?page={{ pages.next_page_number }}">{{ pages.next_page_number }}</a></li>
+             <li><a href="{% url 'salary:reports_list' %}?page={{ pages.paginator.num_pages }}">&raquo;</a></li>
         {% endif %}
     </ul>
     </div>
-
     {% endif %}
 
 

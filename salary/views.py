@@ -3,13 +3,19 @@ from .models import Worker, WorkCalc, BonusWork, AccountChange, CategoryOfChange
 from calc.models import Transaction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.db.models import Count
 from django.contrib.auth.decorators import login_required
-from .forms import BonusWorkForm, AccountChangeForm, WorkReportUserForm, WorkForm
+from .forms import BonusWorkForm, AccountChangeForm, \
+    WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
+    ReportConfirmationForm
 from calc.forms import MonthForm
 from django.db.models import Count
 import datetime
+import calendar
+import time
 # Create your views here.
 global code
 
@@ -328,32 +334,117 @@ class WorkView(View):
             form.save()
         return render(request, self.template, context)
 
-class WorkList(View):
+class MyWorkList(View):
     template = 'salary/work_list.html'
+    today = datetime.date.today()
+    last_day = calendar.monthcalendar(today.year, today.month)[1]
 
-    def get(self, request):
-        data = WorkReport.objects.all().order_by('-working_date')
-        exclude_list = ['id', 'filling_date']
+    def get(self, request, page):
+        form = MyWorkFilterForm(request.POST or None)
+        data = WorkReport.objects.filter(
+            user=request.user,
+            working_date__month=self.today.month
+        ).order_by('-working_date')
+        summ = data.values('cost').aggregate(('cost'))
+        exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
-        dupes = self.get_duplicate(WorkReport)
+        splitter = Paginator(data, 25)
+        split_data = splitter.page(page)
         context = {
             'header': header,
-            'data': data,
-            'dupes': dupes,
+            'data': split_data.object_list,
+            'pages': split_data,
+            'form': form
         }
         return render(request, self.template, context)
 
+    def post(self, request):
+        form = MyWorkFilterForm(request.POST or None)
+        start = request.POST['date_start']
+        end = request.POST['date_end']
+        data = WorkReport.objects.filter(
+            user=request.user,
+            working_date__range=(start, end)
+        ).order_by('-working_date')
+        exclude_list = ['filling_date', 'user']
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        context = {
+            'header': header,
+            'data': data,
+            'form': form
+        }
+        return render(request, self.template, context)
+
+class ReportsList(View):
+    template = 'salary/work_reports_list.html'
+
+    def get(self, request):
+        page = request.GET.get('page') or 1
+        dupes = self.get_duplicate(WorkReport)
+        data = WorkReport.objects.all().order_by('working_date', 'user')
+        data_per_page = Paginator(data, 25)
+        result = data_per_page.page(page)
+        exclude_list = ['filling_date']
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        context = {
+            'header': header,
+            'data': result.object_list,
+            'pages': result,
+            'dupes': dupes
+        }
+        return render(request, self.template, context)
+
+
     def get_duplicate(self, data):
-        dupes = data.objects.values('quarter', 'building', 'apartment')\
-            .annotate(Count('id'))\
-            .order_by('working_date')\
-            .filter(working_date__range=[datetime.datetime.date(datetime.datetime.now()).replace(day=1), datetime.datetime.now()])
-        dupes_list = WorkReport.objects.filter(
-            quarter__in=[x['quarter'] for x in dupes],
-            building__in=[x['building'] for x in dupes],
-            apartment__in=[x['apartment'] for x in dupes])\
-            .order_by('quarter', 'building', 'apartment')
 
-        return dupes_list
+        duplicates = data.objects.values('quarter', 'building', 'apartment')\
+            .annotate(Count('quarter'), Count('building'), Count('apartment'))\
+            .order_by()\
+            .filter(
+            building__count__gt=1,
+            quarter__count__gt=1,
+            apartment__count__gt=1
+        )
 
+        dupl = WorkReport.objects.filter(
+            quarter__in=[x['quarter'] for x in duplicates],
+            building__in=[x['building'] for x in duplicates],
+            apartment__in=[x['apartment'] for x in duplicates],
+        ).order_by('building')
 
+        return dupl
+
+class ReportConfirmation(View):
+    template = 'salary/report_confirmation.html'
+
+    def get(self, request):
+        rqst = request.GET
+        form = ReportConfirmationForm(rqst or None)
+        data, result = '', ''
+        if request.user.has_perm('salary.change_workreport'):
+            if 'id' in rqst and 'cost' in rqst:
+                result = self.update_report(rqst['id'], rqst['cost'])
+            if 'deleted' in rqst:
+                result = self.update_report(rqst['id'],deleted=True)
+            data = WorkReport.objects.filter(confirmed=False).order_by(
+            '-working_date', 'user').distinct()
+        if data.__len__() > 0:
+            data = data[0]
+        context = {
+            'data': data,
+            'form': form,
+            'result': result,
+        }
+        return render(request, self.template, context)
+
+    def update_report(self, id, cost=0, deleted=False):
+        data = WorkReport.objects.get(id=id)
+        data.cost = cost
+        data.confirmed = True
+        data.deleted = deleted
+        data.save()
+        message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
+        print('%s - Confirmed %s report with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
+        if deleted:
+            message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
+        return message

@@ -3,7 +3,7 @@
 <script src="/media/static/bootstrap/js/bootstrap.js"></script>
 {{ form.media }}
 {% load bootstrap_themes %}
-{% bootstrap_styles theme='spacelab' type='css' %}
+{% bootstrap_styles theme='yeti' type='css' %}
 {% block script %}
 {% endblock %}
 {% block head %}
@@ -24,12 +24,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{% url 'index' %}">Finans 0.11</a>
+      <a class="navbar-brand" href="{% url 'index' %}">Finans 0.2</a>
     </div>
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2" aria-expanded="true">
       <ul class="nav navbar-nav">
           <li><a href="{% url 'salary:work_report_create' %}">Создать отчет</a></li>
-          <li><a href="{% url 'salary:work_reports_list' %}">Список отчетов</a></li>
+          <li><a href="{% url 'salary:my_reports_list' 1 %}">Мои отчеты</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li><a href="{% url 'logout' %}">{{ user.username }}:Выйти</a></li>

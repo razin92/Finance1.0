@@ -198,7 +198,6 @@ class Total(models.Model):
         total.balance_after = total.balance_before + total.accrual + total.bonus - total.withholding
         total.save()
 
-
     def issued_calc(self, date):
         total = self.object_filter(date=date)
         last_year = total.date.year
@@ -236,7 +235,7 @@ class Total(models.Model):
         total.save()
 
 class Work(models.Model):
-    name = models.CharField(max_length=50, verbose_name="Вид работ")
+    name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
 
     def __str__(self):
         return self.name
@@ -254,6 +253,10 @@ class WorkReport(models.Model):
     confirmed = models.BooleanField(default=False, verbose_name="Принята")
     cost = models.IntegerField(default=0, verbose_name="Стоимость")
     comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")
+    deleted = models.BooleanField(default=False, verbose_name="Удален")
 
     def __str__(self):
         return '%s %s %s' % (self.working_date, self.work, self.user)
+
+    class Meta:
+        unique_together = ['working_date', 'user', 'work', 'quarter', 'building', 'apartment']

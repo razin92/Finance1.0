@@ -1,13 +1,39 @@
 {% extends 'reports.html' %}
 {% load bootstrap %}
 {% block body %}
+    <!-- <script src="jquery.blockUI.js"></script> -->
+<script src="/media/static/js/jquery.blockUI.js"></script>
+    <script language="javascript" type="text/javascript">
+    function submit_form() {
+       $("#search").submit();
+    }
+    $(document).ready(function() {
+    $('#demo3').click(function() {
+        $.blockUI({
+            message: '<img src="/media/static/img/loading.gif"/>',
+            css: {
+                top: '20%'
+            }
+        })
+    });
+});
+    </script>
     <div class="panel-body">
-    <div class="panel panel-default scroll" style="max-width: 500px;">
-    <form method="post" style="margin: 2%;">
-        {% csrf_token %}
-        {{ form|bootstrap }}
-        <input type="submit" value="Сохранить" class="btn btn-success"/>
-    </form>
+        <div class="panel panel-default scroll" style="max-width: 500px;">
+            <form method="post" style="margin: 2%;">
+                {% csrf_token %}
+                {{ form|bootstrap }}
+                <div align="center">
+                    <input
+                            type="submit"
+                            value="Сохранить и добавить еще"
+                            class="btn btn-success"
+                            style="width: 98%;"
+                            onclick="submit_form()"
+                    />
+                </div>
+            </form>
+        </div>
     </div>
-    </div>
+
 {% endblock %}

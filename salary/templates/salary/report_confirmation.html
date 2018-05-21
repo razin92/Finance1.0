@@ -1,0 +1,65 @@
+{% extends 'index.html' %}
+{% load bootstrap %}
+{% load object_filter %}
+{% block body %}
+    <style>
+    .form-group {
+        margin: 0.5%;
+    }
+    </style>
+    {% if result %}
+        <div class="alert alert-dismissible alert-info" style="max-width: 500px; margin: auto">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong>{{ result }}</strong>
+        </div>
+    {% endif %}
+    <div class="panel-body">
+        <div class="panel panel-default scroll" style="max-width: 500px;">
+            {% if data %}
+            <table class="table table-hover table-striped">
+                <tr>
+                    <td>Дата:</td>
+                    <td>{{ data.working_date.year }}-{{ data.working_date.month }}-{{ data.working_date.day }}</td>
+                </tr>
+                <tr>
+                    <td>Мастер:</td>
+                    <td>{{ data.user }}</td>
+                </tr>
+                <tr>
+                    <td>Работа:</td>
+                    <td>{{ data.work }}</td>
+                </tr>
+                <tr>
+                    <td>Кол-во часов:</td>
+                    <td>{{ data.hours_qty }}</td>
+                </tr>
+                <tr>
+                    <td>Адрес:</td>
+                    <td>{{ data.quarter }}-{{ data.building }}-{{ data.apartment }}</td>
+                </tr>
+                <tr>
+                    <td>Коммент:</td>
+                    <td>{{ data.comment }}</td>
+                </tr>
+                <tr>
+                    <td>Помощники:</td>
+                    <td>{{ data|value:'coworker' }}</td>
+                </tr>
+            </table>
+            <div>
+            <form method="get" class="form-group">
+                {% csrf_token %}
+                {{ form|bootstrap }}
+                <input type="hidden" value="{{ data.id }}" name="id">
+                <div align="center">
+                    <input type="submit" value="Подтвердить" class="btn btn-success form-group" style="width: 99%">
+                    <a href="{% url 'salary:report_confirm' %}?deleted=True&id={{ data.id }}" class="btn btn-danger form-group" style="width: 99%">Удалить</a>
+                </div>
+            </form>
+            </div>
+            {% else %}
+                <div align="center"><h4 class="text-danger">Недостаточно прав для этого действия</h4></div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

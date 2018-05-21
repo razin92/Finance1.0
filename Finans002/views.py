@@ -11,7 +11,7 @@ from .forms import LoginForm
 def index(request):
     workers = Worker.objects.filter(user=request.user)
     if workers.__len__() > 0:
-        return HttpResponseRedirect(reverse('salary:work_reports_list'))
+        return HttpResponseRedirect(reverse('salary:work_report_create'))
     return HttpResponseRedirect(reverse('calc:transaction'))
 
 def login_page(request):

@@ -1,4 +1,5 @@
 from django import template
+from ..models import Worker
 
 register = template.Library()
 
@@ -16,4 +17,9 @@ def value(value, arg):
         if len(values) > 0:
             return ', '.join(values)
         return ''
+    elif arg == 'user':
+        user = Worker.objects.filter(user=result)
+        if user.__len__() > 0:
+            return user[0].name
+        
     return result
