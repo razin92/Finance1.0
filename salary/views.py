@@ -426,7 +426,7 @@ class ReportConfirmation(View):
                 result = self.update_report(rqst['id'], rqst['cost'], confirmed=True)
             if 'deleted' in rqst:
                 result = self.update_report(rqst['id'],deleted=True)
-            data = WorkReport.objects.filter(confirmed=False).order_by(
+            data = WorkReport.objects.filter(confirmed=False, deleted=False).order_by(
             '-working_date', 'user').distinct()
         if data.__len__() > 0:
             data = data[0]

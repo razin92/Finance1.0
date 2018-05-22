@@ -60,6 +60,7 @@ class WorkReportUserForm(forms.Form):
         self.fields['apartment'] = forms.ChoiceField(
             label='Квартира',
             choices=self.generator(1, 140),
+            required=False,
         )
         self.fields['work'] = forms.ModelChoiceField(
             label='Работа',
@@ -87,7 +88,9 @@ class WorkReportUserForm(forms.Form):
         )
 
     def generator(self, start, stop):
-        result = ((x, x) for x in range(start, stop))
+        a = [(x, x) for x in range(start, stop)]
+        b = [('', '')]
+        result = tuple(b + a)
         return result
 
 class WorkForm(forms.ModelForm):
@@ -139,6 +142,10 @@ class WorkFilterForm(forms.Form):
     quarter = forms.ModelChoiceField(queryset=WorkReport.objects.all().values('quarter').distinct())
 
 class ReportConfirmationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ReportConfirmationForm, self).__init__(*args, **kwargs)
+        self.fields['cost'].required = False
 
     class Meta:
         model = WorkReport
