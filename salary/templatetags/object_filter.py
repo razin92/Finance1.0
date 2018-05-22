@@ -21,5 +21,8 @@ def value(value, arg):
         user = Worker.objects.filter(user=result)
         if user.__len__() > 0:
             return user[0].name
+    elif arg == 'deleted':
+        if result == True:
+            return 'УДАЛЕНО'
         
     return result
