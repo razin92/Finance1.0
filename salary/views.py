@@ -286,34 +286,45 @@ class WorkerReportUser(View):
 
     def post(self, request):
         form = WorkReportUserForm(request.POST)
+        message = ''
         context = {
             'form': form,
+            'message': message,
         }
         if form.is_valid():
             new_object = self.WorkReportCreate(form.data, request.user)
             coworkers = request.POST.getlist('coworker', '')
             for x in coworkers:
                 new_object.coworker.add(x)
+            context['message'] = 'Успех'
         return render(request, self.template, context)
 
     def WorkReportCreate(self, data, user):
-        result = WorkReport.objects.create(
+        result = WorkReport.objects.get_or_create(
             working_date=data['working_date'],
             hours_qty=data['hours_qty'],
             user=user,
             work=Work.objects.get(pk=data['work']),
             quarter=data['quarter'],
             building='%s%s' % (data['building'], data['building_litera']),
-            apartment=data['apartment'],
-            comment=self.get_parameter(data, 'comment')
+            apartment=self.apartment(data),
+            comment=data['comment']
         )
-        result.save()
-        return result
+        return result[1]
 
     def get_parameter(self, data, name):
         if name in data:
-            return data[name]
+            try:
+                return data[name]
+            except:
+                return ''
         return ''
+
+    def apartment(self, request):
+        if request['apartment'] == '':
+            return None
+        else:
+            return request['apartment']
 
 class WorkView(View):
     template = 'salary/work_report.html'
@@ -448,3 +459,8 @@ class ReportConfirmation(View):
         if deleted:
             message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
         return message
+
+class EditReport(View):
+
+    def get(self, request):
+        form = ReportConfirmationForm(request.POST or None)

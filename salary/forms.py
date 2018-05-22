@@ -59,7 +59,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['apartment'] = forms.ChoiceField(
             label='Квартира',
-            choices=self.generator(1, 140),
+            choices=self.generator(1, 300),
             required=False,
         )
         self.fields['work'] = forms.ModelChoiceField(
@@ -68,7 +68,8 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['hours_qty'] = forms.ChoiceField(
             label='Затрачено часов',
-            choices=self.generator(1, 25)
+            choices=self.generator(1, 25),
+            initial=1,
         )
         self.fields['coworker'] = forms.MultipleChoiceField(
             label='Помощники',
