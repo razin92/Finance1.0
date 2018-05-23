@@ -310,7 +310,7 @@ class WorkerReportUser(View):
             apartment=self.apartment(data),
             comment=data['comment']
         )
-        return result[1]
+        return result[0]
 
     def get_parameter(self, data, name):
         if name in data:
