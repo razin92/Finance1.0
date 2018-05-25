@@ -369,7 +369,7 @@ class MyWorkList(View):
         }
         return render(request, self.template, context)
 
-    def post(self, request):
+    def post(self, request, page):
         form = MyWorkFilterForm(request.POST or None)
         start = request.POST['date_start']
         end = request.POST['date_end']

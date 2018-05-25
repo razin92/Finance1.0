@@ -22,7 +22,7 @@ function ShowHideContent(spoiler)
 </script>
     <div class="panel-body">
     <div class="panel panel-default scroll">
-    <form method="post">
+    <form action="{% url 'salary:my_reports_list' 1 %}" method="post">
         {% csrf_token %}
         {{ form|bootstrap }}
         <div class="form-group">
