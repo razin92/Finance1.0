@@ -68,7 +68,7 @@ function ShowHideContent(spoiler)
     <div class="panel-body">
     <div class="panel panel-default scroll">
 
-    <table class="table table-hover table-striped">
+    <table class="table table-hover">
         <thead>
             <tr>
                 {% for each in header %}
@@ -78,7 +78,7 @@ function ShowHideContent(spoiler)
         </thead>
         <tbody>
             {% for each in data %}
-                <tr>
+                <tr style="background-color: {% if each.confirmed %}#EAFEE7{% else %}#F9E6E6{% endif %};">
                     {% for element in header %}
                     <td>{{ each|value:element.name|intcomma }}</td>
                     {% endfor %}
