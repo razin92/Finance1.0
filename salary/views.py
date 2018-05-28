@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
@@ -356,7 +356,7 @@ class MyWorkList(View):
             user=request.user,
             working_date__month=self.today.month
         ).order_by('-working_date')
-        #summ = data.values('cost').aggregate(('cost'))
+        cost_sum = data.values('cost').aggregate(Sum('cost'))
         exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         splitter = Paginator(data, 25)
@@ -365,7 +365,8 @@ class MyWorkList(View):
             'header': header,
             'data': split_data.object_list,
             'pages': split_data,
-            'form': form
+            'form': form,
+            'cost_sum': cost_sum['cost__sum']
         }
         return render(request, self.template, context)
 
@@ -377,12 +378,14 @@ class MyWorkList(View):
             user=request.user,
             working_date__range=(start, end)
         ).order_by('-working_date')
+        cost_sum = data.values('cost').aggregate(Sum('cost'))
         exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         context = {
             'header': header,
             'data': data,
-            'form': form
+            'form': form,
+            'cost_sum': cost_sum['cost__sum'],
         }
         return render(request, self.template, context)
 
@@ -390,13 +393,15 @@ class ReportsList(View):
     template = 'salary/work_reports_list.html'
 
     def get(self, request):
-        page = request.GET.get('page') or 1
-        dupes = self.get_duplicate(WorkReport)
-        data = WorkReport.objects.all().order_by('working_date', 'user')
+        page = request.GET.get('page') or 1 #Getting page number
+        dupes = self.get_duplicate(WorkReport) #Dupes checking
+        data = WorkReport.objects.all().order_by('-working_date', 'user')
         data_per_page = Paginator(data, 25)
         result = data_per_page.page(page)
         exclude_list = ['filling_date']
-        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        work_count = self.counter(data)
+        print(work_count)
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list] #Headers for table
         context = {
             'header': header,
             'data': result.object_list,
@@ -404,6 +409,9 @@ class ReportsList(View):
             'dupes': dupes
         }
         return render(request, self.template, context)
+
+    def post(self, request):
+        pass
 
 
     def get_duplicate(self, data):
@@ -424,6 +432,10 @@ class ReportsList(View):
         ).order_by('building')
 
         return dupl
+
+    def counter(self, data):
+        result = ["%s:" % x for x in data.values()]
+        return result
 
 class ReportConfirmation(View):
     template = 'salary/report_confirmation.html'

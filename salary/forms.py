@@ -73,7 +73,9 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['coworker'] = forms.MultipleChoiceField(
             label='Помощники',
-            choices=((x.id, x.name) for x in Worker.objects.filter(position=WorkCalc.objects.filter(name='Мастер'))),
+            choices=((x.id, x.name) for x in Worker.objects.filter(
+                position=WorkCalc.objects.filter(name='Мастер')
+            )),
             widget=CheckboxSelectMultiple,
             required=False
         )

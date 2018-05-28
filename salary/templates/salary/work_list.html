@@ -21,18 +21,22 @@ function ShowHideContent(spoiler)
 }
 </script>
     <div class="panel-body">
-    <div class="panel panel-default scroll">
-    <form action="{% url 'salary:my_reports_list' 1 %}" method="post">
-        {% csrf_token %}
-        {{ form|bootstrap }}
-        <div class="form-group">
-            <label class="control-label">Подтвердить</label>
-            <input type="submit" value="Фильтр" class="btn btn-success btn-sm form-control">
+        <div class="panel panel-default scroll">
+            <form action="{% url 'salary:my_reports_list' 1 %}" method="post">
+                {% csrf_token %}
+                {{ form|bootstrap }}
+                <div class="form-group">
+                    <label class="control-label">Подтвердить</label>
+                    <input type="submit" value="Фильтр" class="btn btn-success btn-sm form-control">
+                </div>
+            </form>
         </div>
-    </form>
     </div>
+    <div class="panel-body">
+        <div class="panel panel-default scroll">
+            <p style="margin: 1%;">Итого заработано за период: {{ cost_sum|intcomma }}</p>
+        </div>
     </div>
-
     {% if dupes %}
     <div class="panel panel-success" style="margin: auto; max-width: 98%;">
     <div class="panel-heading">
