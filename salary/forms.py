@@ -149,7 +149,9 @@ class ReportConfirmationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ReportConfirmationForm, self).__init__(*args, **kwargs)
         self.fields['cost'].required = False
+        self.fields['admin_comment'].widget = forms.Textarea(attrs={'rows': '4'})
+        self.fields['admin_comment'].required = False
 
     class Meta:
         model = WorkReport
-        fields = ['cost']
+        fields = ['cost', 'admin_comment']

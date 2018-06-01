@@ -142,9 +142,9 @@ def TotalView(request):
 
 def TotalCreate(request):
     workers = Worker.objects.all()
-    total = Total.objects.filter(date__month=datetime.datetime.now().month)
+    total = Total.objects.filter(date__month=datetime.date.today().month)
     total_workers = [each.worker for each in total.all()]
-    month_now = datetime.datetime.now().replace(day=1)
+    month_now = datetime.date.today().replace(day=1)
 
     for each in workers:
         if each not in total_workers:
@@ -241,8 +241,8 @@ def issued(request, worker_id, total_id):
         who_is=worker.name,
         category=worker.category,
         date__range=(
-            datetime.datetime(year, month, 1),
-            datetime.datetime(next_year, next_month, 1)
+            datetime.date(year, month, 1),
+            datetime.date(next_year, next_month, 1)
         ),
         checking=True
     ).order_by('-date')
@@ -254,15 +254,15 @@ def issued(request, worker_id, total_id):
 @login_required()
 def calculate(request, code):
     total_list = Total.objects.filter(date__month=timezone.now().month)
-    date = {'month': timezone.now().month, 'year': timezone.now().year}
+    date_now = {'month': timezone.now().month, 'year': timezone.now().year}
     for total in total_list:
-        total.balance_before_calc(date=date)
-        total.accrual_calc(date=date)
-        total.bonus_calc(date=date)
-        total.withholding_calc(date=date)
-        total.balance_after_calc(date=date)
-        total.issued_calc(date=date)
-        total.balance_now_calc(date=date)
+        total.balance_before_calc(date=date_now)
+        total.accrual_calc(date=date_now)
+        total.bonus_calc(date=date_now)
+        total.withholding_calc(date=date_now)
+        total.balance_after_calc(date=date_now)
+        total.issued_calc(date=date_now)
+        total.balance_now_calc(date=date_now)
     if code == '1':
         return HttpResponseRedirect(reverse('salary:worker'))
     elif code == '2':
@@ -434,7 +434,7 @@ class ReportsList(View):
         return dupl
 
     def counter(self, data):
-        result = ["%s:" % x for x in data.values()]
+        result = data.annotate(Count('work'))
         return result
 
 class ReportConfirmation(View):
@@ -446,9 +446,9 @@ class ReportConfirmation(View):
         data, result = '', ''
         if request.user.has_perm('salary.change_workreport'):
             if 'id' in rqst and 'cost' in rqst:
-                result = self.update_report(rqst['id'], rqst['cost'], confirmed=True)
+                result = self.update_report(rqst['id'], rqst['admin_comment'], rqst['cost'], confirmed=True)
             if 'deleted' in rqst:
-                result = self.update_report(rqst['id'],deleted=True)
+                result = self.update_report(rqst['id'], rqst['admin_comment'], deleted=True)
             data = WorkReport.objects.filter(confirmed=False, deleted=False).order_by(
             '-working_date', 'user').distinct()
         if data.__len__() > 0:
@@ -460,11 +460,12 @@ class ReportConfirmation(View):
         }
         return render(request, self.template, context)
 
-    def update_report(self, id, cost=0, deleted=False, confirmed=False):
+    def update_report(self, id, comment, cost=0, deleted=False, confirmed=False):
         data = WorkReport.objects.get(id=id)
         data.cost = cost
         data.confirmed = confirmed
         data.deleted = deleted
+        data.admin_comment = comment
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
         print('%s - Confirmed %s report with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
