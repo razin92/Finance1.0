@@ -3,7 +3,7 @@ from .models import BalanceStamp, TransactionChangeHistory
 # Register your models here.
 
 class BalanceStampAdmin(admin.ModelAdmin):
-    list_display = ('date', 'pouch', 'balance_before', 'balance_after')
+    list_display = ('date', 'pouch')
 
 class TransactionChangeHistoryAdmin(admin.ModelAdmin):
     list_display = ('transaction_id', 'date_before', 'date_after', 'sum_val_before', 'sum_val_after',

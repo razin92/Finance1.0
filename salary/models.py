@@ -252,13 +252,12 @@ class WorkReport(models.Model):
     apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Квартира")
     confirmed = models.BooleanField(default=False, verbose_name="Принята")
     cost = models.IntegerField(default=0, verbose_name="Стоимость")
-    comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")
-    admin_comment = models.CharField(max_length=50, blank=True, verbose_name="Комментарий начальника")
+    comment = models.CharField(max_length=1250, blank=True, null=True, verbose_name="Комментарий")
+    admin_comment = models.CharField(max_length=1250, blank=True, verbose_name="Комментарий начальника")
     deleted = models.BooleanField(default=False, verbose_name="Удален")
 
     def __str__(self):
         return '%s %s %s' % (self.working_date, self.work, self.user)
 
     class Meta:
-        unique_together = ['working_date', 'work', 'quarter', 'building', 'apartment']
         ordering = ['-working_date']

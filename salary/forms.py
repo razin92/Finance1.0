@@ -81,6 +81,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
+	    max_length=1250,	
             required=False,
             widget=forms.Textarea(
                 attrs={
