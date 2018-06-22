@@ -33,6 +33,7 @@ urlpatterns = [
         url(r'^total/issued_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.issued, name='issued'),
 
         url(r'^work_report/create/$', login_required(views.WorkerReportUser.as_view()), name='work_report_create'),
+        url(r'^work_report/edit/$', login_required(views.WorkerReportUserEdit), name='work_report_edit'),
         url(r'^work/$', login_required(views.WorkView.as_view()), name='work'),
         url(r'^my_reports_list/(?P<page>[0-9]+)/$', login_required(views.MyWorkList.as_view()), name='my_reports_list'),
         url(r'^reports_list/$', login_required(views.ReportsList.as_view()), name='reports_list'),

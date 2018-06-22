@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.forms.widgets import CheckboxSelectMultiple
+from django.forms.widgets import CheckboxSelectMultiple, HiddenInput
 from .models import BonusWork, WorkCalc, Worker, CategoryOfChange, Work, WorkReport
 from bootstrap3_datetime.widgets import DateTimePicker
 import calendar
@@ -81,7 +81,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
-	    max_length=1250,	
+	        max_length=1250,
             required=False,
             widget=forms.Textarea(
                 attrs={
@@ -96,6 +96,19 @@ class WorkReportUserForm(forms.Form):
         b = [('', '')]
         result = tuple(b + a)
         return result
+
+class WorkReportForm(forms.ModelForm):
+
+    class Meta:
+        model = WorkReport
+        fields = ['working_date', 'quarter', 'building', 'apartment',
+                  'work', 'hours_qty', 'coworker', 'comment', 'user']
+
+    def __init__(self, *args, **kwargs):
+        super(WorkReportForm, self).__init__(*args, **kwargs)
+        self.fields['working_date'].widget = DateTimePicker(options={"format": "YYYY-MM-DD"})
+        self.fields['comment'].widget = forms.Textarea(attrs={'rows': '4',})
+        self.fields['user'].widget = HiddenInput()
 
 class WorkForm(forms.ModelForm):
 

@@ -10,7 +10,7 @@ from django.db.models import Count, Sum
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
-    ReportConfirmationForm
+    ReportConfirmationForm, WorkReportForm
 from calc.forms import MonthForm
 from django.db.models import Count
 import datetime
@@ -326,6 +326,26 @@ class WorkerReportUser(View):
         else:
             return request['apartment']
 
+def WorkerReportUserEdit(request):
+    template = 'salary/work_report.html'
+    work_id = request.GET['wid']
+    work = get_object_or_404(
+        WorkReport,
+        id=work_id,
+        user=request.user,
+        confirmed=False
+    )
+    print(datetime.datetime.now(), request.user, 'edited', work)
+    form = WorkReportForm(request.POST or None, instance=work)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('salary:my_reports_list', kwargs={'page': 1}))
+    context = {
+        'form': form,
+    }
+    return render(request, template, context)
+
+
 class WorkView(View):
     template = 'salary/work_report.html'
 
@@ -345,12 +365,13 @@ class WorkView(View):
             form.save()
         return render(request, self.template, context)
 
+
 class MyWorkList(View):
     template = 'salary/work_list.html'
     today = datetime.date.today()
     last_day = calendar.monthcalendar(today.year, today.month)[1]
 
-    def get(self, request, page):
+    def get(self, request, page=1):
         form = MyWorkFilterForm(request.POST or None)
         data = WorkReport.objects.filter(
             user=request.user,
@@ -393,15 +414,15 @@ class ReportsList(View):
     template = 'salary/work_reports_list.html'
 
     def get(self, request):
-        page = request.GET.get('page') or 1 #Getting page number
-        dupes = self.get_duplicate(WorkReport) #Dupes checking
+        page = request.GET.get('page') or 1 # Getting page number
+        dupes = self.get_duplicate(WorkReport) # Dupes checking
         data = WorkReport.objects.all().order_by('-working_date', 'user')
         data_per_page = Paginator(data, 25)
         result = data_per_page.page(page)
         exclude_list = ['filling_date']
         work_count = self.counter(data)
         print(work_count)
-        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list] #Headers for table
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list] # Headers for table
         context = {
             'header': header,
             'data': result.object_list,
