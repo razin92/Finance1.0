@@ -42,7 +42,6 @@ class Keyboard():
         return keyboard
 
 
-
 #Проверка на наличие полей входящего контакта
 def user_data_check(msg, user_data):
     if user_data in json_extractor(msg)['contact']:

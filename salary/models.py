@@ -27,7 +27,8 @@ class Worker(models.Model):
     position = models.ManyToManyField(WorkCalc)
     category = models.ForeignKey(Category, null=True)
     salary = models.IntegerField(default=650000)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.OneToOneField(User, null=True, blank=True)
+    can_make_report = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.name)
@@ -234,6 +235,15 @@ class Total(models.Model):
         worker.save()
         total.save()
 
+    def calculate(self, date):
+        self.balance_before_calc(date=date)
+        self.accrual_calc(date=date)
+        self.bonus_calc(date=date)
+        self.withholding_calc(date=date)
+        self.balance_after_calc(date=date)
+        self.issued_calc(date=date)
+        self.balance_now_calc(date=date)
+
 class Work(models.Model):
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
 
@@ -252,8 +262,8 @@ class WorkReport(models.Model):
     apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Квартира")
     confirmed = models.BooleanField(default=False, verbose_name="Принята")
     cost = models.IntegerField(default=0, verbose_name="Стоимость")
-    comment = models.CharField(max_length=1250, blank=True, null=True, verbose_name="Комментарий")
-    admin_comment = models.CharField(max_length=1250, blank=True, verbose_name="Комментарий начальника")
+    comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")
+    admin_comment = models.CharField(max_length=50, blank=True, verbose_name="Комментарий начальника")
     deleted = models.BooleanField(default=False, verbose_name="Удален")
 
     def __str__(self):

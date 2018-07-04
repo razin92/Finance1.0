@@ -4,6 +4,7 @@ from calc.models import Transaction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Count, Sum
@@ -26,6 +27,7 @@ class WorkerView(ListView):
 
     def get_queryset(self):
         return Worker.objects.order_by('name__firstname')
+
 
 class WorkerCreate(CreateView):
     model = Worker
@@ -71,6 +73,7 @@ def BonusWorkCreate(request):
     else:
         return render(request, template, context)
 
+
 class BonusWorkEdit(UpdateView):
     model = BonusWork
     template_name = 'salary/bonuswork_edit.html'
@@ -85,6 +88,7 @@ class AccountChangeView(ListView):
     def get_queryset(self):
         return AccountChange.objects.order_by('-date')
 
+
 def AccountChangeCreate(request):
     form = AccountChangeForm(request.POST or None)
     user = request.user
@@ -93,18 +97,19 @@ def AccountChangeCreate(request):
         'form': form,
         'user': user
     }
-
     if request.method == 'POST' and form.is_valid():
         AccountChange.objects.create(**form.cleaned_data)
         return HttpResponseRedirect(reverse('salary:accountchange'))
     else:
         return render(request, template, context)
 
+
 class AccountChangeEdit(UpdateView):
     model = AccountChange
     template_name = 'salary/accountchange_edit.html'
     success_url = reverse_lazy('salary:accountchange')
     fields = ['date', 'summ', 'worker', 'reason', 'comment']
+
 
 class CategoryOfChangeView(ListView):
     template_name = 'salary/categoryofchange_list.html'
@@ -140,6 +145,7 @@ def TotalView(request):
     }
     return render(request, template, context)
 
+
 def TotalCreate(request):
     workers = Worker.objects.all()
     total = Total.objects.filter(date__month=datetime.date.today().month)
@@ -152,6 +158,7 @@ def TotalCreate(request):
 
     return HttpResponseRedirect(reverse('salary:calculate', args={'2': '2'}))
 
+
 @login_required()
 def accrual(request, worker_id):
     worker = get_object_or_404(Worker, pk=worker_id)
@@ -161,6 +168,7 @@ def accrual(request, worker_id):
                   'worker': worker
     }
                   )
+
 
 @login_required()
 def bonus(request, worker_id, total_id):
@@ -256,13 +264,7 @@ def calculate(request, code):
     total_list = Total.objects.filter(date__month=timezone.now().month)
     date_now = {'month': timezone.now().month, 'year': timezone.now().year}
     for total in total_list:
-        total.balance_before_calc(date=date_now)
-        total.accrual_calc(date=date_now)
-        total.bonus_calc(date=date_now)
-        total.withholding_calc(date=date_now)
-        total.balance_after_calc(date=date_now)
-        total.issued_calc(date=date_now)
-        total.balance_now_calc(date=date_now)
+        total.calculate(date=date_now)
     if code == '1':
         return HttpResponseRedirect(reverse('salary:worker'))
     elif code == '2':
@@ -415,19 +417,20 @@ class ReportsList(View):
 
     def get(self, request):
         page = request.GET.get('page') or 1 # Getting page number
+        per_page = request.GET.get('per_page') or 25
         dupes = self.get_duplicate(WorkReport) # Dupes checking
         data = WorkReport.objects.all().order_by('-working_date', 'user')
-        data_per_page = Paginator(data, 25)
+        data_per_page = Paginator(data, per_page)
         result = data_per_page.page(page)
         exclude_list = ['filling_date']
-        work_count = self.counter(data)
-        print(work_count)
+        salary = self.salary_of_workers()
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list] # Headers for table
         context = {
             'header': header,
             'data': result.object_list,
             'pages': result,
-            'dupes': dupes
+            'dupes': dupes,
+            'salary': salary
         }
         return render(request, self.template, context)
 
@@ -458,6 +461,15 @@ class ReportsList(View):
         result = data.annotate(Count('work'))
         return result
 
+    def salary_of_workers(self, *args, **kwargs):
+        reports_now_a_month = WorkReport.objects.filter(
+            working_date__month=datetime.datetime.now().month-1)
+        workers = Worker.objects.filter(can_make_report=True)
+        result = ['%s: %s' %
+               (each, reports_now_a_month.filter(user=each.user).aggregate(Sum('cost'))['cost__sum'])
+               for each in workers]
+        return result
+
 class ReportConfirmation(View):
     template = 'salary/report_confirmation.html'
 
@@ -467,9 +479,9 @@ class ReportConfirmation(View):
         data, result = '', ''
         if request.user.has_perm('salary.change_workreport'):
             if 'id' in rqst and 'cost' in rqst:
-                result = self.update_report(rqst['id'], rqst['admin_comment'], rqst['cost'], confirmed=True)
+                result = self.update_report(rqst['id'], rqst, rqst['cost'], confirmed=True)
             if 'deleted' in rqst:
-                result = self.update_report(rqst['id'], rqst['admin_comment'], deleted=True)
+                result = self.update_report(rqst['id'], rqst, deleted=True)
             data = WorkReport.objects.filter(confirmed=False, deleted=False).order_by(
             '-working_date', 'user').distinct()
         if data.__len__() > 0:
@@ -482,11 +494,14 @@ class ReportConfirmation(View):
         return render(request, self.template, context)
 
     def update_report(self, id, comment, cost=0, deleted=False, confirmed=False):
+        admin_comment = ''
+        if 'admin_comment' in comment:
+            admin_comment = comment['admin_comment']
         data = WorkReport.objects.get(id=id)
         data.cost = cost
         data.confirmed = confirmed
         data.deleted = deleted
-        data.admin_comment = comment
+        data.admin_comment = admin_comment
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
         print('%s - Confirmed %s report with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
@@ -494,7 +509,21 @@ class ReportConfirmation(View):
             message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
         return message
 
-class EditReport(View):
+
+class ConsolidatedReport(View):
+    """
+    Displays detailed reports for head person
+    """
 
     def get(self, request):
-        form = ReportConfirmationForm(request.POST or None)
+        template = ''
+        form = ''
+        report = []
+        context = {
+            'form': form,
+            'report': report
+        }
+        return render(request, template, context)
+
+
+

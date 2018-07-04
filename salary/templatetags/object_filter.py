@@ -11,7 +11,7 @@ def value(value, arg):
     elif arg == 'confirmed':
         if result:
             return 'Принята'
-        return 'НЕ принята'
+        return 'Не принята'
     elif arg == 'coworker':
         values = [x.name.firstname for x in result.all()]
         if len(values) > 0:
