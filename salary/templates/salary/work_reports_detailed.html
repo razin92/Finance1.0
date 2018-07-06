@@ -2,6 +2,7 @@
 {% load bootstrap %}
 {% load humanize %}
 {% load object_filter %}
+{% load get_salary %}
 {% block body %}
     <style>
     #id_work {
@@ -65,7 +66,8 @@
                        onclick="ShowHideContent(document.getElementById('id{{ forloop.counter }}'))"
                        class="btn btn-default btn-xs" style="margin: 5px">
                         {% for x in each|slice:":1" %}<---{{ x.user.worker }}--->{% endfor %}
-                    </a>Количество заявок: {{ each|length }}
+                    </a>Количество заявок: {{ each|length }} /
+                    Заработано за период: <strong>{{ each|salary|intcomma }}</strong>
                 </div>
             <div id="id{{ forloop.counter }}" style="display: none;">
                 <div class="panel-body">

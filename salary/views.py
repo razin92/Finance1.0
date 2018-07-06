@@ -4,7 +4,6 @@ from calc.models import Transaction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.paginator import Paginator
-from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Count, Sum
@@ -13,10 +12,8 @@ from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
     ReportConfirmationForm, WorkReportForm
 from calc.forms import MonthForm
-from django.db.models import Count
 import datetime
 import calendar
-import time
 # Create your views here.
 global code
 
