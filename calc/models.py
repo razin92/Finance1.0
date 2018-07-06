@@ -14,7 +14,7 @@ class Transaction(models.Model):
     typeof = models.BooleanField(default=False, verbose_name=(u'Пополнение'))
     checking = models.BooleanField(default=True, verbose_name=(u'Проведено'))
     create_date = models.DateTimeField(default=timezone.now, verbose_name=(u'Дата создания/изменения'))
-    creator = models.ForeignKey(User, default=User.objects.get(is_superuser=True).pk)
+    creator = models.ForeignKey(User, default=None, null=True)
 
     def __unicode__(self):
         return self.date
