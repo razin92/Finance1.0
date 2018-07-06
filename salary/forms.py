@@ -180,15 +180,18 @@ class WorkFilterForm(forms.Form):
     )
     quarter = forms.CharField(
         required=False,
-        label="Квартал"
+        label="Квартал",
+        disabled=True
     )
     building = forms.CharField(
         required=False,
-        label="Дом"
+        label="Дом",
+        disabled=True
     )
     apartment = forms.CharField(
         required=False,
-        label="Квартира"
+        label="Квартира",
+        disabled=True
     )
 
 class ReportConfirmationForm(forms.ModelForm):

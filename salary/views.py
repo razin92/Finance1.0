@@ -525,7 +525,8 @@ class ConsolidatedReport(View):
             'form': form,
             'report': self.worker_sorter(report),
             'header': self.header(),
-            'work_counter': self.work_counter(report)
+            'work_counter': self.work_counter(report),
+            'dates': '%s - %s' % (self.data['date_start'], self.data['date_end'])
         }
 
         return render(request, template, context)

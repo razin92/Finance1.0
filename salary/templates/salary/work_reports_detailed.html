@@ -26,7 +26,7 @@
         <div class="panel-heading">
             <a href="javascript:void(0)"
                onclick="ShowHideContent(document.getElementById('id-2'))"
-               class="btn btn-default btn-xs" style="margin: 5px">Фильтр</a>
+               class="btn btn-default btn-xs" style="margin: 5px">Фильтр</a> Период отчета: {{ dates }}
         </div>
         <div class="panel-body">
             <div id="id-2" style="display: none;">
@@ -59,17 +59,16 @@
     <!-- Block report -->
     {% for each in report %}
         {% if each %}
-            <div class="panel" style="margin: auto; max-width: 98%; margin-top: 5px">
+            <div class="panel panel-default scroll" style="margin: auto; max-width: 98%; margin-top: 5px">
                 <div class="panel-heading">
                     <a href="javascript:void(0)"
                        onclick="ShowHideContent(document.getElementById('id{{ forloop.counter }}'))"
                        class="btn btn-default btn-xs" style="margin: 5px">
                         {% for x in each|slice:":1" %}<---{{ x.user.worker }}--->{% endfor %}
-                    </a>
+                    </a>Количество заявок: {{ each|length }}
                 </div>
-            <p>Количество заявок: {{ each|length }}</p>
             <div id="id{{ forloop.counter }}" style="display: none;">
-                <div class="panel panel-default scroll" style="margin: auto;">
+                <div class="panel-body">
                     <table class="table table-hover table-striped">
                     <thead>
                         <tr>
