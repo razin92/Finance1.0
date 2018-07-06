@@ -523,8 +523,9 @@ class ConsolidatedReport(View):
         report = self.work_filter(self.data)
         context = {
             'form': form,
-            'report': self.counter(report),
-            'header': self.header()
+            'report': self.worker_sorter(report),
+            'header': self.header(),
+            'work_counter': self.work_counter(report)
         }
 
         return render(request, template, context)
@@ -556,7 +557,7 @@ class ConsolidatedReport(View):
 
         return data
 
-    def counter(self, report):
+    def worker_sorter(self, report):
         result = [report.filter(
             user__worker__id__in=each,
         ) for each in self.data['workers']]
@@ -567,3 +568,14 @@ class ConsolidatedReport(View):
         exclude_list = ['filling_date', 'deleted', 'confirmed', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         return header
+
+    def work_counter(self, report):
+        work_counter = ['%s: %s' %
+                (Work.objects.get(id__in=x),
+                 report.filter(
+                     work__id__in=x,
+                     coworker__isnull=True).__len__()
+                 ) for x in self.data['work_list'] if
+                        report.filter(work__id__in=x, coworker__isnull=True).__len__() > 0
+                 ]
+        return work_counter
