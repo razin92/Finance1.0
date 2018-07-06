@@ -564,7 +564,7 @@ class ConsolidatedReport(View):
         return result
 
     def header(self):
-        exclude_list = ['filling_date', 'deleted', 'confirmed', 'user']
+        exclude_list = ['filling_date', 'deleted', 'confirmed']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         return header
 
