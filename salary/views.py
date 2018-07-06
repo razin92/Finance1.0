@@ -522,8 +522,9 @@ class ConsolidatedReport(View):
             'form': form,
             'report': self.worker_sorter(report),
             'header': self.header(),
-            'work_counter': self.work_counter(report),
-            'dates': '%s - %s' % (self.data['date_start'], self.data['date_end'])
+            'work_counter': self.work_counter_single(report),
+            'dates': '%s - %s' % (self.data['date_start'], self.data['date_end']),
+            'group_work': self.work_counter_group(report)
         }
 
         return render(request, template, context)
@@ -567,7 +568,7 @@ class ConsolidatedReport(View):
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         return header
 
-    def work_counter(self, report):
+    def work_counter_single(self, report):
         work_counter = ['%s: %s' %
                 (Work.objects.get(id__in=x),
                  report.filter(
@@ -577,3 +578,8 @@ class ConsolidatedReport(View):
                         report.filter(work__id__in=x, coworker__isnull=True).__len__() > 0
                  ]
         return work_counter
+
+    def work_counter_group(self, report):
+        work_list_group = report.filter(coworker__isnull=False).\
+            order_by('quarter', 'building', 'apartment', 'work')
+        return work_list_group

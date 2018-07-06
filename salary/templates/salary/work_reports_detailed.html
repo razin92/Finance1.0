@@ -46,7 +46,7 @@
     <table class="table table-hover table-striped">
         <thead>
             <tr>
-            <th>Общее кол-во заявок, выполненных по одному</th>
+            <th>Работы, выполненные по одному</th>
             </tr>
         </thead>
         <tbody>
@@ -56,7 +56,52 @@
         </tbody>
     </table>
     </div>
-    <!-- end block
+    <!-- end block -->
+    <!-- Block group work -->
+    <div class="panel" style="margin: auto; max-width: 98%; margin-top: 5px;">
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+            <th>Работы, выполненные в команде</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>NULL</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="panel-heading">
+        <a href="javascript:void(0)"
+           onclick="ShowHideContent(document.getElementById('id1'))"
+           class="btn btn-success btn-xs" style="margin: 5px">Подробно</a>
+    </div>
+    <div class="panel-body">
+          <div id="id1" style="display: none;">
+          <div class="panel panel-default scroll" style="margin: auto;">
+            <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    {% for each in header %}
+                        <th>{{ each.verbose_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for each in group_work %}
+                    <tr>
+                        {% for element in header %}
+                        <td>{{ each|value:element.name|intcomma }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+          </div>
+          </div>
+    </div>
+    </div>
+    <!-- end block -->
     <!-- Block report -->
     {% for each in report %}
         {% if each %}
@@ -69,29 +114,30 @@
                     </a>Количество заявок: {{ each|length }} /
                     Заработано за период: <strong>{{ each|salary|intcomma }}</strong>
                 </div>
-            <div id="id{{ forloop.counter }}" style="display: none;">
                 <div class="panel-body">
-                    <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            {% for head in header %}
-                                <th>{{ head.verbose_name }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in each %}
+                    <div id="id{{ forloop.counter }}" style="display: none;">
+                        <div class="panel panel-default scroll" style="margin: auto;">
+                        <table class="table table-hover table-striped">
+                        <thead>
                             <tr>
-                                {% for element in header %}
-                                <td>{{ data|value:element.name|intcomma }}</td>
+                                {% for head in header %}
+                                    <th>{{ head.verbose_name }}</th>
                                 {% endfor %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                    </table>
-                  </div>
-                  </div>
-            </div>
+                        </thead>
+                        <tbody>
+                            {% for data in each %}
+                                <tr>
+                                    {% for element in header %}
+                                    <td>{{ data|value:element.name|intcomma }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        </table>
+                      </div>
+                      </div>
+                    </div>
         {% endif %}
     {% endfor %}
     <!-- End block -->
