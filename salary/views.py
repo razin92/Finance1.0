@@ -514,16 +514,56 @@ class ConsolidatedReport(View):
     """
     Displays detailed reports for head person
     """
+    data = {}
 
     def get(self, request):
-        template = ''
-        form = ''
-        report = []
+        self.data = self.parameters(request)
+        template = 'salary/work_reports_detailed.html'
+        form = WorkFilterForm(None)
+        report = self.work_filter(self.data)
         context = {
             'form': form,
-            'report': report
+            'report': self.counter(report),
+            'header': self.header()
         }
+
         return render(request, template, context)
 
+    def work_filter(self, parameters):
+        return WorkReport.objects.filter(
+            work__id__in=parameters['work_list'],
+            user__worker__id__in=parameters['workers'],
+            working_date__range=(parameters['date_start'], parameters['date_end']),
+            confirmed=True,
+            deleted=False
+        ).order_by('-working_date', 'work__name')
 
+    def parameters(self, request):
+        work_list = request.GET.getlist('work', Work.objects.values_list('id'))
+        date_start = datetime.date.today().replace(day=1)
+        date_end = datetime.date.today()
+        if 'working_date_start' in request.GET:
+            date_start = request.GET['working_date_start']
+        if 'working_date_end' in request.GET:
+            date_end = request.GET['working_date_end']
+        workers = request.GET.getlist('workers', Worker.objects.values_list('id').filter(can_make_report=True))
+        data = {
+            'work_list': work_list,
+            'date_start': date_start,
+            'date_end': date_end,
+            'workers': workers
+        }
 
+        return data
+
+    def counter(self, report):
+        result = [report.filter(
+            user__worker__id__in=each,
+        ) for each in self.data['workers']]
+
+        return result
+
+    def header(self):
+        exclude_list = ['filling_date', 'deleted', 'confirmed', 'user']
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        return header

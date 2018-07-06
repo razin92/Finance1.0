@@ -1,0 +1,78 @@
+{% extends 'salary/work_reports_list.html' %}
+{% load bootstrap %}
+{% load humanize %}
+{% load object_filter %}
+{% block body %}
+    <style>
+    #id_work {
+       max-height: 100px;
+       overflow: auto;
+    }
+    </style>
+    <script type="text/javascript">
+        function ShowHideContent(spoiler)
+        {
+            if (spoiler.style.display != 'none')
+                spoiler.style.display = 'none';
+            else
+                spoiler.style.display = 'block';
+        }
+    </script>
+    <!-- Block filter -->
+    <div class="panel" style="margin: auto; max-width: 98%;">
+        <div class="panel-heading">
+            <a href="javascript:void(0)"
+               onclick="ShowHideContent(document.getElementById('id-2'))"
+               class="btn btn-default btn-xs" style="margin: 5px">Фильтр</a>
+        </div>
+        <div class="panel-body">
+            <div id="id-2" style="display: none;">
+                <div class="panel panel-default scroll" style="margin: auto;">
+                    <form method="get">
+                        {{ form|bootstrap_horizontal }}
+                        <input type="submit" value="Фильтр" class="btn btn-success" style="margin: 3px">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end block -->
+    <!-- Block report -->
+    {% for each in report %}
+        {% if each %}
+            <div class="panel" style="margin: auto; max-width: 98%; margin-top: 5px">
+                <div class="panel-heading">
+                    <a href="javascript:void(0)"
+                       onclick="ShowHideContent(document.getElementById('id{{ forloop.counter }}'))"
+                       class="btn btn-default btn-xs" style="margin: 5px">
+                        {% for x in each|slice:":1" %}<---{{ x.user.worker }}--->{% endfor %}
+                    </a>
+                </div>
+            <p>Количество заявок: {{ each|length }}</p>
+            <div id="id{{ forloop.counter }}" style="display: none;">
+                <div class="panel panel-default scroll" style="margin: auto;">
+                    <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            {% for head in header %}
+                                <th>{{ head.verbose_name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in each %}
+                            <tr>
+                                {% for element in header %}
+                                <td>{{ data|value:element.name|intcomma }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                  </div>
+                  </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+    <!-- End block -->
+{% endblock %}

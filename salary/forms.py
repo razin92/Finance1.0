@@ -151,10 +151,45 @@ class MyWorkFilterForm(forms.Form):
 
 class WorkFilterForm(forms.Form):
 
-    working_date = forms.DateField(widget=DateTimePicker(options={"format": "YYYY-MM-DD"}))
-    user = forms.ModelChoiceField(queryset=Worker.objects.filter(user__isnull=False))
-    work = forms.ModelChoiceField(queryset=Work.objects.all())
-    quarter = forms.ModelChoiceField(queryset=WorkReport.objects.all().values('quarter').distinct())
+    def __init__(self, *args, **kwargs):
+        super(WorkFilterForm, self).__init__(*args, **kwargs)
+        self.fields['working_date_start'].initial = datetime.date.today().replace(day=1)
+        self.fields['working_date_end'].initial = datetime.date.today()
+
+    working_date_start = forms.DateField(
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD"}),
+        required=False,
+        label="Начало периода"
+    )
+    working_date_end = forms.DateField(
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD"}),
+        required=False,
+        label="Конец периода"
+    )
+    workers = forms.ModelMultipleChoiceField(
+        queryset=Worker.objects.filter(can_make_report=True),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Работники"
+    )
+    work = forms.ModelMultipleChoiceField(
+        queryset=Work.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Работа"
+    )
+    quarter = forms.CharField(
+        required=False,
+        label="Квартал"
+    )
+    building = forms.CharField(
+        required=False,
+        label="Дом"
+    )
+    apartment = forms.CharField(
+        required=False,
+        label="Квартира"
+    )
 
 class ReportConfirmationForm(forms.ModelForm):
 
