@@ -1,5 +1,6 @@
 from django import template
 from ..models import Worker
+from django.db.models import Sum
 
 register = template.Library()
 
@@ -28,4 +29,10 @@ def value(value, arg):
         if not result:
             return '--'
         
+    return result
+
+
+@register.filter(name='salary')
+def salary(salary):
+    result = salary.aggregate(Sum('cost'))['cost__sum']
     return result

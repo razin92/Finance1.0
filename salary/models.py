@@ -4,8 +4,9 @@ from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
 from calc.models import Transaction
 import datetime
-#Должность
 
+
+# Должность
 class WorkCalc(models.Model):
     time = {
         ('Час','hour'),
@@ -21,6 +22,7 @@ class WorkCalc(models.Model):
     def __str__(self):
         return self.name
 
+
 class Worker(models.Model):
     name = models.OneToOneField(Person)
     account = models.IntegerField(default=0)
@@ -33,7 +35,6 @@ class Worker(models.Model):
     def __str__(self):
         return str(self.name)
 
-    #@property
     def get_salary(self):
         date_today = timezone.now().replace(day=1, hour=15, minute=00, second=00, microsecond=000000)
         account, created = Pouch.objects.get_or_create(
@@ -48,6 +49,7 @@ class Worker(models.Model):
             money=account
         )
         return date_today
+
 
 class BonusWork(models.Model):
     model = models.ForeignKey(WorkCalc)
@@ -66,11 +68,13 @@ class BonusWork(models.Model):
         calc = result.model.cost * result.quantity
         return calc
 
+
 class CategoryOfChange(models.Model):
     name = models.CharField(max_length=20)
 
     def __str__(self):
         return self.name
+
 
 class AccountChange(models.Model):
     summ = models.IntegerField(default=0)
@@ -84,6 +88,7 @@ class AccountChange(models.Model):
 
     def __str__(self):
         return str(self.summ) + ' ' + str(self.worker) + ' ' + str(self.date)
+
 
 class Total(models.Model):
     date = models.DateField(default=timezone.now().replace(day=1))
@@ -244,11 +249,16 @@ class Total(models.Model):
         self.issued_calc(date=date)
         self.balance_now_calc(date=date)
 
+
 class Work(models.Model):
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
+
 
 class WorkReport(models.Model):
     filling_date = models.DateField(auto_now=True, verbose_name="Дата заполнения")
@@ -265,9 +275,27 @@ class WorkReport(models.Model):
     comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")
     admin_comment = models.CharField(max_length=50, blank=True, verbose_name="Комментарий начальника")
     deleted = models.BooleanField(default=False, verbose_name="Удален")
+    tagged_coworker = models.BooleanField(default=False, verbose_name="Отмечен помощник")
+    stored = models.BooleanField(default=False, verbose_name="Отложен")
 
     def __str__(self):
         return '%s %s %s' % (self.working_date, self.work, self.user)
 
     class Meta:
         ordering = ['-working_date']
+
+    def tag_coworker(self):
+        if self.coworker is not None:
+            self.tagged_coworker = True
+            self.save()
+
+    def tagged_work(self, user_id):
+        return self.objects.filter(tagged_coworker=True, coworker__user__id__in=user_id)
+
+    def store_work(self):
+        self.stored = True
+        self.save()
+
+    def untag_work(self):
+        self.tagged_coworker = False
+        self.save()
