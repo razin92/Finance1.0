@@ -10,7 +10,7 @@ from django.db.models import Count, Sum
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
-    ReportConfirmationForm, WorkReportForm
+    ReportConfirmationForm, WorkReportForm, WorkReportTaggedForm
 from calc.forms import MonthForm
 import datetime
 import calendar
@@ -199,6 +199,7 @@ def bonus(request, worker_id, total_id):
     }
                 )
 
+
 @login_required()
 def withholding(request, worker_id, total_id):
     worker = get_object_or_404(Worker, pk=worker_id)
@@ -231,6 +232,7 @@ def withholding(request, worker_id, total_id):
     }
                   )
 
+
 @login_required()
 def issued(request, worker_id, total_id):
     worker = get_object_or_404(Worker, pk=worker_id)
@@ -256,6 +258,7 @@ def issued(request, worker_id, total_id):
         'issued': issued
     })
 
+
 @login_required()
 def calculate(request, code):
     total_list = Total.objects.filter(date__month=timezone.now().month)
@@ -267,24 +270,33 @@ def calculate(request, code):
     elif code == '2':
         return HttpResponseRedirect(reverse('salary:total'))
 
+
 @login_required()
 def get_salary(request):
     for each in Worker.objects.all():
         each.get_salary()
     return HttpResponseRedirect(reverse('salary:calculate', args={'2': '2'}))
 
+
 class WorkerReportUser(View):
     template = 'salary/work_report.html'
 
     def get(self, request):
+        user = request.user.id
+        tagged_work = self.tagged_work(user).last()
         form = WorkReportUserForm(None)
+        #if tagged_work:
+        #    form = self.make_form(tagged_work, user)
         context = {
             'form': form,
+            'tagged_work': tagged_work
         }
         return render(request, self.template, context)
 
     def post(self, request):
         form = WorkReportUserForm(request.POST)
+        if 'new' in request.POST:
+            form = WorkReportTaggedForm(request.POST)
         message = ''
         context = {
             'form': form,
@@ -295,6 +307,8 @@ class WorkerReportUser(View):
             coworkers = request.POST.getlist('coworker', '')
             for x in coworkers:
                 new_object.coworker.add(x)
+            if coworkers != '':
+                new_object.tag_coworker()
             context['message'] = 'Успех'
         return render(request, self.template, context)
 
@@ -324,6 +338,13 @@ class WorkerReportUser(View):
             return None
         else:
             return request['apartment']
+
+    def tagged_work(self, user_id):
+        return WorkReport.objects.filter(tagged_coworker=True, coworker__user__id__in=[user_id, ])
+
+    def make_form(self, work_object, user_id):
+        return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
+
 
 def WorkerReportUserEdit(request):
     template = 'salary/work_report.html'
@@ -374,8 +395,9 @@ class MyWorkList(View):
         form = MyWorkFilterForm(request.POST or None)
         data = WorkReport.objects.filter(
             user=request.user,
-            working_date__month=self.today.month
-        ).order_by('-working_date')
+            working_date__month=self.today.month,
+            working_date__year=self.today.year
+        ).order_by('confirmed', '-working_date')
         cost_sum = data.values('cost').aggregate(Sum('cost'))
         exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
@@ -397,7 +419,7 @@ class MyWorkList(View):
         data = WorkReport.objects.filter(
             user=request.user,
             working_date__range=(start, end)
-        ).order_by('-working_date')
+        ).order_by('confirmed', '-working_date')
         cost_sum = data.values('cost').aggregate(Sum('cost'))
         exclude_list = ['filling_date', 'user']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]

@@ -289,9 +289,6 @@ class WorkReport(models.Model):
             self.tagged_coworker = True
             self.save()
 
-    def tagged_work(self, user_id):
-        return self.objects.filter(tagged_coworker=True, coworker__user__id__in=user_id)
-
     def store_work(self):
         self.stored = True
         self.save()

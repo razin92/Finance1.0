@@ -79,7 +79,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
-	        max_length=1250,
+            max_length=1250,
             required=False,
             widget=forms.Textarea(
                 attrs={
@@ -93,6 +93,83 @@ class WorkReportUserForm(forms.Form):
         a = [(x, x) for x in range(start, stop)]
         b = [('', '')]
         result = tuple(b + a)
+        return result
+
+
+class WorkReportTaggedForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        work = kwargs.pop('work', None)
+        user = kwargs.pop('user_id', None)
+        super(WorkReportTaggedForm, self).__init__()
+        self.fields['working_date'] = forms.DateField(
+            label='Дата выполнения',
+            disabled=True,
+            initial=work.working_date,
+        )
+        self.fields['quarter'] = forms.CharField(
+            label='Квартал',
+            disabled=True,
+            initial=work.quarter,
+        )
+        self.fields['building'] = forms.CharField(
+            label='Дом',
+            disabled=True,
+            initial=work.building,
+        )
+        self.fields['building_litera'] = forms.CharField(
+            initial='',
+            widget=HiddenInput()
+        )
+        self.fields['apartment'] = forms.CharField(
+            label='Квартира',
+            disabled=True,
+            initial=work.apartment,
+        )
+        self.fields['work'] = forms.CharField(
+            label='Работа',
+            disabled=True,
+            initial=work.work
+        )
+        self.fields['hours_qty'] = forms.CharField(
+            label='Затрачено часов',
+            disabled=True,
+            initial=work.hours_qty,
+        )
+        self.fields['coworkers'] = forms.CharField(
+            label='Участники этой работы',
+            disabled=True,
+            initial=', '.join(['%s' % x for x in Worker.objects.filter(id__in=[x.id for x in work.coworker.all()])]) + ', %s' % Worker.objects.get(user=work.user)
+        )
+        self.fields['coworker'] = forms.MultipleChoiceField(
+            label='Помощники',
+            choices=((x.id, x.name) for x in Worker.objects.filter(can_make_report=True)),
+            initial=self.get_worker(work, user),
+            widget=CheckboxSelectMultiple,
+            required=False
+        )
+        self.fields['comment'] = forms.CharField(
+            label='Комментарий',
+            max_length=1250,
+            required=False,
+            initial=work.comment,
+            widget=forms.Textarea(
+                attrs={
+                    'rows': '4',
+                }
+            ),
+
+        )
+        self.fields['new'] = forms.BooleanField(
+            initial=True,
+            widget=HiddenInput()
+        )
+
+    def get_worker(self, work, user):
+        result = [x.id for x in Worker.objects.filter(
+            id__in=[x.id for x in work.coworker.all().exclude(user__id=user)])
+                  ]
+        result.append(Worker.objects.get(user=work.user).id)
         return result
 
 class WorkReportForm(forms.ModelForm):
