@@ -282,7 +282,7 @@ class WorkReport(models.Model):
         return '%s %s %s' % (self.working_date, self.work, self.user)
 
     class Meta:
-        unique_together = ['working_date', 'work', 'user', 'quarter', 'building', 'apartment']
+        unique_together = ['working_date', 'work', 'user', 'quarter', 'building', 'apartment', 'comment']
         ordering = ['-working_date']
 
     def tag_coworker(self):
