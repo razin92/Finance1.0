@@ -84,7 +84,7 @@ function ShowHideContent(spoiler)
         <tbody>
             {% for each in data %}
                 <tr style="background-color: {% if each.confirmed %}#EAFEE7{% else %}#F9E6E6{% endif %};">
-                    {% if not each.confirmed %}
+                    {% if not each.confirmed and not each.deleted %}
                         <td><a href="{% url 'salary:work_report_edit' %}?wid={{ each.id }}" class="btn btn-xs btn-success">Изменить</a></td>
                     {% else %}
                         <td align="center">X</td>

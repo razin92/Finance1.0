@@ -25,6 +25,7 @@ class AccountChangeForm(forms.Form):
 class WorkReportUserForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
         super(WorkReportUserForm, self).__init__(*args, **kwargs)
         quarters = (
             (2, 2),
@@ -73,7 +74,8 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['coworker'] = forms.MultipleChoiceField(
             label='Помощники',
-            choices=((x.id, x.name) for x in Worker.objects.filter(can_make_report=True)),
+            choices=((x.id, x.name) for x in Worker.objects.filter(
+                can_make_report=True).exclude(user__id=user_id)),
             widget=CheckboxSelectMultiple,
             required=False
         )
@@ -102,48 +104,74 @@ class WorkReportTaggedForm(forms.Form):
         work = kwargs.pop('work', None)
         user = kwargs.pop('user_id', None)
         super(WorkReportTaggedForm, self).__init__()
-        self.fields['working_date'] = forms.DateField(
+        self.fields['mock_working_date'] = forms.DateField(
             label='Дата выполнения',
             disabled=True,
             initial=work.working_date,
         )
-        self.fields['quarter'] = forms.CharField(
+        self.fields['working_date'] = forms.DateField(
+            widget=HiddenInput,
+            initial=work.working_date,
+        )
+        self.fields['mock_quarter'] = forms.CharField(
             label='Квартал',
             disabled=True,
             initial=work.quarter,
         )
-        self.fields['building'] = forms.CharField(
+        self.fields['quarter'] = forms.CharField(
+            widget=HiddenInput,
+            initial=work.quarter,
+        )
+        self.fields['mock_building'] = forms.CharField(
             label='Дом',
             disabled=True,
             initial=work.building,
         )
+        self.fields['building'] = forms.CharField(
+            widget=HiddenInput,
+            initial=work.building,
+        )
         self.fields['building_litera'] = forms.CharField(
             initial='',
-            widget=HiddenInput()
+            widget=HiddenInput
         )
-        self.fields['apartment'] = forms.CharField(
+        self.fields['mock_apartment'] = forms.CharField(
             label='Квартира',
             disabled=True,
             initial=work.apartment,
         )
-        self.fields['work'] = forms.CharField(
+        self.fields['apartment'] = forms.CharField(
+            widget=HiddenInput,
+            initial=work.apartment,
+        )
+        self.fields['mock_work'] = forms.CharField(
             label='Работа',
             disabled=True,
             initial=work.work
         )
-        self.fields['hours_qty'] = forms.CharField(
+        self.fields['work'] = forms.CharField(
+            widget=HiddenInput,
+            initial=work.work.id
+        )
+        self.fields['mock_hours_qty'] = forms.CharField(
             label='Затрачено часов',
             disabled=True,
+            initial=work.hours_qty,
+        )
+        self.fields['hours_qty'] = forms.CharField(
+            widget=HiddenInput,
             initial=work.hours_qty,
         )
         self.fields['coworkers'] = forms.CharField(
             label='Участники этой работы',
             disabled=True,
-            initial=', '.join(['%s' % x for x in Worker.objects.filter(id__in=[x.id for x in work.coworker.all()])]) + ', %s' % Worker.objects.get(user=work.user)
+            initial=', '.join(['%s' % x for x in Worker.objects.filter(
+                id__in=[x.id for x in work.coworker.all()])]) + ', %s' % Worker.objects.get(user=work.user)
         )
         self.fields['coworker'] = forms.MultipleChoiceField(
             label='Помощники',
-            choices=((x.id, x.name) for x in Worker.objects.filter(can_make_report=True)),
+            choices=((x.id, x.name) for x in Worker.objects.filter(
+                can_make_report=True).exclude(user__id=user)),
             initial=self.get_worker(work, user),
             widget=CheckboxSelectMultiple,
             required=False
@@ -162,7 +190,7 @@ class WorkReportTaggedForm(forms.Form):
         )
         self.fields['new'] = forms.BooleanField(
             initial=True,
-            widget=HiddenInput()
+            widget=HiddenInput
         )
 
     def get_worker(self, work, user):

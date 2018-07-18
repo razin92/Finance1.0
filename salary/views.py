@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Count, Sum
+from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
@@ -279,51 +280,72 @@ def get_salary(request):
 
 
 class WorkerReportUser(View):
+    """
+    View for creating the report
+    if a user was tagged in the ones work,
+    the first action: confirm or cancel work
+    """
     template = 'salary/work_report.html'
+    message = ''
 
     def get(self, request):
         user = request.user.id
         tagged_work = self.tagged_work(user).last()
-        form = WorkReportUserForm(None)
-        #if tagged_work:
-        #    form = self.make_form(tagged_work, user)
+        form = WorkReportUserForm(None, user_id=user)
+        if tagged_work:
+            form = self.make_form(tagged_work, user)
+            self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
         context = {
             'form': form,
-            'tagged_work': tagged_work
+            'tagged_work': tagged_work,
+            'message': self.message
         }
         return render(request, self.template, context)
 
     def post(self, request):
-        form = WorkReportUserForm(request.POST)
-        if 'new' in request.POST:
-            form = WorkReportTaggedForm(request.POST)
-        message = ''
+        user = request.user.id
+        form = WorkReportUserForm(request.POST, user_id=user)
         context = {
             'form': form,
-            'message': message,
+            'message': self.message,
         }
-        if form.is_valid():
-            new_object = self.WorkReportCreate(form.data, request.user)
-            coworkers = request.POST.getlist('coworker', '')
-            for x in coworkers:
-                new_object.coworker.add(x)
-            if coworkers != '':
-                new_object.tag_coworker()
-            context['message'] = 'Успех'
+        if form.is_valid() or 'new' in request.POST:
+            new_object = self.WorkReportCreate(request.POST, request.user)
+            if new_object is not None:
+                coworkers = request.POST.getlist('coworker', '')
+                for x in coworkers:
+                    new_object.coworker.add(x)
+                if coworkers != '':
+                    new_object.tag_coworker()
+                if 'new' in request.POST:
+                    self.tagged_work(user).last().untag_coworker()
+                    new_object.untag_coworker()
+                context['message'] = 'Успех'
+            else:
+                context['message'] = 'Объект уже существует'
+        if 'new' in request.POST:
+            return HttpResponseRedirect(reverse('salary:work_report_create'))
         return render(request, self.template, context)
 
     def WorkReportCreate(self, data, user):
-        result = WorkReport.objects.get_or_create(
-            working_date=data['working_date'],
-            hours_qty=data['hours_qty'],
-            user=user,
-            work=Work.objects.get(pk=data['work']),
-            quarter=data['quarter'],
-            building='%s%s' % (data['building'], data['building_litera']),
-            apartment=self.apartment(data),
-            comment=data['comment']
-        )
-        return result[0]
+        try:
+            result = WorkReport.objects.get_or_create(
+                working_date=data['working_date'],
+                hours_qty=data['hours_qty'],
+                user=user,
+                work=Work.objects.get(pk=data['work']),
+                quarter=data['quarter'],
+                building='%s%s' % (data['building'], data['building_litera']),
+                apartment=self.apartment(data),
+                comment=data['comment']
+            )
+            if result[1]:
+                return result[0]
+            self.tagged_work(user.id).last().untag_coworker()
+            return None
+        except IntegrityError:
+            return None
+
 
     def get_parameter(self, data, name):
         if name in data:
@@ -387,6 +409,9 @@ class WorkView(View):
 
 
 class MyWorkList(View):
+    """
+    View for workers
+    """
     template = 'salary/work_list.html'
     today = datetime.date.today()
     last_day = calendar.monthcalendar(today.year, today.month)[1]
@@ -432,6 +457,9 @@ class MyWorkList(View):
         return render(request, self.template, context)
 
 class ReportsList(View):
+    """
+    View for Head person
+    """
     template = 'salary/work_reports_list.html'
 
     def get(self, request):
@@ -452,10 +480,6 @@ class ReportsList(View):
             'salary': salary
         }
         return render(request, self.template, context)
-
-    def post(self, request):
-        pass
-
 
     def get_duplicate(self, data):
 
@@ -480,7 +504,7 @@ class ReportsList(View):
         result = data.annotate(Count('work'))
         return result
 
-    def salary_of_workers(self, *args, **kwargs):
+    def salary_of_workers(self):
         reports_now_a_month = WorkReport.objects.filter(
             working_date__month=datetime.datetime.now().month)
         workers = Worker.objects.filter(can_make_report=True)
@@ -490,6 +514,9 @@ class ReportsList(View):
         return result
 
 class ReportConfirmation(View):
+    """
+    View for Head person
+    """
     template = 'salary/report_confirmation.html'
 
     def get(self, request):

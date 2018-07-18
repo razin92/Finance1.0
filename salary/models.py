@@ -282,6 +282,7 @@ class WorkReport(models.Model):
         return '%s %s %s' % (self.working_date, self.work, self.user)
 
     class Meta:
+        unique_together = ['working_date', 'work', 'user', 'quarter', 'building', 'apartment']
         ordering = ['-working_date']
 
     def tag_coworker(self):
@@ -289,10 +290,11 @@ class WorkReport(models.Model):
             self.tagged_coworker = True
             self.save()
 
+    def untag_coworker(self):
+        self.tagged_coworker = False
+        self.save()
+
     def store_work(self):
         self.stored = True
         self.save()
 
-    def untag_work(self):
-        self.tagged_coworker = False
-        self.save()
