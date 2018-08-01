@@ -11,36 +11,36 @@ from .forms import TransactionForm, TransactionEditForm, MonthForm
 from .models import Transaction
 import datetime
 
-#Список транзакцй
+
 @login_required()
 def TransactionView(request):
+    """
+    Displays list of all transaction within one month filtered by
+    staff.pouches and user permissions
+    """
     template = 'calc/transaction.html'
     form = MonthForm
     user = request.user
-    user_id = user.pk
     rqst = request.POST
     if 'select_month' in rqst and rqst['select_month']:
         month = rqst['select_month']
     else:
         month = str(timezone.now().month)
-    get_permission = Staff.objects.get(
-        name__id=user_id
+    year = datetime.datetime.now().year
+    staff = Staff.objects.get(
+        name__id=user.pk
     )
-    permitted_pouches = [x for x in get_permission.pouches.all()] #Разрешенные кошельки (lib.staff.pouches)
-    if user.is_superuser:
-        transaction = Transaction.objects.filter(
-            money__in = permitted_pouches,
-            date__month=month,
-        ).order_by('-date')
-    else:
-        transaction = Transaction.objects.filter(
-            money__in = permitted_pouches,
-            checking = True,
-            date__month=month
-        ).order_by('-date')
-    pouch = Pouch.objects.filter(
-        name__in = permitted_pouches
-    ).order_by('name')
+    permitted_pouches = [x for x in staff.pouches.all()]
+
+    transaction = Transaction.objects.filter(
+        money__in=permitted_pouches,
+        date__month=month,
+        date__year=year
+    ).order_by('-date')
+    if not user.is_superuser:
+        transaction.filter(checking=True)
+    pouch = staff.pouches.order_by('name')
+
     month_name = MonthForm.month[int(month)][1]
     context = {
         'transaction': transaction,
@@ -51,7 +51,7 @@ def TransactionView(request):
     }
     return render(request, template, context)
 
-#Детально о транзакции
+
 @login_required()
 def TransactionDetailView(request, pk):
     template = 'calc/transaction_detail.html'
@@ -66,6 +66,10 @@ def TransactionDetailView(request, pk):
 
 @login_required()
 def TransactionCreate(request, kind):
+    """
+    :param kind: points the type of transaction: income(1) or spending(0)
+    Creates transaction
+    """
     template = 'calc/transaction_create.html'
     form = TransactionForm(request.POST or None, user_id=request.user.pk)
     context = {
