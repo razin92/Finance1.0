@@ -145,7 +145,7 @@ def TotalView(request):
 
 
 def TotalCreate(request):
-    workers = Worker.objects.all()
+    workers = Worker.objects.filter(fired=False)
     total = Total.objects.filter(date__month=datetime.date.today().month)
     total_workers = [each.worker for each in total.all()]
     month_now = datetime.date.today().replace(day=1)

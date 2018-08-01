@@ -31,6 +31,7 @@ class Worker(models.Model):
     salary = models.IntegerField(default=650000)
     user = models.OneToOneField(User, null=True, blank=True)
     can_make_report = models.BooleanField(default=False)
+    fired = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.name)
