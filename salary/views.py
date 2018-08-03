@@ -1,7 +1,8 @@
 from django.views.generic import View, ListView, CreateView, UpdateView
-from .models import Worker, WorkCalc, BonusWork, AccountChange, CategoryOfChange, Total, WorkReport, Work
+from .models import Worker, WorkCalc, BonusWork, AccountChange, \
+    CategoryOfChange, Total, WorkReport, Work
 from calc.models import Transaction
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
@@ -12,7 +13,9 @@ from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
     ReportConfirmationForm, WorkReportForm, WorkReportTaggedForm
+from ast import literal_eval
 from calc.forms import MonthForm
+from .auth import AuthData
 import datetime
 import calendar
 # Create your views here.
@@ -632,3 +635,67 @@ class ConsolidatedReport(View):
         work_list_group = report.filter(coworker__isnull=False).\
             order_by('quarter', 'building', 'apartment', 'work')
         return work_list_group
+
+
+# Subscriber searcher
+class SubsSearcher(AuthData):
+
+    def get(self, request):
+        template = 'salary/subs_search.html'
+        address = request.GET.get('address', None)
+        search_data = None
+        result = None
+        if address:
+            search_data = self.data_splitter(address)
+            data = self.data_extractor(search_data)
+            result = []
+            for each in data:
+                if self.check_subscriber(each['Number']):
+                    dictionary = {
+                        'ID': each['Number'],
+                        'Address': each['ПредставлениеАдреса'],
+                        'Telephone': each['ФизическоеЛицо']['Телефон'],
+                        'Name': each['ФизическоеЛицо']['Description'],
+                        'Tv_number': each['ФизическоеЛицо']['КоличествоТВ'],
+                        'Comment': each['ФизическоеЛицо']['Комментарий']
+                    }
+                    result.append(dictionary)
+        context = {
+            'search_data': search_data,
+            'result': result
+        }
+        return render(request, template, context)
+
+    def data_extractor(self, address):
+        search_by = ''
+        data = ['КварталМассив/Description eq ',
+                ' and Дом/Description eq ',
+                ' and Квартира/Description eq '
+                ]
+        eng = ['quarter', 'building', 'apartment']
+        for each in range(len(address)):
+            search_by = search_by + data[each] + '\'%s\'' % address[eng[each]]
+        url = 'odata/standard.odata/' \
+              'Document_АбонентскийДоговор?$format=json;odata=nometadata' \
+              '&$select=Number,ПредставлениеАдреса,ФизическоеЛицо/Description,' \
+              'ФизическоеЛицо/Телефон,ФизическоеЛицо/КоличествоТВ,' \
+              'ФизическоеЛицо/Комментарий' \
+              '&$filter=ВАрхиве eq false and %s' \
+              '&$expand=ФизическоеЛицо' \
+              '&$orderby=ПредставлениеАдреса asc' % search_by
+        result = self.Connector(url).json()['value']
+        return result
+
+    def check_subscriber(self, uid):
+        url = 'hs/payme/get/%s' % uid
+        response = self.Connector(url)
+        result = literal_eval(response.content.decode())
+        return result
+
+    def data_splitter(self, address):
+        parameters = ['quarter', 'building', 'apartment']
+        split_data = address.split('-')
+        result = {}
+        for each in range(len(split_data)):
+            result[parameters[each]] = split_data[each]
+        return result

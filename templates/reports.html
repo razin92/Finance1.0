@@ -30,6 +30,7 @@
       <ul class="nav navbar-nav">
           <li><a href="{% url 'salary:work_report_create' %}">Создать отчет</a></li>
           <li><a href="{% url 'salary:my_reports_list' 1 %}">Мои отчеты</a></li>
+          <li><a href="{% url 'salary:subscriber_search' %}">Поиск абонента</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li><a href="{% url 'logout' %}">{{ user.username }}:Выйти</a></li>

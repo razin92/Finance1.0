@@ -31,7 +31,7 @@ urlpatterns = [
         url(r'^total/bonus_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.bonus, name='bonus'),
         url(r'^total/withholding_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.withholding, name='withholding'),
         url(r'^total/issued_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.issued, name='issued'),
-
+        # Work reports
         url(r'^work_report/create/$', login_required(views.WorkerReportUser.as_view()), name='work_report_create'),
         url(r'^work_report/edit/$', login_required(views.WorkerReportUserEdit), name='work_report_edit'),
         url(r'^work/$', login_required(views.WorkView.as_view()), name='work'),
@@ -39,4 +39,6 @@ urlpatterns = [
         url(r'^reports_list/$', login_required(views.ReportsList.as_view()), name='reports_list'),
         url(r'^detailed_report/$', login_required(views.ConsolidatedReport.as_view()), name='detailed_report'),
         url(r'^report_confirm/$', login_required(views.ReportConfirmation.as_view()), name='report_confirm'),
+        # Searching
+        url(r'^search/$', login_required(views.SubsSearcher.as_view()), name='subscriber_search'),
         ]
