@@ -40,11 +40,13 @@ class WorkReportUserForm(forms.Form):
             ('Б', 'Б'),
             ('В', 'В'),
         )
+        '''
         self.fields['working_date'] = forms.DateField(
             label='Дата выполнения',
             initial=datetime.date.today(),
             widget=DateTimePicker(options={"format": "YYYY-MM-DD"})
         )
+        '''
         self.fields['quarter'] = forms.ChoiceField(
             label='Квартал',
             choices=quarters,
