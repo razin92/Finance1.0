@@ -1,15 +1,17 @@
 {% extends 'reports.html' %}
 {% load subs_search %}
+{% load humanize %}
 {% block body %}
     {% if search_data %}
         <div class="alert alert-dismissible alert-success" style="max-width: 500px; margin: auto">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
             <p><strong>Ваши параметры поиска:</strong></p>
             <p><strong>{{ search_data|dictionary }} (Только Активные)</strong></p>
+            <p><strong>Найдено совпадений: {{ result|length }}</strong></p>
         </div>
     {% endif %}
     <div class="panel-body">
-        <div class="panel panel-default scroll" style="max-width: 500px">
+        <div class="panel panel-default scroll" style="max-width: 500px; margin: auto">
             <form method="get" class="form-horizontal">
                 <div class="form-group" style="max-width: 490px; margin: 15px">
                   <div class="input-group" align="center">
@@ -44,7 +46,11 @@
                             </tr>
                             <tr>
                                 <td>Телефон: </td>
-                                <td>{{ each|get_key:'Telephone' }}</td>
+                                <td>
+                                    <a href="tel:{{ each|get_key:'Telephone' }}">
+                                        {{ each|get_key:'Telephone' }}
+                                    </a>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Кол-во ТВ: </td>
@@ -54,10 +60,30 @@
                                 <td>Комментарий: </td>
                                 <td>{{ each|get_key:'Comment' }}</td>
                             </tr>
+                            {% if balance %}
+                            {% with balance|get_key:'Balance1' as balance1 %}
+                                <tr {% if balance1|intword >= 0 %} class="success" {% else %} class="danger" {% endif %}>
+                                    <td>Абонентская:</td>
+                                    <td><strong>{{ balance1|intcomma }}</strong></td>
+                                </tr>
+                            {% endwith %}
+                            {% with balance|get_key:'Balance2' as balance2 %}
+                                <tr {% if balance2|intword >= 0 %} class="success" {% else %} class="danger" {% endif %}>
+                                    <td>Подключение:</td>
+                                    <td><strong>{{ balance2|intcomma }}</strong></td>
+                                </tr>
+                            {% endwith %}
+                            {% with balance|get_key:'Balance3' as balance3 %}
+                                <tr {% if balance3|intword >= 0 %} class="success" {% else %} class="danger" {% endif %}>
+                                    <td>Прочее:</td>
+                                    <td><strong>{{ balance3|intcomma }}</strong></td>
+                                </tr>
+                            {% endwith %}
+                            {% endif %}
                         </tbody>
                     </table>
                 {% endfor %}
-                    <br>
+                    <br style="margin: 2px;">
             {% else %}
                 <h4 class="text-danger" align="center">Ничего не найдено</h4>
             {% endif %}

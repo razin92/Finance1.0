@@ -645,6 +645,7 @@ class SubsSearcher(AuthData):
         address = request.GET.get('address', None)
         search_data = None
         result = None
+        balance = None
         if address:
             search_data = self.data_splitter(address)
             data = self.data_extractor(search_data)
@@ -660,9 +661,12 @@ class SubsSearcher(AuthData):
                         'Comment': each['ФизическоеЛицо']['Комментарий']
                     }
                     result.append(dictionary)
+        if result and len(result) == 1:
+            balance = self.get_balance(result[0]['ID'])
         context = {
             'search_data': search_data,
-            'result': result
+            'result': result,
+            'balance': balance
         }
         return render(request, template, context)
 
@@ -699,3 +703,8 @@ class SubsSearcher(AuthData):
         for each in range(len(split_data)):
             result[parameters[each]] = split_data[each]
         return result
+
+    def get_balance(self, uid):
+        url = 'hs/subjectinfo/%s' % uid
+        balance = self.Connector(url).json()
+        return balance
