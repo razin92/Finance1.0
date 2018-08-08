@@ -83,7 +83,7 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
-            max_length=1250,
+            max_length=255,
             required=False,
             widget=forms.Textarea(
                 attrs={
@@ -180,7 +180,7 @@ class WorkReportTaggedForm(forms.Form):
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
-            max_length=1250,
+            max_length=255,
             required=False,
             initial=work.comment,
             widget=forms.Textarea(
@@ -305,10 +305,11 @@ class ReportConfirmationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReportConfirmationForm, self).__init__(*args, **kwargs)
-        self.fields['cost'].required = False
-        self.fields['admin_comment'].widget = forms.Textarea(attrs={'rows': '4'})
-        self.fields['admin_comment'].required = False
         self.fields['cost'].initial = 0
+        self.fields['cost'].required = False
+        self.fields['admin_comment'].widget = forms.Textarea(
+            attrs={'rows': '4', 'maxlength': '255'})
+        self.fields['admin_comment'].required = False
 
     class Meta:
         model = WorkReport

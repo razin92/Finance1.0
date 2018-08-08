@@ -426,9 +426,9 @@ class MyWorkList(View):
             user=request.user,
             working_date__month=self.today.month,
             working_date__year=self.today.year
-        ).order_by('confirmed', '-working_date')
+        ).order_by('deleted', 'confirmed', '-working_date')
         cost_sum = data.values('cost').aggregate(Sum('cost'))
-        exclude_list = ['filling_date', 'user']
+        exclude_list = ['filling_date', 'user', 'stored', 'tagged_coworker']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         splitter = Paginator(data, 25)
         split_data = splitter.page(page)
