@@ -470,9 +470,11 @@ class ReportsList(View):
         page = request.GET.get('page', 1)  # Getting page number
         per_page = request.GET.get('per_page', 25)
         dupes = self.get_duplicate(WorkReport)  # Dupes checking
-        data = WorkReport.objects.all().order_by('-working_date', 'quarter', 'building', 'apartment')
         if 'confirmed' in request.GET or 'deleted' in request.GET or 'stored' in request.GET:
-            data = self.additional_filters(data, request)
+            data = self.additional_filters(request)
+        else:
+            data = WorkReport.objects.all().order_by(
+                'deleted', 'confirmed', '-working_date', 'quarter', 'building', 'apartment')
         data_per_page = Paginator(data, per_page)
         result = data_per_page.page(page)
         exclude_list = ['filling_date', 'stored', 'tagged_coworker']
@@ -520,11 +522,17 @@ class ReportsList(View):
                for each in workers]
         return result
 
-    def additional_filters(self, data, request):
+    def additional_filters(self, request):
         confirmed = request.GET.get('confirmed', False)
         stored = request.GET.get('stored', False)
         deleted = request.GET.get('deleted', False)
-        return data.filter(confirmed=confirmed, stored=stored, deleted=deleted)
+        data = WorkReport.objects.filter(
+            confirmed=confirmed,
+            stored=stored,
+            deleted=deleted
+        ).order_by('deleted', 'confirmed', '-working_date',
+                'quarter', 'building', 'apartment')
+        return data
 
     def get_filter(self, request):
         data = re.split(r'[?&]page=[0-9]+', request.META['QUERY_STRING'])
