@@ -48,12 +48,14 @@
             </table>
             <div>
             <form method="get" class="form-group">
-                {% csrf_token %}
                 {{ form|bootstrap }}
                 <input type="hidden" value="{{ data.id }}" name="id">
                 <div align="center">
                     <input type="submit" value="Подтвердить" class="btn btn-success form-group" style="width: 99%">
-                    <a href="{% url 'salary:report_confirm' %}?deleted=True&id={{ data.id }}" class="btn btn-danger form-group" style="width: 99%">Удалить</a>
+                    <a href="{% url 'salary:report_confirm' %}?deleted=True&id={{ data.id }}"
+                       class="btn btn-danger form-group" style="width: 99%">Удалить</a>
+                    <a href="{% url 'salary:report_confirm' %}?stored=True&id={{ data.id }}"
+                       class="btn btn-primary form-group" style="width: 99%">Отложить</a>
                 </div>
             </form>
             </div>

@@ -73,8 +73,34 @@ function ShowHideContent(spoiler)
     </div>
     <div class="panel-body">
     <div class="panel panel-default scroll">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td class="active" style="width: 20%">
+                    <a href="{% url 'salary:reports_list' %}" class="btn btn-default btn-sm">
+                        Все
+                    </a></td>
+                <td class="success" style="width: 20%">
+                    <a href="?confirmed=True" class="btn btn-success btn-sm">
+                        Подтвержден
+                    </a></td>
+                <td class="warning" style="width: 20%">
+                    <a href="?confirmed=False" class="btn btn-warning btn-sm">
+                       Не подтвержден
+                    </a></td>
+                <td class="info" style="width: 20%">
+                    <a href="?stored=True" class="btn btn-info btn-sm">
+                        Отложен
+                    </a></td>
+                <td class="danger" style="width: 20%">
+                    <a href="?deleted=True" class="btn btn-danger btn-sm">
+                        Удален
+                    </a></td>
+            </tr>
+        </tbody>
+    </table>
 
-    <table class="table table-hover table-striped">
+    <table class="table table-hover table-striped table-bordered">
         <thead>
             <tr>
                 {% for each in header %}
@@ -84,7 +110,16 @@ function ShowHideContent(spoiler)
         </thead>
         <tbody>
             {% for each in data %}
-                <tr>
+                <tr {% if each.deleted %}
+                        class="danger"
+                    {% elif each.stored %}
+                        class="info"
+                    {% elif not each.confirmed %}
+                        class="warning"
+                    {% else %}
+                        class="success"
+                    {% endif %}
+                >
                     {% for element in header %}
                     <td>{{ each|value:element.name|intcomma }}</td>
                     {% endfor %}
@@ -99,8 +134,8 @@ function ShowHideContent(spoiler)
     <div align="center">
     <ul class="pagination">
         {% if pages.has_previous %}
-            <li><a href="{% url 'salary:reports_list' %}?page=1">&laquo;</a></li>
-            <li><a href="{% url 'salary:reports_list' %}?page={{ pages.previous_page_number }}">{{ pages.previous_page_number }}</a></li>
+            <li><a href="?{{ filter }}&page=1">&laquo;</a></li>
+            <li><a href="?{{ filter }}&page={{ pages.previous_page_number }}">{{ pages.previous_page_number }}</a></li>
         {% endif %}
 
         <li class="active">
@@ -108,8 +143,8 @@ function ShowHideContent(spoiler)
         </li>
 
         {% if pages.has_next %}
-             <li><a href="{% url 'salary:reports_list' %}?page={{ pages.next_page_number }}">{{ pages.next_page_number }}</a></li>
-             <li><a href="{% url 'salary:reports_list' %}?page={{ pages.paginator.num_pages }}">&raquo;</a></li>
+             <li><a href="?{{ filter }}&page={{ pages.next_page_number }}">{{ pages.next_page_number }}</a></li>
+             <li><a href="?{{ filter }}&page={{ pages.paginator.num_pages }}">&raquo;</a></li>
         {% endif %}
     </ul>
     </div>

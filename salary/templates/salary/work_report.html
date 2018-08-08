@@ -5,14 +5,15 @@
 <script src="/media/static/js/jquery.blockUI.js"></script>
     <script language="javascript" type="text/javascript">
     function submit_form() {
-       $("#search").submit();
+       $("#report").submit();
     }
     $(document).ready(function() {
     $('#demo3').click(function() {
         $.blockUI({
-            message: '<img src="/media/static/img/loading.gif"/>',
+            message: '<img src="/media/static/img/loading2.gif"/>',
             css: {
-                top: '20%'
+                top: '20%',
+                margin: auto
             }
         })
     });
@@ -26,7 +27,7 @@
     {% endif %}
     <div class="panel-body">
         <div class="panel panel-default scroll" style="max-width: 500px;">
-            <form method="post" style="margin: 2%;">
+            <form method="post" style="margin: 2%;" id="report">
                 {% csrf_token %}
                 <label class="control-label  " for="id_working_date">Дата выполнения</label>
                 <div class=" " style="width: 100%">
@@ -42,13 +43,13 @@
                 </div>
                 {{ form|bootstrap }}
                 <div align="center">
-                    <input
-                            type="submit"
-                            value="Сохранить"
+                    <button
+                            type="button"
+                            id="demo3"
                             class="btn btn-success"
                             style="width: 98%;"
                             onclick="submit_form()"
-                    />
+                    >Сохранить</button>
                 </div>
             </form>
         </div>

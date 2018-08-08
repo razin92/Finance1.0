@@ -8,7 +8,7 @@ register = template.Library()
 def value(value, arg):
     result = getattr(value, arg)
     if arg == 'working_date':
-        return result.strftime('%m-%d')
+        return result.strftime('%m/%d')
     elif arg == 'confirmed':
         if result:
             return 'Принята'

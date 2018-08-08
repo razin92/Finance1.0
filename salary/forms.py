@@ -308,6 +308,7 @@ class ReportConfirmationForm(forms.ModelForm):
         self.fields['cost'].required = False
         self.fields['admin_comment'].widget = forms.Textarea(attrs={'rows': '4'})
         self.fields['admin_comment'].required = False
+        self.fields['cost'].initial = 0
 
     class Meta:
         model = WorkReport

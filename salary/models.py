@@ -263,14 +263,14 @@ class Work(models.Model):
 
 class WorkReport(models.Model):
     filling_date = models.DateField(auto_now=True, verbose_name="Дата заполнения")
-    working_date = models.DateField(verbose_name="Дата выполнения")
-    hours_qty = models.SmallIntegerField(default=1, verbose_name="Кол-во часов")
+    working_date = models.DateField(verbose_name="Дата")
+    hours_qty = models.SmallIntegerField(default=1, verbose_name="Часы")
     user = models.ForeignKey(User, verbose_name="Ответственный")
     work = models.ForeignKey(Work, verbose_name="Вид работ")
     coworker = models.ManyToManyField(Worker, blank=True, verbose_name="Помощники")
-    quarter = models.SmallIntegerField(verbose_name="Квартал")
+    quarter = models.SmallIntegerField(verbose_name="Кв-л")
     building = models.CharField(max_length=4, verbose_name="Дом")
-    apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Квартира")
+    apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Кв-ра")
     confirmed = models.BooleanField(default=False, verbose_name="Принята")
     cost = models.IntegerField(default=0, verbose_name="Стоимость")
     comment = models.CharField(max_length=250, blank=True, null=True, verbose_name="Комментарий")

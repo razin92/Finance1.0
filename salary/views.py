@@ -18,6 +18,7 @@ from calc.forms import MonthForm
 from .auth import AuthData
 import datetime
 import calendar
+import re
 # Create your views here.
 global code
 
@@ -466,21 +467,24 @@ class ReportsList(View):
     template = 'salary/work_reports_list.html'
 
     def get(self, request):
-        page = request.GET.get('page') or 1 # Getting page number
-        per_page = request.GET.get('per_page') or 25
-        dupes = self.get_duplicate(WorkReport) # Dupes checking
-        data = WorkReport.objects.all().order_by('-working_date', 'user')
+        page = request.GET.get('page', 1)  # Getting page number
+        per_page = request.GET.get('per_page', 25)
+        dupes = self.get_duplicate(WorkReport)  # Dupes checking
+        data = WorkReport.objects.all().order_by('-working_date', 'quarter', 'building', 'apartment')
+        if 'confirmed' in request.GET or 'deleted' in request.GET or 'stored' in request.GET:
+            data = self.additional_filters(data, request)
         data_per_page = Paginator(data, per_page)
         result = data_per_page.page(page)
-        exclude_list = ['filling_date']
+        exclude_list = ['filling_date', 'stored', 'tagged_coworker']
         salary = self.salary_of_workers()
-        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list] # Headers for table
+        header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]  # Headers for table
         context = {
             'header': header,
             'data': result.object_list,
             'pages': result,
             'dupes': dupes,
-            'salary': salary
+            'salary': salary,
+            'filter': self.get_filter(request)
         }
         return render(request, self.template, context)
 
@@ -516,6 +520,17 @@ class ReportsList(View):
                for each in workers]
         return result
 
+    def additional_filters(self, data, request):
+        confirmed = request.GET.get('confirmed', False)
+        stored = request.GET.get('stored', False)
+        deleted = request.GET.get('deleted', False)
+        return data.filter(confirmed=confirmed, stored=stored, deleted=deleted)
+
+    def get_filter(self, request):
+        data = re.split(r'[?&]page=[0-9]+', request.META['QUERY_STRING'])
+        return data[0]
+
+
 class ReportConfirmation(View):
     """
     View for Head person
@@ -524,14 +539,16 @@ class ReportConfirmation(View):
 
     def get(self, request):
         rqst = request.GET
-        form = ReportConfirmationForm(rqst or None)
+        form = ReportConfirmationForm(None)
         data, result = '', ''
         if request.user.has_perm('salary.change_workreport'):
             if 'id' in rqst and 'cost' in rqst:
-                result = self.update_report(rqst['id'], rqst, rqst['cost'], confirmed=True)
+                result = self.update_report(rqst['id'], rqst, rqst.get('cost', 0), confirmed=True)
             if 'deleted' in rqst:
                 result = self.update_report(rqst['id'], rqst, deleted=True)
-            data = WorkReport.objects.filter(confirmed=False, deleted=False).order_by(
+            elif 'stored' in rqst:
+                result = self.update_report(rqst['id'], rqst, stored=True)
+            data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
             '-working_date', 'user').distinct()
         if data.__len__() > 0:
             data = data[0]
@@ -542,7 +559,7 @@ class ReportConfirmation(View):
         }
         return render(request, self.template, context)
 
-    def update_report(self, id, comment, cost=0, deleted=False, confirmed=False):
+    def update_report(self, id, comment, cost=0, deleted=False, confirmed=False, stored=False):
         admin_comment = ''
         if 'admin_comment' in comment:
             admin_comment = comment['admin_comment']
@@ -551,11 +568,17 @@ class ReportConfirmation(View):
         data.confirmed = confirmed
         data.deleted = deleted
         data.admin_comment = admin_comment
+        data.stored = stored
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
-        print('%s - Confirmed %s report with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
+        if not deleted or not stored:
+            print('%s - Report %s *confirmed* with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
         if deleted:
             message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
+            print('%s - Report %s *deleted* with cost %s by %s' % (timezone.now(), id, cost, self.request.user))
+        elif stored:
+            message = 'Отчет №%s, выполненный %s отложен' % (id, data.user)
+            print('%s - Report %s *stored* with cost %s by %s' % (timezone.now(), id, cost, self.request.user))
         return message
 
 
@@ -643,9 +666,7 @@ class SubsSearcher(AuthData):
     def get(self, request):
         template = 'salary/subs_search.html'
         address = request.GET.get('address', None)
-        search_data = None
-        result = None
-        balance = None
+        search_data, result, balance = None, None, None
         if address:
             search_data = self.data_splitter(address)
             data = self.data_extractor(search_data)
