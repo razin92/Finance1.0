@@ -469,7 +469,7 @@ class ReportsList(View):
     def get(self, request):
         page = request.GET.get('page', 1)  # Getting page number
         per_page = request.GET.get('per_page', 25)
-        dupes = self.get_duplicate(WorkReport)  # Dupes checking
+        # dupes = self.get_duplicate(WorkReport)  # Dupes checking
         if 'confirmed' in request.GET or 'deleted' in request.GET or 'stored' in request.GET:
             data = self.additional_filters(request)
         else:
@@ -484,7 +484,6 @@ class ReportsList(View):
             'header': header,
             'data': result.object_list,
             'pages': result,
-            'dupes': dupes,
             'salary': salary,
             'filter': self.get_filter(request)
         }
