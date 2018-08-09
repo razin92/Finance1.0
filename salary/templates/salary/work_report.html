@@ -25,6 +25,7 @@
           <strong>{{ message }}</strong>
         </div>
     {% endif %}
+    {% if form %}
     <div class="panel-body">
         <div class="panel panel-default scroll" style="max-width: 500px;">
             <form method="post" style="margin: 2%;" id="report">
@@ -54,5 +55,6 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
 {% endblock %}

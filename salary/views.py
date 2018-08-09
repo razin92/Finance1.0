@@ -294,11 +294,16 @@ class WorkerReportUser(View):
 
     def get(self, request):
         user = request.user.id
-        tagged_work = self.tagged_work(user).last()
-        form = WorkReportUserForm(None, user_id=user)
-        if tagged_work:
-            form = self.make_form(tagged_work, user)
-            self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
+        form = None
+        tagged_work = None
+        if self.can_make_report(request.user):
+            tagged_work = self.tagged_work(user).last()
+            form = WorkReportUserForm(None, user_id=user)
+            if tagged_work:
+                form = self.make_form(tagged_work, user)
+                self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
+        else:
+            self.message = 'Недостаточно прав'
         context = {
             'form': form,
             'tagged_work': tagged_work,
@@ -370,6 +375,12 @@ class WorkerReportUser(View):
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
+
+    def can_make_report(self, user):
+        get_worker = Worker.objects.filter(user=user)
+        if get_worker.__len__() > 0:
+            return True
+        return False
 
 
 def WorkerReportUserEdit(request):
@@ -691,10 +702,15 @@ class SubsSearcher(AuthData):
                     result.append(dictionary)
         if result and len(result) == 1:
             balance = self.get_balance(result[0]['ID'])
+        if self.can_make_report(request.user):
+            base_template = 'reports.html'
+        else:
+            base_template = 'index.html'
         context = {
             'search_data': search_data,
             'result': result,
-            'balance': balance
+            'balance': balance,
+            'base_template': base_template
         }
         return render(request, template, context)
 
@@ -736,3 +752,9 @@ class SubsSearcher(AuthData):
         url = 'hs/subjectinfo/%s' % uid
         balance = self.Connector(url).json()
         return balance
+
+    def can_make_report(self, user):
+        get_worker = Worker.objects.filter(user=user)
+        if get_worker.__len__() > 0:
+            return True
+        return False
