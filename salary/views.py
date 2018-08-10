@@ -613,7 +613,7 @@ class ReportConfirmation(View):
             building=data.building,
             apartment=data.apartment,
             deleted=False,
-        ).order_by('-working_date')
+        ).exclude(id=data.id).order_by('-working_date')
         return result
 
 
