@@ -96,6 +96,18 @@
                             <td>Помощники:</td>
                             <td>{{ data|value:'coworker' }}</td>
                         </tr>
+                        <tr>
+                            <td>Статус:</td>
+                            <td>
+                                {% if data.confirmed %}
+                                    Подтвержден
+                                {% elif data.stored %}
+                                    Отложен
+                                {% else %}
+                                    Не подтвержден
+                                {% endif %}
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                     </div>

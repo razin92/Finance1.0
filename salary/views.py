@@ -558,7 +558,7 @@ class ReportConfirmation(View):
     def get(self, request):
         rqst = request.GET
         form = ReportConfirmationForm(None)
-        data, result = '', ''
+        data, result, info = '', '', None
         if request.user.has_perm('salary.change_workreport'):
             data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
                 '-working_date', 'user').distinct()
@@ -572,12 +572,13 @@ class ReportConfirmation(View):
 
         if data.__len__() > 0:
             data = data[0]
+            info = self.work_on_this_address(data)
 
         context = {
             'data': data,
             'form': form,
             'result': result,
-            'info': self.work_on_this_address(data),
+            'info': info,
         }
         return render(request, self.template, context)
 
