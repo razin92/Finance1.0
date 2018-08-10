@@ -59,6 +59,49 @@
                 </div>
             </form>
             </div>
+            {% if info %}
+                <h4 align="center">На этом же адресе <strong>{{ data.quarter }}-{{ data.building }}-{{ data.apartment }}</strong></h4>
+                {% for data in info %}
+                 <div class="panel-body">
+                    <div class="panel panel-default scroll" style="max-width: 500px;">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата:</th>
+                                <th>{{ data.working_date.year }}-{{ data.working_date.month }}-{{ data.working_date.day }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Мастер:</td>
+                            <td>{{ data.user }}</td>
+                        </tr>
+                        <tr>
+                            <td>Работа:</td>
+                            <td>{{ data.work }}</td>
+                        </tr>
+                        {% if data.comment %}
+                        <tr>
+                            <td>Коммент:</td>
+                            <td>{{ data.comment }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if data.admin_comment %}
+                        <tr>
+                            <td>Заметка нач.:</td>
+                            <td>{{ data.admin_comment }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>Помощники:</td>
+                            <td>{{ data|value:'coworker' }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                 </div>
+                {% endfor %}
+             {% endif %}
             {% else %}
                 <div align="center"><h4 class="text-danger">Все отчеты подтверждены</h4></div>
             {% endif %}

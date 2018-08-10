@@ -560,24 +560,29 @@ class ReportConfirmation(View):
         form = ReportConfirmationForm(None)
         data, result = '', ''
         if request.user.has_perm('salary.change_workreport'):
+            data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
+                '-working_date', 'user').distinct()
             if 'id' in rqst and 'cost' in rqst:
-                result = self.update_report(rqst['id'], rqst, rqst.get('cost', 0), confirmed=True)
-            if 'deleted' in rqst:
+                result = self.update_report(
+                    rqst['id'], rqst, rqst.get('cost', 0), confirmed=True)
+            elif 'deleted' in rqst:
                 result = self.update_report(rqst['id'], rqst, deleted=True)
             elif 'stored' in rqst:
                 result = self.update_report(rqst['id'], rqst, stored=True)
-            data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
-            '-working_date', 'user').distinct()
+
         if data.__len__() > 0:
             data = data[0]
+
         context = {
             'data': data,
             'form': form,
             'result': result,
+            'info': self.work_on_this_address(data),
         }
         return render(request, self.template, context)
 
-    def update_report(self, id, comment, cost=0, deleted=False, confirmed=False, stored=False):
+    def update_report(self, id, comment, cost=0, deleted=False,
+                      confirmed=False, stored=False):
         admin_comment = ''
         if 'admin_comment' in comment:
             admin_comment = comment['admin_comment']
@@ -590,14 +595,26 @@ class ReportConfirmation(View):
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
         if not deleted or not stored:
-            print('%s - Report %s *confirmed* with cost %s by %s' % (timezone.now(),id, cost, self.request.user))
+            print('%s - Report %s *confirmed* with cost %s by %s' % (
+                timezone.now(),id, cost, self.request.user))
         if deleted:
             message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
-            print('%s - Report %s *deleted* with cost %s by %s' % (timezone.now(), id, cost, self.request.user))
+            print('%s - Report %s *deleted* with cost %s by %s' % (
+                timezone.now(), id, cost, self.request.user))
         elif stored:
             message = 'Отчет №%s, выполненный %s отложен' % (id, data.user)
-            print('%s - Report %s *stored* with cost %s by %s' % (timezone.now(), id, cost, self.request.user))
+            print('%s - Report %s *stored* with cost %s by %s' % (
+                timezone.now(), id, cost, self.request.user))
         return message
+
+    def work_on_this_address(self, data):
+        result = WorkReport.objects.filter(
+            quarter=data.quarter,
+            building=data.building,
+            apartment=data.apartment,
+            deleted=False,
+        ).order_by('-working_date')
+        return result
 
 
 class ConsolidatedReport(View):
@@ -639,7 +656,8 @@ class ConsolidatedReport(View):
             date_start = request.GET['working_date_start']
         if 'working_date_end' in request.GET:
             date_end = request.GET['working_date_end']
-        workers = request.GET.getlist('workers', Worker.objects.values_list('id').filter(can_make_report=True))
+        workers = request.GET.getlist(
+            'workers', Worker.objects.values_list('id').filter(can_make_report=True))
         data = {
             'work_list': work_list,
             'date_start': date_start,
