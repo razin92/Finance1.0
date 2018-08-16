@@ -709,9 +709,9 @@ class ConsolidatedReport(View):
 
     def work_counter_single(self, report):
         work_counter = ['%s: %s' %
-                (Work.objects.get(id__in=x),
+                (Work.objects.get(id=int(x)),
                  report.filter(
-                     work__id__in=x,
+                     work__id=int(x),
                      coworker__isnull=True).__len__()
                  ) for x in self.data['work_list'] if
                         report.filter(work__id__in=x, coworker__isnull=True).__len__() > 0
