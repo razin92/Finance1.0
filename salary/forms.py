@@ -263,6 +263,11 @@ class WorkFilterForm(forms.Form):
         self.fields['working_date_start'].initial = datetime.date.today().replace(day=1)
         self.fields['working_date_end'].initial = datetime.date.today()
 
+    do_not_use_date = forms.BooleanField(
+        label="Не учитывать дату",
+        required=False,
+        initial=False
+    )
     working_date_start = forms.DateField(
         widget=DateTimePicker(options={"format": "YYYY-MM-DD"}),
         required=False,
@@ -285,20 +290,17 @@ class WorkFilterForm(forms.Form):
         required=False,
         label="Работа"
     )
-    quarter = forms.CharField(
+    quarter = forms.IntegerField(
         required=False,
         label="Квартал",
-        disabled=True
     )
     building = forms.CharField(
         required=False,
         label="Дом",
-        disabled=True
     )
-    apartment = forms.CharField(
+    apartment = forms.IntegerField(
         required=False,
         label="Квартира",
-        disabled=True
     )
 
 class ReportConfirmationForm(forms.ModelForm):

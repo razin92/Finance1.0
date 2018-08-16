@@ -559,6 +559,7 @@ class ReportConfirmation(View):
         rqst = request.GET
         form = ReportConfirmationForm(None)
         data, result, info = '', '', None
+
         if request.user.has_perm('salary.change_workreport'):
             data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
                 '-working_date', 'user').distinct()
@@ -629,30 +630,52 @@ class ConsolidatedReport(View):
         template = 'salary/work_reports_detailed.html'
         form = WorkFilterForm(None)
         report = self.work_filter(self.data)
+        date = '%s - %s' % (self.data['date_start'], self.data['date_end'])
+        if self.data['do_not_use_date']:
+            date = 'За весь период'
         context = {
             'form': form,
             'report': self.worker_sorter(report),
             'header': self.header(),
             'work_counter': self.work_counter_single(report),
-            'dates': '%s - %s' % (self.data['date_start'], self.data['date_end']),
+            'dates': date,
             'group_work': self.work_counter_group(report)
         }
 
         return render(request, template, context)
 
     def work_filter(self, parameters):
-        return WorkReport.objects.filter(
+        result = WorkReport.objects.filter(
             work__id__in=parameters['work_list'],
             user__worker__id__in=parameters['workers'],
-            working_date__range=(parameters['date_start'], parameters['date_end']),
+            quarter__in=parameters['quarter'],
+            building__in=parameters['building'],
             confirmed=True,
             deleted=False
         ).order_by('-working_date', 'work__name')
+        if not parameters['do_not_use_date']:
+            result = result.filter(
+                working_date__range=(
+                    parameters['date_start'],
+                    parameters['date_end']
+                )
+            )
+        if parameters['apartment']:
+            result = result.filter(apartment__in=parameters['apartment'])
+        return result
 
     def parameters(self, request):
+        do_not_use_date = request.GET.get('do_not_use_date', False)
         work_list = request.GET.getlist('work', Work.objects.values_list('id'))
         date_start = datetime.date.today().replace(day=1)
         date_end = datetime.date.today()
+        quarter = self.get_list(
+            request, 'quarter',
+            [x['quarter'] for x in WorkReport.objects.values('quarter').distinct()])
+        building = self.get_list(
+            request, 'building',
+            [x['building'] for x in WorkReport.objects.values('building').distinct()])
+        apartment = self.get_list(request, 'apartment', None)
         if 'working_date_start' in request.GET:
             date_start = request.GET['working_date_start']
         if 'working_date_end' in request.GET:
@@ -663,7 +686,11 @@ class ConsolidatedReport(View):
             'work_list': work_list,
             'date_start': date_start,
             'date_end': date_end,
-            'workers': workers
+            'workers': workers,
+            'quarter': quarter,
+            'building': building,
+            'apartment': apartment,
+            'do_not_use_date': do_not_use_date
         }
 
         return data
@@ -676,7 +703,7 @@ class ConsolidatedReport(View):
         return result
 
     def header(self):
-        exclude_list = ['filling_date', 'deleted', 'confirmed']
+        exclude_list = ['filling_date', 'deleted', 'confirmed', 'stored', 'tagged_coworker']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         return header
 
@@ -695,6 +722,11 @@ class ConsolidatedReport(View):
         work_list_group = report.filter(coworker__isnull=False).\
             order_by('quarter', 'building', 'apartment', 'work')
         return work_list_group
+
+    def get_list(self, request, data, default):
+        if request.GET.get(data, '') != '':
+            return [request.GET[data], ]
+        return default
 
 
 # Subscriber searcher
