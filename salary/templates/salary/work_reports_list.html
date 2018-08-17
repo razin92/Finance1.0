@@ -123,6 +123,14 @@ function ShowHideContent(spoiler)
                     {% for element in header %}
                     <td>{{ each|value:element.name|intcomma }}</td>
                     {% endfor %}
+                    <td>
+                        {% if each.stored or not each.confirmed and not each.deleted %}
+                            <a href="{% url 'salary:report_confirm' %}?id={{ each.id }}"
+                            class="btn btn-sm" title="Подтвердить">
+                                ✔
+                            </a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

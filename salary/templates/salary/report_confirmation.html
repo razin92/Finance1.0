@@ -16,10 +16,16 @@
     <div class="panel-body">
         <div class="panel panel-default scroll" style="max-width: 500px;">
             {% if data %}
+             <a href="{% url 'salary:reports_list' %}"
+                       class="btn btn-default form-group" style="width: 99%">Вернуться к списку отчетов</a>
             <table class="table table-hover table-striped">
                 <tr>
                     <td>Дата:</td>
                     <td>{{ data.working_date.year }}-{{ data.working_date.month }}-{{ data.working_date.day }}</td>
+                </tr>
+                <tr>
+                    <td>ID:</td>
+                    <td>{{ data.id }}</td>
                 </tr>
                 <tr>
                     <td>Мастер:</td>
@@ -73,6 +79,10 @@
                         </thead>
                         <tbody>
                         <tr>
+                            <td>ID:</td>
+                            <td>{{ data.id }}</td>
+                        </tr>
+                        <tr>
                             <td>Мастер:</td>
                             <td>{{ data.user }}</td>
                         </tr>
@@ -115,7 +125,12 @@
                 {% endfor %}
              {% endif %}
             {% else %}
-                <div align="center"><h4 class="text-danger">Все отчеты подтверждены</h4></div>
+                <div align="center"><h4 class="text-danger">Все отчеты подтверждены!</h4></div>
+                <script>
+                    setTimeout(function () {
+                        window.location.replace("{% url 'salary:reports_list' %}");
+                    }, 2000);
+                </script>
             {% endif %}
         </div>
     </div>

@@ -485,7 +485,8 @@ class ReportsList(View):
             data = self.additional_filters(request)
         else:
             data = WorkReport.objects.all().order_by(
-                'deleted', 'confirmed', '-working_date', 'quarter', 'building', 'apartment')
+                'deleted', 'confirmed', 'stored', '-confirmed',
+                '-working_date', 'quarter', 'building', 'apartment')
         data_per_page = Paginator(data, per_page)
         result = data_per_page.page(page)
         exclude_list = ['filling_date', 'stored', 'tagged_coworker']
@@ -561,7 +562,8 @@ class ReportConfirmation(View):
         data, result, info = '', '', None
 
         if request.user.has_perm('salary.change_workreport'):
-            data = WorkReport.objects.filter(confirmed=False, deleted=False, stored=False).order_by(
+            data = WorkReport.objects.filter(
+                confirmed=False, deleted=False, stored=False).order_by(
                 '-working_date', 'user').distinct()
             if 'id' in rqst and 'cost' in rqst:
                 result = self.update_report(
@@ -570,6 +572,9 @@ class ReportConfirmation(View):
                 result = self.update_report(rqst['id'], rqst, deleted=True)
             elif 'stored' in rqst:
                 result = self.update_report(rqst['id'], rqst, stored=True)
+            elif 'id' in rqst:
+                data = WorkReport.objects.filter(
+                    id=rqst['id'], deleted=False, confirmed=False)
 
         if data.__len__() > 0:
             data = data[0]
