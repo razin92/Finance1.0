@@ -722,7 +722,7 @@ class ConsolidatedReport(View):
 
     def work_counter_group(self, report):
         work_list_group = report.filter(coworker__isnull=False).\
-            order_by('quarter', 'building', 'apartment', 'work')
+            order_by('quarter', 'building', 'apartment', 'work').distinct()
         return work_list_group
 
     def get_list(self, request, data, default):
