@@ -26,7 +26,11 @@
         <div class="panel-heading">
             <a href="javascript:void(0)"
                onclick="ShowHideContent(document.getElementById('id-2'))"
-               class="btn btn-default btn-xs" style="margin: 5px">Фильтр</a> Период отчета: {{ dates }}
+               class="btn btn-default btn-xs" style="margin: 5px">Фильтр</a>
+            Период отчета: {{ dates }}
+            {% if all_work %}
+                Всего заявок: {{ all_work|length }}
+            {% endif %}
         </div>
         <div class="panel-body">
             <div id="id-2" style="display: none;">

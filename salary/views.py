@@ -629,19 +629,23 @@ class ConsolidatedReport(View):
         self.data = self.parameters(request)
         template = 'salary/work_reports_detailed.html'
         form = WorkFilterForm(None)
+        all_work = None
         report = self.work_filter(self.data)
         date = '%s - %s' % (self.data['date_start'], self.data['date_end'])
         if self.data['do_not_use_date']:
             date = 'За весь период'
+        if len(self.data['work_list']) == 1:
+            all_work = report.values(
+                'quarter', 'building', 'apartment').distinct()
         context = {
             'form': form,
             'report': self.worker_sorter(report),
             'header': self.header(),
             'work_counter': self.work_counter_single(report),
             'dates': date,
-            'group_work': self.work_counter_group(report)
+            'group_work': self.work_counter_group(report),
+            'all_work': all_work
         }
-
         return render(request, template, context)
 
     def work_filter(self, parameters):
@@ -666,7 +670,7 @@ class ConsolidatedReport(View):
 
     def parameters(self, request):
         do_not_use_date = request.GET.get('do_not_use_date', False)
-        work_list = request.GET.getlist('work', Work.objects.values_list('id'))
+        work_list = request.GET.getlist('work', [x[0] for x in Work.objects.values_list('id')])
         date_start = datetime.date.today().replace(day=1)
         date_end = datetime.date.today()
         quarter = self.get_list(
@@ -692,14 +696,12 @@ class ConsolidatedReport(View):
             'apartment': apartment,
             'do_not_use_date': do_not_use_date
         }
-
         return data
 
     def worker_sorter(self, report):
         result = [report.filter(
             user__worker__id__in=each,
         ) for each in self.data['workers']]
-
         return result
 
     def header(self):
@@ -714,7 +716,7 @@ class ConsolidatedReport(View):
                      work__id=int(x),
                      coworker__isnull=True).__len__()
                  ) for x in self.data['work_list'] if
-                        report.filter(work__id__in=x, coworker__isnull=True).__len__() > 0
+                        report.filter(work__id=int(x), coworker__isnull=True).__len__() > 0
                  ]
         return work_counter
 
