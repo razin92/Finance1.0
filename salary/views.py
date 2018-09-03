@@ -271,8 +271,9 @@ def issued(request, worker_id, total_id):
 
 @login_required()
 def calculate(request, code):
-    total_list = Total.objects.filter(date__month=timezone.now().month)
-    date_now = {'month': timezone.now().month, 'year': timezone.now().year}
+    today = datetime.date.today()
+    total_list = Total.objects.filter(date__month=today.month, date__year=today.year)
+    date_now = {'month': today.month, 'year': today.year}
     for total in total_list:
         total.calculate(date=date_now)
     if code == '1':
