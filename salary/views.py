@@ -139,8 +139,8 @@ def TotalView(request):
         total = Total.objects.filter(
             date__month=date,
             date__year=today.year
-        )
-        return total.all().order_by('worker__name')
+        ).order_by('worker__name')
+        return total
     user = request.user
     form = MonthForm
     template = 'salary/total_list.html'
