@@ -130,12 +130,16 @@ class CategoryOfChangeCreate(CreateView):
 
 def TotalView(request):
     rqst = request.POST
+    today = datetime.date.today()
     if 'select_month' in rqst and rqst['select_month']:
         date = rqst['select_month']
     else:
-        date = str(timezone.now().month)
+        date = today.month
     def get_queryset(date):
-        total = Total.objects.filter(date__month=date)
+        total = Total.objects.filter(
+            date__month=date,
+            date__year=today.year
+        )
         return total.all().order_by('worker__name')
     user = request.user
     form = MonthForm
@@ -150,7 +154,8 @@ def TotalView(request):
 
 def TotalCreate(request):
     workers = Worker.objects.filter(fired=False)
-    total = Total.objects.filter(date__month=datetime.date.today().month)
+    today = datetime.date.today()
+    total = Total.objects.filter(date__month=today.month, date__year=today.year)
     total_workers = [each.worker for each in total.all()]
     month_now = datetime.date.today().replace(day=1)
 

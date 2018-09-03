@@ -214,6 +214,8 @@ class WorkReportForm(forms.ModelForm):
         self.fields['working_date'].widget = DateTimePicker(options={"format": "YYYY-MM-DD"})
         self.fields['comment'].widget = forms.Textarea(attrs={'rows': '4',})
         self.fields['user'].widget = HiddenInput()
+        self.fields['coworker'].queryset = Worker.objects.filter(
+            can_make_report=True).exclude(user__id=kwargs['instance'].user.id)
 
 class WorkForm(forms.ModelForm):
 
