@@ -14,6 +14,22 @@ class BonusWorkForm(forms.Form):
     comment = forms.CharField(label="Комментарий", max_length=100, required=False)
     withholding = forms.BooleanField(label="Удержание", required=False)
 
+class MassBonusForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(MassBonusForm, self).__init__(*args, **kwargs)
+        self.fields['workers'].queryset = Worker.objects.filter(fired=False).order_by('name__firstname')
+
+    date = forms.DateField(label="Дата", initial=datetime.date.today(),
+                           widget=DateTimePicker(options={"format": "YYYY-MM-DD"}))
+    model = forms.ModelChoiceField(label="Работа", queryset=WorkCalc.objects.all().order_by('name'))
+    quantity = forms.IntegerField(label="Кол-во", min_value=1, max_value=100, initial=1)
+    comment = forms.CharField(label="Комментарий", max_length=100, required=False)
+    workers = forms.ModelMultipleChoiceField(
+        label="Работники",
+        widget=CheckboxSelectMultiple,
+        queryset=None)
+
 class AccountChangeForm(forms.Form):
     date = forms.DateField(label="Дата", initial=datetime.date.today(), widget=DateTimePicker(options={"format": "YYYY-MM-DD"}))
     summ = forms.IntegerField(label="Сумма", initial=5000)

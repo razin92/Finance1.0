@@ -12,7 +12,8 @@ from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from .forms import BonusWorkForm, AccountChangeForm, \
     WorkReportUserForm, WorkForm, WorkFilterForm, MyWorkFilterForm, \
-    ReportConfirmationForm, WorkReportForm, WorkReportTaggedForm
+    ReportConfirmationForm, WorkReportForm, WorkReportTaggedForm, \
+    MassBonusForm
 from ast import literal_eval
 from calc.forms import MonthForm
 from .auth import AuthData
@@ -75,6 +76,30 @@ def BonusWorkCreate(request):
     else:
         return render(request, template, context)
 
+class MassBonus(View):
+
+    def __init__(self):
+        super(MassBonus, self).__init__()
+        self.template = 'salary/bonuswork_create.html'
+        self.form = MassBonusForm
+
+    def get(self, request):
+        form = self.form(None)
+        return render(request, self.template, context={'form': form})
+
+    def post(self, request):
+        form = self.form(request.POST or None)
+        if form.is_valid():
+            for each in request.POST.getlist('workers'):
+                BonusWork.objects.create(
+                    model=WorkCalc.objects.get(id__in=request.POST['model']),
+                    worker=Worker.objects.get(id__in=each),
+                    quantity=request.POST['quantity'],
+                    date=request.POST['date'],
+                    comment=request.POST['comment'],
+                )
+            return HttpResponseRedirect(reverse('salary:bonuswork'))
+        return render(request, self.template, context={'form': form})
 
 class BonusWorkEdit(UpdateView):
     model = BonusWork

@@ -12,6 +12,7 @@ urlpatterns = [
         url(r'^calc/create/$', login_required(views.WorkCalcCreate.as_view()), name='workcalc_create'),
 
         url(r'^bonus/$', login_required(views.BonusWorkView.as_view()), name='bonuswork'),
+        url(r'^bonus/mass/create/$', login_required(views.MassBonus.as_view()), name='mass_bonuswork'),
         url(r'^bonus/create/$', login_required(views.BonusWorkCreate), name='bonuswork_create'),
         url(r'^bonus/edit/(?P<pk>[0-9]+)$', login_required(views.BonusWorkEdit.as_view()), name='bonuswork_edit'),
 
