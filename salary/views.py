@@ -92,8 +92,8 @@ class MassBonus(View):
         if form.is_valid():
             for each in request.POST.getlist('workers'):
                 BonusWork.objects.create(
-                    model=WorkCalc.objects.get(id__in=request.POST['model']),
-                    worker=Worker.objects.get(id__in=each),
+                    model=WorkCalc.objects.get(id=int(request.POST['model'])),
+                    worker=Worker.objects.get(id=int(each)),
                     quantity=request.POST['quantity'],
                     date=request.POST['date'],
                     comment=request.POST['comment'],
