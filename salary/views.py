@@ -17,12 +17,14 @@ from .forms import BonusWorkForm, AccountChangeForm, \
 from ast import literal_eval
 from calc.forms import MonthForm
 from .auth import AuthData
+import logging
 import datetime
 import calendar
 import re
 # Create your views here.
 global code
 
+logging = logging.getLogger(__name__)
 
 class WorkerView(ListView):
     template_name = 'salary/worker_list.html'
@@ -423,10 +425,18 @@ def WorkerReportUserEdit(request):
         user=request.user,
         confirmed=False
     )
-    print(datetime.datetime.now(), request.user, 'edited', work)
     form = WorkReportForm(request.POST or None, instance=work)
     if form.is_valid():
         form.save()
+        rqst = request.POST
+        logging.info('%s edited by %s (%s %s %s(%s) %s)->(%s %s %s %s)' %
+                     (work.id, request.user,
+                      work.working_date,
+                      '-'.join(['%s' % work.quarter,'%s' % work.building, '%s' % work.apartment]),
+                      work.work.name, work.work.id, ','.join(work.coworker.values_list('name')),
+                      rqst['working_date'],
+                      '-'.join(['%s' % rqst['quarter'],'%s' % rqst['building'],'%s' % rqst['apartment']]),
+                      rqst['work'], rqst.getlist('coworker', [])))
         return HttpResponseRedirect(reverse('salary:my_reports_list', kwargs={'page': 1}))
     context = {
         'form': form,
@@ -636,17 +646,17 @@ class ReportConfirmation(View):
         data.stored = stored
         data.save()
         message = 'Отчет №%s, выполненный %s подтвержден' % (id, data.user)
-        if not deleted or not stored:
-            print('%s - Report %s *confirmed* with cost %s by %s' % (
-                timezone.now(),id, cost, self.request.user))
-        if deleted:
+        if confirmed:
+            logging.info('Report %s *confirmed* with cost %s by %s' % (
+                id, cost, self.request.user))
+        elif deleted:
             message = 'Отчет №%s, выполненный %s удален' % (id, data.user)
-            print('%s - Report %s *deleted* with cost %s by %s' % (
-                timezone.now(), id, cost, self.request.user))
+            logging.info('Report %s *deleted* with cost %s by %s' % (
+                id, cost, self.request.user))
         elif stored:
             message = 'Отчет №%s, выполненный %s отложен' % (id, data.user)
-            print('%s - Report %s *stored* with cost %s by %s' % (
-                timezone.now(), id, cost, self.request.user))
+            logging.info('Report %s *stored* with cost %s by %s' % (
+                id, cost, self.request.user))
         return message
 
     def work_on_this_address(self, data):
