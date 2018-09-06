@@ -590,32 +590,36 @@ class ReportConfirmation(View):
     def get(self, request):
         rqst = request.GET
         form = ReportConfirmationForm(None)
-        data, result, info = '', '', None
+        data, result, info, cost = '', '', None, None
 
         if request.user.has_perm('salary.change_workreport'):
             data = WorkReport.objects.filter(
                 confirmed=False, deleted=False, stored=False).order_by(
                 '-working_date', 'user').distinct()
-            if 'id' in rqst and 'cost' in rqst:
+            if 'action' in  rqst and rqst['action'] == 'Подтвердить':
                 result = self.update_report(
                     rqst['id'], rqst, rqst.get('cost', 0), confirmed=True)
-            elif 'deleted' in rqst:
+            elif 'action' in  rqst and rqst['action'] == 'Удалить':
                 result = self.update_report(rqst['id'], rqst, deleted=True)
-            elif 'stored' in rqst:
+            elif 'action' in  rqst and rqst['action'] == 'Отложить':
                 result = self.update_report(rqst['id'], rqst, stored=True)
             elif 'id' in rqst:
                 data = WorkReport.objects.filter(
                     id=rqst['id'], deleted=False, confirmed=False)
+                if data.__len__() > 0:
+                    form = ReportConfirmationForm(instance=data[0])
 
         if data.__len__() > 0:
             data = data[0]
             info = self.work_on_this_address(data)
+            cost = info.filter(confirmed=True).values('cost').aggregate(Sum('cost'))['cost__sum']
 
         context = {
             'data': data,
             'form': form,
             'result': result,
             'info': info,
+            'cost': cost
         }
         return render(request, self.template, context)
 

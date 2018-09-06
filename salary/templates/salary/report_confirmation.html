@@ -1,6 +1,7 @@
 {% extends 'index.html' %}
 {% load bootstrap %}
 {% load object_filter %}
+{% load humanize %}
 {% block body %}
     <style>
     .form-group {
@@ -21,7 +22,7 @@
             <table class="table table-hover table-striped">
                 <tr>
                     <td>Дата:</td>
-                    <td>{{ data.working_date.year }}-{{ data.working_date.month }}-{{ data.working_date.day }}</td>
+                    <td>{{ data.working_date|date:"d-m-Y" }}</td>
                 </tr>
                 <tr>
                     <td>ID:</td>
@@ -57,16 +58,18 @@
                 {{ form|bootstrap }}
                 <input type="hidden" value="{{ data.id }}" name="id">
                 <div align="center">
-                    <input type="submit" value="Подтвердить" class="btn btn-success form-group" style="width: 99%">
-                    <a href="{% url 'salary:report_confirm' %}?deleted=True&id={{ data.id }}"
-                       class="btn btn-danger form-group" style="width: 99%">Удалить</a>
-                    <a href="{% url 'salary:report_confirm' %}?stored=True&id={{ data.id }}"
-                       class="btn btn-primary form-group" style="width: 99%">Отложить</a>
+                    <input type="submit" name="action" value="Подтвердить"
+                           class="btn btn-success form-group" style="width: 99%">
+                    <input type="submit" name="action" value="Удалить"
+                           class="btn btn-danger form-group" style="width: 99%">
+                    <input type="submit" name="action" value="Отложить"
+                           class="btn btn-primary form-group" style="width: 99%">
                 </div>
             </form>
             </div>
             {% if info %}
-                <h4 align="center">На этом же адресе <strong>{{ data.quarter }}-{{ data.building }}-{{ data.apartment }}</strong></h4>
+                <h4 align="center">По этому адресу <strong>{{ data.quarter }}-{{ data.building }}-{{ data.apartment }}</strong></h4>
+                <h4 align="center">Сумма за работы: <strong>{{ cost|intcomma }}</strong></h4>
                 {% for data in info %}
                  <div class="panel-body">
                     <div class="panel panel-default scroll" style="max-width: 500px;">
@@ -74,7 +77,7 @@
                         <thead>
                             <tr>
                                 <th>Дата:</th>
-                                <th>{{ data.working_date.year }}-{{ data.working_date.month }}-{{ data.working_date.day }}</th>
+                                <th>{{ data.working_date|date:"d-m-Y" }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,6 +93,12 @@
                             <td>Работа:</td>
                             <td>{{ data.work }}</td>
                         </tr>
+                        {% if data.confirmed %}
+                        <tr>
+                            <td>Стоимость:</td>
+                            <td>{{ data.cost }}</td>
+                        </tr>
+                        {% endif %}
                         {% if data.comment %}
                         <tr>
                             <td>Коммент:</td>
@@ -109,13 +118,15 @@
                         <tr>
                             <td>Статус:</td>
                             <td>
-                                {% if data.confirmed %}
-                                    Подтвержден
-                                {% elif data.stored %}
-                                    Отложен
-                                {% else %}
-                                    Не подтвержден
-                                {% endif %}
+                                <p
+                                    {% if data.confirmed %}
+                                        class="text-success">Подтвержден
+                                    {% elif data.stored %}
+                                        class="text-info">Отложен
+                                    {% else %}
+                                        class="text-warning">Не подтвержден
+                                    {% endif %}
+                                </p>
                             </td>
                         </tr>
                         </tbody>
