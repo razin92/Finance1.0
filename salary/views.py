@@ -433,7 +433,7 @@ def WorkerReportUserEdit(request):
                      (work.id, request.user,
                       work.working_date,
                       '-'.join(['%s' % work.quarter,'%s' % work.building, '%s' % work.apartment]),
-                      work.work.name, work.work.id, ','.join(work.coworker.values_list('name')),
+                      work.work.name, work.work.id, ['%s(%s)' % (x.name, x.id) for x in work.coworker.all()],
                       rqst['working_date'],
                       '-'.join(['%s' % rqst['quarter'],'%s' % rqst['building'],'%s' % rqst['apartment']]),
                       rqst['work'], rqst.getlist('coworker', [])))
