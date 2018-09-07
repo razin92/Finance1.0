@@ -696,6 +696,7 @@ class ConsolidatedReport(View):
             'group_work': self.work_counter_group(report),
             'all_work': all_work
         }
+        logging.debug(context)
         return render(request, template, context)
 
     def work_filter(self, parameters):
