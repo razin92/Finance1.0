@@ -702,8 +702,6 @@ class ConsolidatedReport(View):
         result = WorkReport.objects.filter(
             work__id__in=parameters['work_list'],
             user__worker__id__in=parameters['workers'],
-            quarter__in=parameters['quarter'],
-            building__in=parameters['building'],
             confirmed=True,
             deleted=False
         ).order_by('-working_date', 'work__name')
@@ -714,6 +712,10 @@ class ConsolidatedReport(View):
                     parameters['date_end']
                 )
             )
+        if parameters['quarter']:
+            result = result.filter(quarter__in=parameters['quarter'])
+        if parameters['building']:
+            result = result.filter(building__in=parameters['building'])
         if parameters['apartment']:
             result = result.filter(apartment__in=parameters['apartment'])
         return result
@@ -723,13 +725,9 @@ class ConsolidatedReport(View):
         work_list = request.GET.getlist('work', [x[0] for x in Work.objects.values_list('id')])
         date_start = datetime.date.today().replace(day=1)
         date_end = datetime.date.today()
-        quarter = self.get_list(
-            request, 'quarter',
-            [x['quarter'] for x in WorkReport.objects.values('quarter').distinct()])
-        building = self.get_list(
-            request, 'building',
-            [x['building'] for x in WorkReport.objects.values('building').distinct()])
-        apartment = self.get_list(request, 'apartment', None)
+        quarter = self.get_list(request, 'quarter')
+        building = self.get_list(request, 'building')
+        apartment = self.get_list(request, 'apartment')
         if 'working_date_start' in request.GET:
             date_start = request.GET['working_date_start']
         if 'working_date_end' in request.GET:
@@ -775,9 +773,9 @@ class ConsolidatedReport(View):
             order_by('quarter', 'building', 'apartment', 'work').distinct()
         return work_list_group
 
-    def get_list(self, request, data, default):
+    def get_list(self, request, data, default=None):
         if request.GET.get(data, '') != '':
-            return [request.GET[data], ]
+            return request.GET[data].split(',')
         return default
 
 
