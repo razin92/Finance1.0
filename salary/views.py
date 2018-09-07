@@ -718,6 +718,7 @@ class ConsolidatedReport(View):
             result = result.filter(building__in=parameters['building'])
         if parameters['apartment']:
             result = result.filter(apartment__in=parameters['apartment'])
+        logging.debug('Work: %s %s' % (result.__len__(), [x.id for x in result]))
         return result
 
     def parameters(self, request):
@@ -744,6 +745,7 @@ class ConsolidatedReport(View):
             'apartment': apartment,
             'do_not_use_date': do_not_use_date
         }
+        logging.debug(data)
         return data
 
     def worker_sorter(self, report):
