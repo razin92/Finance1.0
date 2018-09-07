@@ -751,7 +751,7 @@ class ConsolidatedReport(View):
 
     def worker_sorter(self, report):
         result = [report.filter(
-            user__worker__id__in=each,
+            user__worker__id=int(each),
         ) for each in self.data['workers']]
         return result
 
