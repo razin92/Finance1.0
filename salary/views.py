@@ -735,7 +735,7 @@ class ConsolidatedReport(View):
         if 'working_date_end' in request.GET:
             date_end = request.GET['working_date_end']
         workers = request.GET.getlist(
-            'workers', Worker.objects.values_list('id').filter(can_make_report=True))
+            'workers', [x[0] for x in Worker.objects.values_list('id').filter(can_make_report=True)])
         data = {
             'work_list': work_list,
             'date_start': date_start,
