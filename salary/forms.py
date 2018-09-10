@@ -97,6 +97,10 @@ class WorkReportUserForm(forms.Form):
             widget=CheckboxSelectMultiple,
             required=False
         )
+        self.fields['income'] = forms.IntegerField(
+            label='Принятые кредиты',
+            initial=None
+        )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
             max_length=255,
@@ -223,7 +227,7 @@ class WorkReportForm(forms.ModelForm):
     class Meta:
         model = WorkReport
         fields = ['working_date', 'quarter', 'building', 'apartment',
-                  'work', 'hours_qty', 'coworker', 'comment', 'user']
+                  'work', 'hours_qty', 'coworker', 'income', 'comment', 'user']
 
     def __init__(self, *args, **kwargs):
         super(WorkReportForm, self).__init__(*args, **kwargs)
@@ -232,6 +236,7 @@ class WorkReportForm(forms.ModelForm):
         self.fields['user'].widget = HiddenInput()
         self.fields['coworker'].queryset = Worker.objects.filter(
             can_make_report=True).exclude(user__id=kwargs['instance'].user.id)
+        self.fields['income'].initial = None
 
 class WorkForm(forms.ModelForm):
 
@@ -325,7 +330,7 @@ class ReportConfirmationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReportConfirmationForm, self).__init__(*args, **kwargs)
-        self.fields['cost'].initial = 0
+        self.fields['cost'].initial = None
         self.fields['cost'].required = False
         self.fields['admin_comment'].widget = forms.Textarea(
             attrs={'rows': '4', 'maxlength': '255'})

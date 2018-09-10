@@ -379,6 +379,7 @@ class WorkerReportUser(View):
                 quarter=data['quarter'],
                 building='%s%s' % (data['building'], data['building_litera']),
                 apartment=self.apartment(data),
+                income=data['income'],
                 comment=data['comment']
             )
             if result[1]:
@@ -608,7 +609,7 @@ class ReportConfirmation(View):
                 '-working_date', 'user').distinct()
             if 'action' in  rqst and rqst['action'] == 'Подтвердить':
                 result = self.update_report(
-                    rqst['id'], rqst, rqst.get('cost', 0), confirmed=True)
+                    rqst['id'], rqst, rqst.get('cost', None), confirmed=True)
             elif 'action' in  rqst and rqst['action'] == 'Удалить':
                 result = self.update_report(rqst['id'], rqst, deleted=True)
             elif 'action' in  rqst and rqst['action'] == 'Отложить':
@@ -633,12 +634,14 @@ class ReportConfirmation(View):
         }
         return render(request, self.template, context)
 
-    def update_report(self, id, comment, cost=0, deleted=False,
+    def update_report(self, id, comment, cost=None, deleted=False,
                       confirmed=False, stored=False):
         admin_comment = ''
         if 'admin_comment' in comment:
             admin_comment = comment['admin_comment']
         data = WorkReport.objects.get(id=id)
+        if cost == '':
+            cost = None
         data.cost = cost
         data.confirmed = confirmed
         data.deleted = deleted
@@ -679,14 +682,13 @@ class ConsolidatedReport(View):
         self.data = self.parameters(request)
         template = 'salary/work_reports_detailed.html'
         form = WorkFilterForm(None)
-        all_work = None
+        #all_work = None
         report = self.work_filter(self.data)
         date = '%s - %s' % (self.data['date_start'], self.data['date_end'])
         if self.data['do_not_use_date']:
             date = 'За весь период'
-        if len(self.data['work_list']) == 1:
-            all_work = report.values(
-                'quarter', 'building', 'apartment').distinct()
+        all_work = report.values(
+            'quarter', 'building', 'apartment', 'work', 'working_date').distinct()
         context = {
             'form': form,
             'report': self.worker_sorter(report),

@@ -272,7 +272,8 @@ class WorkReport(models.Model):
     building = models.CharField(max_length=4, verbose_name="Дом")
     apartment = models.SmallIntegerField(null=True, blank=True, verbose_name="Кв-ра")
     confirmed = models.BooleanField(default=False, verbose_name="Принята")
-    cost = models.IntegerField(default=0, verbose_name="Стоимость")
+    cost = models.IntegerField(default=None, verbose_name="Стоимость", null=True)
+    income = models.IntegerField(default=None, null=True, verbose_name="Принятые кредиты")
     comment = models.CharField(max_length=255, blank=True, null=True, verbose_name="Комментарий")
     admin_comment = models.CharField(max_length=255, blank=True, verbose_name="Комментарий начальника")
     deleted = models.BooleanField(default=False, verbose_name="Удален")
@@ -298,4 +299,3 @@ class WorkReport(models.Model):
     def store_work(self):
         self.stored = True
         self.save()
-

@@ -52,6 +52,16 @@
                     <td>Помощники:</td>
                     <td>{{ data|value:'coworker' }}</td>
                 </tr>
+                <tr>
+                    <td>Принятные кредиты:</td>
+                    <td>
+                    {% if not data.income %}
+                        Нет
+                    {% else %}
+                        <strong>{{ data.income|intcomma }}</strong>
+                    {% endif %}
+                    </td>
+                </tr>
             </table>
             <div>
             <form method="get" class="form-group">

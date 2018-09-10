@@ -25,6 +25,11 @@ def value(value, arg):
     elif arg == 'deleted':
         if result == True:
             return 'УДАЛЕНО'
+        else:
+            return ''
+    elif arg == 'cost' or arg == 'income':
+        if not result:
+            return '-'
     elif arg == 'apartment':
         if not result:
             return '--'
