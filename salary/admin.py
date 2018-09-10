@@ -4,7 +4,8 @@ from .models import WorkCalc, BonusWork, CategoryOfChange, Worker, AccountChange
 # Register your models here.
 class WorkReportAdmin(admin.ModelAdmin):
     list_display = ['id', 'working_date', 'user', 'quarter', 'building',
-                    'apartment','work', 'cost', 'confirmed', 'deleted']
+                    'apartment','work', 'cost','comment', 'admin_comment',
+                    'confirmed', 'deleted']
 
     date_hierarchy = 'working_date'
     search_fields = ['id']
