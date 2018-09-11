@@ -198,6 +198,16 @@ class WorkReportTaggedForm(forms.Form):
             widget=CheckboxSelectMultiple,
             required=False
         )
+        self.fields['income1'] = forms.IntegerField(
+            label='Принятые сотрудником',
+            disabled=True,
+            initial=work.income,
+        )
+        self.fields['income'] = forms.IntegerField(
+            label='Принятые Вами',
+            required=False,
+            initial=None
+        )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
             max_length=255,

@@ -379,7 +379,7 @@ class WorkerReportUser(View):
                 quarter=data['quarter'],
                 building='%s%s' % (data['building'], data['building_litera']),
                 apartment=self.apartment(data),
-                income=data['income'],
+                income=self.get_income(data['income']),
                 comment=data['comment']
             )
             if result[1]:
@@ -403,6 +403,11 @@ class WorkerReportUser(View):
             return None
         else:
             return request['apartment']
+
+    def get_income(self, data):
+        if data == '':
+            return None
+        return data
 
     def tagged_work(self, user_id):
         return WorkReport.objects.filter(tagged_coworker=True, coworker__user__id__in=[user_id, ])
