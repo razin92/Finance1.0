@@ -19,13 +19,14 @@ class TransactionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
-        last_transaction = Transaction.objects.filter(creator__id=user_id).order_by('-create_date')[0]
+        last_transaction = Transaction.objects.filter(creator__id=user_id).order_by('-create_date').last()
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['money'].queryset = Staff.objects.get(name__id=user_id).pouches.all().order_by('name')
-        self.fields['money'].initial = last_transaction.money
-        self.fields['who_is'].initial = last_transaction.who_is
-        self.fields['category'].initial = last_transaction.category
         self.fields['date'].initial = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        if last_transaction:
+            self.fields['money'].initial = last_transaction.money
+            self.fields['who_is'].initial = last_transaction.who_is
+            self.fields['category'].initial = last_transaction.category
 
 class TransactionEditForm(ModelForm):
     class Meta:

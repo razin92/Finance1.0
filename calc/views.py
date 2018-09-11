@@ -22,14 +22,14 @@ def TransactionView(request):
     form = MonthForm
     user = request.user
     rqst = request.POST
+
     if 'select_month' in rqst and rqst['select_month']:
         month = rqst['select_month']
     else:
         month = str(timezone.now().month)
     year = datetime.datetime.now().year
-    staff = Staff.objects.get(
-        name__id=user.pk
-    )
+    staff = get_object_or_404(Staff,
+        name__id=user.pk)
     permitted_pouches = [x for x in staff.pouches.all()]
 
     transaction = Transaction.objects.filter(
@@ -38,7 +38,7 @@ def TransactionView(request):
         date__year=year
     ).order_by('-date')
     if not user.is_superuser:
-        transaction.filter(checking=True)
+        transaction = transaction.filter(checking=True)
     pouch = staff.pouches.order_by('name')
 
     month_name = MonthForm.month[int(month)][1]
