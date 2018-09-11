@@ -34,7 +34,7 @@ function ShowHideContent(spoiler)
     </div>
     <div class="panel-body">
         <div class="panel panel-default scroll">
-            <p style="margin: 1%;">Итого заработано за период: {{ cost_sum|intcomma }}</p>
+            <p style="margin: 1%;">Итого заработано за период: {{ cost_sum|intcomma }} Принято кредитов: {{ income|intcomma }}</p>
         </div>
     </div>
     {% if dupes %}
@@ -71,7 +71,6 @@ function ShowHideContent(spoiler)
 
     <div class="panel-body">
     <div class="panel panel-default scroll">
-
     <table class="table table-hover">
         <thead>
             <tr>
@@ -85,7 +84,8 @@ function ShowHideContent(spoiler)
             {% for each in data %}
                 <tr style="background-color: {% if each.confirmed %}#EAFEE7{% else %}#F9E6E6{% endif %};">
                     {% if not each.confirmed and not each.deleted %}
-                        <td><a href="{% url 'salary:work_report_edit' %}?wid={{ each.id }}" class="btn btn-xs btn-success">Изменить</a></td>
+                        <td><a href="{% url 'salary:work_report_edit' %}?wid={{ each.id }}"
+                               class="btn btn-xs btn-success">Изменить</a></td>
                     {% else %}
                         <td align="center">X</td>
                     {% endif %}
