@@ -99,7 +99,8 @@ class WorkReportUserForm(forms.Form):
         )
         self.fields['income'] = forms.IntegerField(
             label='Принятые кредиты',
-            initial=None
+            initial=None,
+            required=False
         )
         self.fields['comment'] = forms.CharField(
             label='Комментарий',
