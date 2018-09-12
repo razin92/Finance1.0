@@ -38,6 +38,7 @@ urlpatterns = [
         url(r'^work/$', login_required(views.WorkView.as_view()), name='work'),
         url(r'^my_reports_list/(?P<page>[0-9]+)/$', login_required(views.MyWorkList.as_view()), name='my_reports_list'),
         url(r'^reports_list/$', login_required(views.ReportsList.as_view()), name='reports_list'),
+        url(r'^reports_history/$', login_required(views.ReportHistory.as_view()), name='reports_history'),
         url(r'^detailed_report/$', login_required(views.ConsolidatedReport.as_view()), name='detailed_report'),
         url(r'^report_confirm/$', login_required(views.ReportConfirmation.as_view()), name='report_confirm'),
         # Searching

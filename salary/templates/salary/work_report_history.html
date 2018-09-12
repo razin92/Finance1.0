@@ -1,0 +1,85 @@
+{% extends 'index.html' %}
+{% load bootstrap %}
+{% load object_filter %}
+{% load humanize %}
+{% block body %}
+    {% if info %}
+                <h4 align="center">По этому адресу <strong>{{ address }}</strong></h4>
+                <h4 align="center">Выплачено за работы: <strong>{{ cost|intcomma }}</strong></h4>
+                {% for data in info %}
+                 <div class="panel-body">
+                    <div class="panel panel-default scroll" style="max-width: 500px;">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата:</th>
+                                <th>{{ data.working_date|date:"d-m-Y" }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>ID:</td>
+                            <td>{{ data.id }}</td>
+                        </tr>
+                        <tr>
+                            <td>Мастер:</td>
+                            <td>{{ data.user }}</td>
+                        </tr>
+                        <tr>
+                            <td>Работа:</td>
+                            <td>{{ data.work }}</td>
+                        </tr>
+                        {% if data.cost %}
+                            <tr>
+                                <td>Стоимость:</td>
+                                <td>{{ data.cost|intcomma }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if data.income %}
+                            <td>Принято мастером:</td>
+                            <td>{{ data.income|intcomma }}</td>
+                        {% endif %}
+                        {% if data.comment %}
+                        <tr>
+                            <td>Коммент:</td>
+                            <td>{{ data.comment }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if data.admin_comment %}
+                        <tr>
+                            <td>Заметка нач.:</td>
+                            <td>{{ data.admin_comment }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>Помощники:</td>
+                            <td>{{ data|value:'coworker' }}</td>
+                        </tr>
+                        <tr {% if data.confirmed %}
+                                class="success"
+                            {% elif data.stored %}
+                                class="info"
+                            {% else %}
+                                class="warning"
+                            {% endif %}
+                        >
+                            <td>Статус:</td>
+                            <td>
+                                <p
+                                    {% if data.confirmed %}
+                                        class="text-success">Подтвержден
+                                    {% elif data.stored %}
+                                        class="text-info">Отложен
+                                    {% else %}
+                                        class="text-warning">Не подтвержден
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                 </div>
+                {% endfor %}
+             {% endif %}
+{% endblock %}

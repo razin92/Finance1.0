@@ -603,6 +603,35 @@ class ReportsList(View):
         return data[0]
 
 
+class ReportHistory(View):
+    """
+    Displays the list of all reports on selected address
+    """
+    def get(self, request):
+        template = 'salary/work_report_history.html'
+        work = None
+        work_list = None
+        address = None
+        cost = None
+        if 'id' in request.GET:
+            work = get_object_or_404(WorkReport, id=request.GET['id'])
+        if work:
+            work_list = WorkReport.objects.filter(
+                quarter=work.quarter,
+                building=work.building,
+                apartment=work.apartment,
+                deleted=False
+            ).order_by('-working_date')
+            address = '-'.join(
+                [str(work.quarter), str(work.building), str(work.apartment) if work.apartment else '#'])
+            cost = work_list.filter(confirmed=True).values('cost').aggregate(Sum('cost'))['cost__sum']
+        context = {
+            'info': work_list,
+            'address': address,
+            'cost': cost
+        }
+        return render(request, template, context)
+
 class ReportConfirmation(View):
     """
     View for Head person
