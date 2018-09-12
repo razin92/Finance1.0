@@ -237,12 +237,11 @@ class WorkReportForm(forms.ModelForm):
 
     class Meta:
         model = WorkReport
-        fields = ['working_date', 'quarter', 'building', 'apartment',
+        fields = ['quarter', 'building', 'apartment',
                   'work', 'hours_qty', 'coworker', 'income', 'comment', 'user']
 
     def __init__(self, *args, **kwargs):
         super(WorkReportForm, self).__init__(*args, **kwargs)
-        self.fields['working_date'].widget = DateTimePicker(options={"format": "YYYY-MM-DD"})
         self.fields['comment'].widget = forms.Textarea(attrs={'rows': '4',})
         self.fields['user'].widget = HiddenInput()
         self.fields['coworker'].queryset = Worker.objects.filter(

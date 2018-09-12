@@ -436,15 +436,15 @@ def WorkerReportUserEdit(request):
     form = WorkReportForm(request.POST or None, instance=work)
     if form.is_valid():
         form.save()
+        work.working_date = request.POST['working_date']
+        work.save()
         rqst = request.POST
-        logging.info('%s edited by %s (%s %s %s(%s) %s)->(%s %s %s %s)' %
+        logging.info('%s edited by %s (%s %s %s(%s) %s)->(%s)' %
                      (work.id, request.user,
                       work.working_date,
                       '-'.join(['%s' % work.quarter,'%s' % work.building, '%s' % work.apartment]),
                       work.work.name, work.work.id, ['%s(%s)' % (x.name, x.id) for x in work.coworker.all()],
-                      rqst['working_date'],
-                      '-'.join(['%s' % rqst['quarter'],'%s' % rqst['building'],'%s' % rqst['apartment']]),
-                      rqst['work'], rqst.getlist('coworker', [])))
+                      rqst))
         return HttpResponseRedirect(reverse('salary:my_reports_list', kwargs={'page': 1}))
     context = {
         'form': form,
