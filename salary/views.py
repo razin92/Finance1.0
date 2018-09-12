@@ -571,7 +571,7 @@ class ReportsList(View):
             quarter__in=[x['quarter'] for x in duplicates],
             building__in=[x['building'] for x in duplicates],
             apartment__in=[x['apartment'] for x in duplicates],
-        ).order_by('building', 'apartment', '-working_date')
+        ).order_by('quarter', 'building', 'apartment', '-working_date')
 
         return dupl
 
