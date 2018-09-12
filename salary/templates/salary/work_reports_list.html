@@ -122,10 +122,13 @@ function ShowHideContent(spoiler)
                     {% else %}
                         class="success"
                     {% endif %}
-                    onclick="window.open('{% url 'salary:reports_history' %}?id={{ each.id }}', '_blank')"
                 >
                     {% for element in header %}
-                    <td>{{ each|value:element.name|intcomma }}</td>
+                        <td {% if forloop.counter == 1 %}
+                                onclick="window.open('{% url 'salary:reports_history' %}?id={{ each.id }}', '_blank')"
+                            {% endif %}>
+                            {{ each|value:element.name|intcomma }}
+                        </td>
                     {% endfor %}
                     <td>
                         {% if each.stored or not each.confirmed and not each.deleted %}
