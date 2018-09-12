@@ -383,10 +383,12 @@ class WorkerReportUser(View):
                 comment=data['comment']
             )
             if result[1]:
+                logging.debug('*success* %s' % data)
                 return result[0]
             self.tagged_work(user.id).last().untag_coworker()
             return None
         except IntegrityError:
+            logging.debug('*error* %s' % data)
             return None
 
 
