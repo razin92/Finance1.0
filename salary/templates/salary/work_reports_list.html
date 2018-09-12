@@ -9,9 +9,6 @@
         float: left;
         margin: 0.5%;
     }
-    tr {
-        cursor: pointer;
-    }
 </style>
 <script type="text/javascript">
 function ShowHideContent(spoiler)
@@ -126,6 +123,7 @@ function ShowHideContent(spoiler)
                     {% for element in header %}
                         <td {% if forloop.counter == 1 %}
                                 onclick="window.open('{% url 'salary:reports_history' %}?id={{ each.id }}', '_blank')"
+                                style="cursor: pointer"
                             {% endif %}>
                             {{ each|value:element.name|intcomma }}
                         </td>
