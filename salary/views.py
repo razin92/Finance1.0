@@ -533,7 +533,7 @@ class ReportsList(View):
     def get(self, request):
         page = request.GET.get('page', 1)  # Getting page number
         per_page = request.GET.get('per_page', 25)
-        # dupes = self.get_duplicate(WorkReport)  # Dupes checking
+        dupes = self.get_duplicate(WorkReport)  # Dupes checking
         if 'confirmed' in request.GET or 'deleted' in request.GET or 'stored' in request.GET:
             data = self.additional_filters(request)
         else:
@@ -550,13 +550,16 @@ class ReportsList(View):
             'data': result.object_list,
             'pages': result,
             'salary': salary,
-            'filter': self.get_filter(request)
+            'filter': self.get_filter(request),
+            'dupes': dupes
         }
         return render(request, self.template, context)
 
     def get_duplicate(self, data):
-
-        duplicates = data.objects.values('quarter', 'building', 'apartment')\
+        nowadays_month = datetime.datetime.today().month
+        duplicates = data.objects.filter(
+            working_date__month=nowadays_month, deleted=False, apartment__isnull=False).\
+            values('quarter', 'building', 'apartment')\
             .annotate(Count('quarter'), Count('building'), Count('apartment'))\
             .order_by()\
             .filter(
@@ -564,12 +567,11 @@ class ReportsList(View):
             quarter__count__gt=1,
             apartment__count__gt=1
         )
-
         dupl = WorkReport.objects.filter(
             quarter__in=[x['quarter'] for x in duplicates],
             building__in=[x['building'] for x in duplicates],
             apartment__in=[x['apartment'] for x in duplicates],
-        ).order_by('building')
+        ).order_by('building', 'apartment', '-working_date')
 
         return dupl
 
