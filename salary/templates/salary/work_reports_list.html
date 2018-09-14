@@ -19,8 +19,35 @@ function ShowHideContent(spoiler)
         spoiler.style.display = 'block';
 }
 </script>
-
-    {% if dupes %}
+    {% regroup dupes by quarter as quarter_list %}
+    <ul>
+        {% for quarter in quarter_list %}
+            <li>{{ quarter.grouper }}
+                <ul>
+                    {% regroup quarter.list|dictsort:"building" by building as building_list %}
+                    {% for building in building_list %}
+                      <li>{{ building.grouper }}
+                                <ul>
+                                {% regroup building.list|dictsort:"apartment" by apartment as apartment_list %}
+                                   {% for apartment in apartment_list %}
+                                    <li>{{ apartment.grouper }}
+                                        {% if apartment.list|length > 1 %}
+                                       {% for each in apartment.list %}
+                                           <ul>
+                                            {{ each.id }}: {{ each.working_date|date:"d-m-Y" }} - {{ each.work__name }}
+                                           </ul>
+                                       {% endfor %}
+                                        {% endif %}
+                                   </li>
+                                   {% endfor %}
+                                </ul>
+                    {% endfor %}
+                      </li>
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    {% if dupess %}
     <div class="panel panel-success" style="margin: auto; max-width: 98%;">
     <div class="panel-heading">
         <a href="javascript:void(0)"
