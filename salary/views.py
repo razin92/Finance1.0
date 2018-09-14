@@ -385,7 +385,9 @@ class WorkerReportUser(View):
             if result[1]:
                 logging.debug('*success* %s' % data)
                 return result[0]
-            self.tagged_work(user.id).last().untag_coworker()
+            a = self.tagged_work(user.id)
+            if a.__len__() > 0:		
+                a.last().untag_coworker()
             return None
         except IntegrityError:
             logging.debug('*error* %s' % data)
