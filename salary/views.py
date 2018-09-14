@@ -551,7 +551,6 @@ class ReportsList(View):
             'pages': result,
             'salary': salary,
             'filter': self.get_filter(request),
-            'dupes': dupes
         }
         return render(request, self.template, context)
 
