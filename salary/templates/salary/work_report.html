@@ -30,17 +30,19 @@
         <div class="panel panel-default scroll" style="max-width: 500px;">
             <form method="post" style="margin: 2%;" id="report">
                 {% csrf_token %}
-                <label class="control-label  " for="id_working_date">Дата выполнения</label>
                 <div class=" " style="width: 100%">
-                    <input class="form-control form-control"
-                           id="id_working_date"
-                           name="working_date"
-                           required="True"
-                           type="date"
-                           value="{% now "Y-m-d" %}"
-                           min="{% now "Y-m-01" %}"
-                           max="{% now "Y-m-d" %}"
-                    />
+                    {% if not form.working_date %}
+                        <label class="control-label  " for="id_working_date">Дата выполнения</label>
+                        <input class="form-control form-control"
+                               id="id_working_date"
+                               name="working_date"
+                               required="required"
+                               type="date"
+                               value="{% now "Y-m-d" %}"
+                               min="{% now "Y-m-01" %}"
+                               max="{% now "Y-m-d" %}"
+                        />
+                    {% endif %}
                 </div>
                 {{ form|bootstrap }}
                 <div align="center">

@@ -3,6 +3,7 @@ from django.utils import timezone
 from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
 from calc.models import Transaction
+from django.core.exceptions import ObjectDoesNotExist
 import datetime
 
 
@@ -278,7 +279,9 @@ class WorkReport(models.Model):
     admin_comment = models.CharField(max_length=255, blank=True, verbose_name="Комментарий начальника")
     deleted = models.BooleanField(default=False, verbose_name="Удален")
     tagged_coworker = models.BooleanField(default=False, verbose_name="Отмечен помощник")
+    coworkers_qt_ty = models.SmallIntegerField(default=1, verbose_name="Кол-во подтвержденных")
     stored = models.BooleanField(default=False, verbose_name="Отложен")
+    transaction = models.OneToOneField(Transaction, null=True, blank=True, verbose_name="Связанная транзакция")
 
     def __str__(self):
         return '%s %s %s' % (self.working_date, self.work, self.user)
@@ -293,9 +296,32 @@ class WorkReport(models.Model):
             self.save()
 
     def untag_coworker(self):
-        self.tagged_coworker = False
-        self.save()
+        if self.coworker.all().__len__() <= self.coworkers_qt_ty:
+            self.tagged_coworker = False
+            self.save()
+        else:
+            self.c_counter()
 
     def store_work(self):
         self.stored = True
         self.save()
+
+    def c_counter(self):
+        self.coworkers_qt_ty += 1
+        self.save()
+
+    def check_report(self, user):
+        try:
+            work = WorkReport.objects.get(
+                working_date=self.working_date,
+                quarter=self.quarter,
+                building=self.building,
+                apartment=self.apartment,
+                user=user,
+                work=self.work,
+            )
+            if work:
+                return False
+        except ObjectDoesNotExist:
+            return True
+

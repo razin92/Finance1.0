@@ -332,7 +332,7 @@ class WorkerReportUser(View):
         if self.can_make_report(request.user):
             tagged_work = self.tagged_work(user).last()
             form = WorkReportUserForm(None, user_id=user)
-            if tagged_work:
+            if tagged_work and tagged_work.check_report(request.user):
                 form = self.make_form(tagged_work, user)
                 self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
         else:
@@ -357,11 +357,13 @@ class WorkerReportUser(View):
                 coworkers = request.POST.getlist('coworker', '')
                 for x in coworkers:
                     new_object.coworker.add(x)
-                if coworkers != '':
-                    new_object.tag_coworker()
                 if 'new' in request.POST:
                     self.tagged_work(user).last().untag_coworker()
-                    new_object.untag_coworker()
+                    new_object.coworkers_qt_ty = 0
+                    new_object.save()
+                if coworkers != '' and new_object.coworkers_qt_ty == 1:
+                    new_object.tag_coworker()
+
                 context['message'] = 'Успех'
             else:
                 context['message'] = 'Объект уже существует'
