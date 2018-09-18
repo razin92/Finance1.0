@@ -495,7 +495,7 @@ class MyWorkList(View):
                                deleted=False,
                                stored=False).values('cost').aggregate(Sum('cost'))['cost__sum']
         income_sum = data.filter(deleted=False).values('income').aggregate(Sum('income'))['income__sum']
-        exclude_list = ['filling_date', 'user', 'stored', 'tagged_coworker']
+        exclude_list = ['filling_date', 'user', 'stored', 'tagged_coworker', 'transaction', 'coworkers_qt_ty']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         splitter = Paginator(data, 25)
         split_data = splitter.page(page)
@@ -546,7 +546,7 @@ class ReportsList(View):
                 '-working_date', 'quarter', 'building', 'apartment')
         data_per_page = Paginator(data, per_page)
         result = data_per_page.page(page)
-        exclude_list = ['filling_date', 'stored', 'tagged_coworker']
+        exclude_list = ['filling_date', 'stored', 'tagged_coworker', 'transaction', 'coworkers_qt_ty']
         salary = self.salary_of_workers()
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]  # Headers for table
         context = {
@@ -797,7 +797,8 @@ class ConsolidatedReport(View):
         return result
 
     def header(self):
-        exclude_list = ['filling_date', 'deleted', 'confirmed', 'stored', 'tagged_coworker']
+        exclude_list = ['filling_date', 'deleted', 'confirmed', 'stored',
+                        'tagged_coworker', 'transaction', 'coworkers_qt_ty']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         return header
 
