@@ -5,12 +5,12 @@
 <script src="/media/static/js/jquery.blockUI.js"></script>
     <script language="javascript" type="text/javascript">
     function submit_form() {
-       $("#search").submit();
+       $("#transaction").submit();
     }
     $(document).ready(function() {
     $('#demo3').click(function() {
         $.blockUI({
-            message: '<img src="/media/static/img/loading.gif"/>',
+            message: '<img src="/media/static/img/loading2.gif"/>',
             css: {
                 top: '20%',
                 margin: auto
@@ -28,11 +28,18 @@
      <h4 class="text-success">Приход</h4>
  {% endif %}
  </div>
-<form method="post" action="{% url 'calc:transaction_calc' kind %}" style="margin: 2%">
+<form method="post" action="{% url 'calc:transaction_calc' kind %}" style="margin: 2%" id="transaction">
     {% csrf_token %}
         {{ form|bootstrap }}
         <div align="center">
-        <input type="submit" id="demo3" value="Сохранить" class="btn btn-success" style="margin: 7px" onclick="submit_form()"/>
+            <button
+                    type="button"
+                    id="demo3"
+                    value="Сохранить"
+                    class="btn btn-success"
+                    style="margin: 7px"
+                    onclick="submit_form()"
+            >Сохранить</button>
         <a href="{% url 'calc:transaction' %}" class="btn btn-default" style="margin: 7px">Отмена</a>
         </div>
 </form>
