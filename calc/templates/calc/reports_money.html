@@ -1,0 +1,41 @@
+{% extends 'index.html' %}
+{% load object_filter %}
+{% load humanize %}
+{% block body %}
+    <style>
+        p {
+            margin: 5px 0 0 5px;
+        }
+    </style>
+    <div class="panel-body">
+        <div class="panel panel-default scroll" style="max-width: 700px">
+            {% if total_sum %}
+                <p>Общая сумма к сдачи в кассу: <strong>{{ total_sum|intcomma }}</strong></p>
+            {% else %}
+                <p class="text-danger" align="center">Недостаточно прав</p>
+            {% endif %}
+            {% if reports_list %}
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            {% for each in headers %}
+                                <th>{{ each.verbose_name }}</th>
+                            {% endfor %}
+                                <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for each in reports_list %}
+                            <tr>
+                                {% for element in headers %}
+                                    <td>{{ each|value:element.name|intcomma }}</td>
+                                {% endfor %}
+                                    <td></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

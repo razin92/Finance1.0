@@ -51,6 +51,7 @@
             <li><a href="{% url 'salary:reports_list' %}?page=1">Отчеты</a></li>
            {% if user.is_staff %}
             <li><a href="{% url 'salary:detailed_report' %}">Отчеты по работам</a></li>
+            <li><a href="{% url 'calc:reports_money' %}">Принятые кредиты</a></li>
             <li><a href="{% url 'salary:workcalc' %}">Список работ / стоимость</a></li>
             <li><a href="{% url 'salary:bonuswork' %}">Бонусы</a></li>
             <li><a href="{% url 'salary:accountchange' %}">Бонусы без фиксы</a></li>

@@ -4,9 +4,12 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from lib.models import Pouch, Staff, Category, Person
 from report.models import TransactionChangeHistory, BalanceStamp
 from django.utils import timezone
+from salary.models import WorkReport
+from django.views import View
 from .forms import TransactionForm, TransactionEditForm, MonthForm
 from .models import Transaction
 import datetime
@@ -31,7 +34,6 @@ def TransactionView(request):
     staff = get_object_or_404(Staff,
         name__id=user.pk)
     permitted_pouches = [x for x in staff.pouches.all()]
-
     transaction = Transaction.objects.filter(
         money__in=permitted_pouches,
         date__month=month,
@@ -64,6 +66,7 @@ def TransactionDetailView(request, pk):
     }
     return render(request, template, context)
 
+
 @login_required()
 def TransactionCreate(request, kind):
     """
@@ -77,6 +80,7 @@ def TransactionCreate(request, kind):
         'kind': kind,
     }
     return render(request, template, context)
+
 
 #Проводка/отмена транзакции
 @login_required()
@@ -124,7 +128,8 @@ def changer(request, transaction_id, number):
         return HttpResponseRedirect(reverse('calc:transaction_edit', args={transaction_id, }))
     return HttpResponseRedirect(reverse('calc:transaction'))
 
-#Метки изменения баланса
+
+# Метки изменения баланса
 def CreateBalanceStamp(transaction, history, reason):
     balance_before = transaction.money.balance
     if transaction.checking:
@@ -150,9 +155,10 @@ def CreateBalanceStamp(transaction, history, reason):
     stamp.save()
     return stamp
 
+
 def CreateTransactionChangeHistory(data):
     data_get=data.get
-    #Создается объект истории с текущими данными транзакции
+    # Создается объект истории с текущими данными транзакции
     TransactionChangeHistory.objects.create(
         transaction_id=data_get('id'),
         date_before=data_get('date'),
@@ -170,7 +176,7 @@ def CreateTransactionChangeHistory(data):
     )
 
 def UpdateTransactionChangeHistory(data):
-    #Обновленные данные транзакции в объект истории
+    # Обновленные данные транзакции в объект истории
     data_get = data.get
     history = TransactionChangeHistory.objects.last()
     history.date_after = data_get('date')
@@ -182,6 +188,7 @@ def UpdateTransactionChangeHistory(data):
     history.date_of_change = timezone.now()
     history.save()
     return history
+
 
 @login_required()
 def TransactionEdit(request, transaction_id):
@@ -224,6 +231,7 @@ def TransactionEdit(request, transaction_id):
     }
     return render(request, template, context)
 
+
 @login_required()
 def calculate(request, kind):
     form = TransactionForm(request.POST, user_id=request.user.pk)
@@ -257,6 +265,29 @@ def calculate(request, kind):
             'kind': kind,
         }
         return render(request, template, context)
+
+
+class ReportsMoney(View):
+
+    template = 'calc/reports_money.html'
+
+    def get(self, request):
+        user = request.user
+        reports_list = WorkReport.objects.filter(income__gt=0, confirmed=True, deleted=False)
+        total_sum = reports_list.values('income').aggregate(Sum('income'))['income__sum']
+        exclude_list = ['filling_date', 'user', 'stored',
+                        'tagged_coworker', 'transaction',
+                        'coworkers_qt_ty', 'confirmed', 'deleted',
+                        'cost', 'comment', 'admin_comment', 'hours_qty'
+                        ]
+        headers = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
+        context = {
+            'reports_list': reports_list if user.is_superuser else None,
+            'headers': headers,
+            'total_sum': total_sum if user.is_superuser else None
+        }
+        return render(request, self.template, context)
+
 
 def set_default_color(color):
     category = Category.objects.all()
