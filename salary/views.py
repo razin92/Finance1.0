@@ -330,9 +330,9 @@ class WorkerReportUser(View):
         form = None
         tagged_work = None
         if self.can_make_report(request.user):
-            tagged_work = self.tagged_work(user).last()
+            tagged_work = self.tagged_work(user)
             form = WorkReportUserForm(None, user_id=user)
-            if tagged_work and tagged_work.check_report(request.user):
+            if tagged_work and tagged_work.check_report(user):
                 form = self.make_form(tagged_work, user)
                 self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
         else:
@@ -415,7 +415,7 @@ class WorkerReportUser(View):
 
     def tagged_work(self, user_id):
         worker = Worker.objects.get(user_id=user_id)
-        return WorkReport.objects.filter(tagged_coworker=True, coworker__id__in=[worker.id, ])
+        return WorkReport.objects.filter(tagged_coworker=True, coworker__id=[worker.id, ]).last()
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
