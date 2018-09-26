@@ -416,7 +416,7 @@ class WorkerReportUser(View):
         return data
 
     def tagged_work(self, user_id):
-        return WorkReport.objects.filter(tagged_coworker=True, coworker__user__id__in=[user_id, ])
+        return WorkReport.objects.filter(tagged_coworker=True, coworker__user__in=[user_id, ])
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
