@@ -322,6 +322,7 @@ class WorkerReportUser(View):
     if a user was tagged in the ones work,
     the first action: confirm or cancel work
     """
+    # 
     template = 'salary/work_report.html'
     message = ''
 
