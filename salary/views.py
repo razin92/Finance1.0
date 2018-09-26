@@ -415,7 +415,7 @@ class WorkerReportUser(View):
 
     def tagged_work(self, user_id):
         worker = Worker.objects.get(user_id=user_id)
-        return WorkReport.objects.filter(tagged_coworker=True, coworker__id=[worker.id, ]).last()
+        return WorkReport.objects.filter(tagged_coworker=True, coworker__id=worker.id).last()
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
