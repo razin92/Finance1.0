@@ -387,7 +387,7 @@ class WorkerReportUser(View):
             if result[1]:
                 logging.debug('*success* %s' % data)
                 return result[0]
-            self.tagged_work(user.id).last().untag_coworker()
+            self.tagged_work(user.id).untag_coworker()
             return None
         except IntegrityError:
             logging.debug('*error* %s' % data)
@@ -440,6 +440,8 @@ def WorkerReportUserEdit(request):
     if form.is_valid():
         form.save()
         work.working_date = request.POST['working_date']
+        if work.coworker.all().__len__() != 0 and work.coworkers_qt_ty == 1:
+            work.tag_coworker()
         work.save()
         rqst = request.POST
         logging.info('%s edited by %s (%s %s %s(%s) %s)->(%s)' %
