@@ -322,7 +322,7 @@ class WorkerReportUser(View):
     if a user was tagged in the ones work,
     the first action: confirm or cancel work
     """
-    # 
+    #
     template = 'salary/work_report.html'
     message = ''
 
@@ -551,12 +551,15 @@ class ReportsList(View):
         exclude_list = ['filling_date', 'stored', 'tagged_coworker', 'transaction', 'coworkers_qt_ty']
         salary = self.salary_of_workers()
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]  # Headers for table
+        not_confirmed, stored = self.counter()
         context = {
             'header': header,
             'data': result.object_list,
             'pages': result,
             'salary': salary,
             'filter': self.get_filter(request),
+            'not_confirmed': not_confirmed,
+            'stored': stored,
         }
         return render(request, self.template, context)
 
@@ -574,18 +577,24 @@ class ReportsList(View):
         '''
         return duplicates
 
-    def counter(self, data):
-        result = data.annotate(Count('work'))
-        return result
+    def counter(self):
+        work_list = WorkReport.objects.all()
+        not_confirmed = work_list.filter(confirmed=False, deleted=False, stored=False).__len__()
+        stored = work_list.filter(confirmed=False, deleted=False, stored=True).__len__()
+        return not_confirmed, stored,
 
-    def salary_of_workers(self):
+    def salary_aggregator(self, user):
         reports_now_a_month = WorkReport.objects.filter(
             working_date__month=datetime.datetime.now().month)
+        result = reports_now_a_month.filter(
+            user=user).aggregate(Sum('cost'))['cost__sum']
+        return result or 0
+
+    def salary_of_workers(self):
         workers = Worker.objects.filter(can_make_report=True)
         result = ['%s: %s' %
-               (each, reports_now_a_month.filter(user=each.user).aggregate(Sum('cost'))['cost__sum'])
-               for each in workers]
-        return result
+                  (each.name,'{:,}'.format(self.salary_aggregator(each.user))) for each in workers]
+        return ' / '.join(result)
 
     def additional_filters(self, request):
         confirmed = request.GET.get('confirmed', False)
