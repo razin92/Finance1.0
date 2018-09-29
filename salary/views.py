@@ -359,9 +359,9 @@ class WorkerReportUser(View):
                 for x in coworkers:
                     new_object.coworker.add(x)
                 if 'new' in request.POST:
-                    self.tagged_work(user).last().untag_coworker()
-                    new_object.coworkers_qt_ty = 0
-                    new_object.save()
+                    self.tagged_work(user).untag_coworker()
+                    #new_object.coworkers_qt_ty = 0
+                    #new_object.save()
                 if coworkers != '' and new_object.coworkers_qt_ty == 1:
                     new_object.tag_coworker()
 
@@ -416,7 +416,8 @@ class WorkerReportUser(View):
 
     def tagged_work(self, user_id):
         worker = Worker.objects.get(user_id=user_id)
-        return WorkReport.objects.filter(tagged_coworker=True, coworker__id=worker.id).last()
+        work = WorkReport.objects.filter(tagged_coworker=True, coworker__id=worker.id)
+        return work.last()
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)
