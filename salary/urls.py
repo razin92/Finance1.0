@@ -27,7 +27,7 @@ urlpatterns = [
         url(r'^total/create/$', login_required(views.TotalCreate), name='total_create'),
         url(r'^total/get_salary/$', login_required(views.get_salary), name='get_salary'),
 
-        url(r'^total/calculate/([0-9]{1})/$', views.calculate, name='calculate'),
+        url(r'^total/calculate/([1-2])/$', views.calculate, name='calculate'),
         url(r'^total/work_detail/(?P<worker_id>[0-9]+)$', views.accrual, name='accrual'),
         url(r'^total/bonus_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.bonus, name='bonus'),
         url(r'^total/withholding_detail/(?P<worker_id>[0-9]+)/(?P<total_id>[0-9]+)$', views.withholding, name='withholding'),
