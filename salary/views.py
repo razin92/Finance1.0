@@ -2,11 +2,10 @@ from django.views.generic import View, ListView, CreateView, UpdateView
 from .models import Worker, WorkCalc, BonusWork, AccountChange, \
     CategoryOfChange, Total, WorkReport, Work
 from calc.models import Transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.db.models import Count, Sum
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
@@ -299,8 +298,9 @@ def issued(request, worker_id, total_id):
 @login_required()
 def calculate(request, code):
     today = datetime.date.today()
-    total_list = Total.objects.filter(date__month=today.month, date__year=today.year)
-    date_now = {'month': today.month, 'year': today.year}
+    month = request.GET.get('month', today.month)
+    total_list = Total.objects.filter(date__month=month, date__year=today.year)
+    date_now = {'month': month, 'year': today.year}
     for total in total_list:
         total.calculate(date=date_now)
     if code == '1':
