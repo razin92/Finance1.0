@@ -3,9 +3,9 @@ from .models import BalanceStamp, TransactionChangeHistory
 # Register your models here.
 
 class BalanceStampAdmin(admin.ModelAdmin):
-    list_display = ('date', 'pouch', 'transaction_id', 'balance_before', 'balance_after', 'transaction__checking')
-    date_hierarchy = 'transaction__date'
-    search_fields = ['transaction__id']
+    list_display = ('date', 'pouch', 'transaction_id', 'balance_before', 'balance_after')
+    date_hierarchy = 'date'
+    search_fields = ['transaction_id']
 
 class TransactionChangeHistoryAdmin(admin.ModelAdmin):
     list_display = ('transaction_id', 'date_before', 'date_after', 'sum_val_before', 'sum_val_after',
