@@ -16,11 +16,16 @@ class Transaction(models.Model):
     create_date = models.DateTimeField(verbose_name=(u'Дата создания/изменения'))
     creator = models.ForeignKey(User, default=None, null=True)
 
-    def __unicode__(self):
-        return self.date
+    def __str__(self):
+        tr = '(%s)%s: %s %s-%s' % (
+            self.id, self.date.strftime('%d-%m-%y'),
+            self.category ,self.money, self.sum_val
+        )
+        return tr
 
     class Meta():
         unique_together = ['date', 'sum_val', 'category', 'who_is', 'comment', 'money', 'typeof']
+        ordering = ['-date']
 
     def save(self, *args, **kwargs):
 
