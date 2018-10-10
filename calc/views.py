@@ -10,7 +10,7 @@ from report.models import TransactionChangeHistory, BalanceStamp
 from django.utils import timezone
 from salary.models import WorkReport
 from django.views import View
-from .forms import TransactionForm, TransactionEditForm, MonthForm
+from .forms import TransactionForm, TransactionEditForm, MonthForm, WorkReportTransactionForm
 from .models import Transaction
 import datetime
 
@@ -273,9 +273,15 @@ class ReportsMoney(View):
 
     def get(self, request):
         user = request.user
-        reports_list = WorkReport.objects.filter(income__gt=0, confirmed=True, deleted=False)
+        reports_list = WorkReport.objects.filter(income__gt=0, deleted=False, working_date__gt='2018-09-30')
         total_sum = reports_list.values('income').aggregate(Sum('income'))['income__sum']
-        exclude_list = ['filling_date', 'user', 'stored',
+        got = reports_list.filter(transaction__isnull=False)\
+            .values_list('income')\
+            .aggregate(Sum('income'))['income__sum']
+        not_got = reports_list.filter(transaction__isnull=True)\
+            .values_list('income')\
+            .aggregate(Sum('income'))['income__sum']
+        exclude_list = ['filling_date', 'stored',
                         'tagged_coworker', 'transaction',
                         'coworkers_qt_ty', 'confirmed', 'deleted',
                         'cost', 'comment', 'admin_comment', 'hours_qty'
@@ -284,7 +290,9 @@ class ReportsMoney(View):
         context = {
             'reports_list': reports_list if user.is_superuser else None,
             'headers': headers,
-            'total_sum': total_sum if user.is_superuser else None
+            'total_sum': total_sum if user.is_superuser else None,
+            'got': got or 0,
+            'not_got': not_got or 0
         }
         return render(request, self.template, context)
 
@@ -295,3 +303,41 @@ def set_default_color(color):
         each.color = '3E3E3E'
         each.save()
     return print('done')
+
+
+class WorkReportTransaction(View):
+    template = 'calc/report_confirmation.html'
+
+    def get(self, request):
+        report = get_object_or_404(WorkReport, id=request.GET.get('report_id', 0))
+        form = WorkReportTransactionForm(None, user_id=request.user.id, report=report)
+        context = {
+            'form': form,
+            'report': report
+        }
+        return render(request, self.template, context)
+
+    def post(self, request):
+        report = get_object_or_404(WorkReport, id=request.GET.get('report_id', 0))
+        form = WorkReportTransactionForm(data=request.POST, user_id=request.user.pk, report=report)
+        # Если форма валидна, заносим транзакцию в базу
+        if form.is_valid():
+            transaction = Transaction.objects.create(**form.cleaned_data)
+            transaction.creator = request.user
+            pouch = get_object_or_404(Pouch, pk=transaction.money.id)
+            sum = transaction.sum_val
+            # Калькуляция
+            transaction.typeof = True
+            pouch.balance += sum
+            transaction.save()
+            pouch.save()
+            report.transaction = transaction
+            report.save()
+            CreateBalanceStamp(transaction, None, 'Создание')
+            return HttpResponseRedirect(reverse('calc:reports_money'))
+        else:
+            context = {
+                'form': form,
+                'report': report
+            }
+            return render(request, self.template, context)

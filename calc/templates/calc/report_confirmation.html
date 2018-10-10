@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+{% block body %}
+{% load bootstrap %}
+     <div class="panel-body">
+        <div class="panel panel-default scroll" style="margin: auto; max-width: 500px;">
+            <form style="margin: 2%" method="post">
+                {% csrf_token %}
+                <p>Отчет №:{{ report.id }}</p>
+                <p>Адрес: {{ report.quarter }}-{{ report.building }}
+                {% if report.apartment %}}-{{ report.apartment }}{% endif %}</p>
+                <p>Работа: {{ report.work }}</p>
+                {{ form|bootstrap }}
+                <input type="submit" value="сохранить" class="btn btn-sm btn-success" style="width: 100%">
+            </form>
+        </div>
+     </div>
+{% endblock %}

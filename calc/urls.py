@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from .views import TransactionView, TransactionDetailView, \
     changer, TransactionCreate, calculate, TransactionEdit, \
-    ReportsMoney
+    ReportsMoney, WorkReportTransaction
 from django.contrib.auth.decorators import login_required
 
 
@@ -17,5 +17,6 @@ urlpatterns = [
     url(r'^transactions/edit/(?P<transaction_id>[0-9]+)/$', TransactionEdit, name='transaction_edit'),
     url(r'^transactions/calc/([0-1]+)/$', calculate, name='transaction_calc'),
     # work reports
-    url(r'transactions/reports_list/$', login_required(ReportsMoney.as_view()), name='reports_money')
+    url(r'transactions/reports_list/$', login_required(ReportsMoney.as_view()), name='reports_money'),
+    url(r'report_transactions/$', login_required(WorkReportTransaction.as_view()), name='report_transaction'),
     ]

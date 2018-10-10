@@ -8,9 +8,13 @@
         }
     </style>
     <div class="panel-body">
-        <div class="panel panel-default scroll" style="max-width: 700px">
+        <div class="panel panel-default scroll" style="max-width: 90%">
             {% if total_sum %}
-                <p>Общая сумма к сдачи в кассу: <strong>{{ total_sum|intcomma }}</strong></p>
+                <p>
+                    Общая сумма к сдачи в кассу: <strong>{{ total_sum|intcomma }}</strong>
+                    Сдано: <strong class="text-success">{{ got|intcomma }}</strong>
+                    Не сдано: <strong class="text-danger">{{ not_got|intcomma }}</strong>
+                </p>
             {% else %}
                 <p class="text-danger" align="center">Недостаточно прав</p>
             {% endif %}
@@ -30,7 +34,19 @@
                                 {% for element in headers %}
                                     <td>{{ each|value:element.name|intcomma }}</td>
                                 {% endfor %}
-                                    <td></td>
+                                <td>
+                                    {% if not each.transaction %}
+                                        <a href="{% url 'calc:report_transaction' %}?report_id={{ each.id }}"
+                                           title="Добавить">
+                                            <strong style="font-size: large; color: red">+</strong>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'calc:transaction_detail' each.transaction.id %}"
+                                           title="Посмотреть транзакцию" target="_blank">
+                                            <strong style="color: green">✔</strong>
+                                        </a>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
