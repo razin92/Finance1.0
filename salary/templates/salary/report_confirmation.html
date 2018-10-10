@@ -60,6 +60,9 @@
                     {% else %}
                         <strong>{{ data.income|intcomma }}</strong>
                     {% endif %}
+                    {% if data.transaction %}
+                        В кассе
+                    {% endif %}
                     </td>
                 </tr>
             </table>
