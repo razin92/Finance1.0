@@ -7,7 +7,7 @@
                 {% csrf_token %}
                 <p>Отчет №:{{ report.id }}</p>
                 <p>Адрес: {{ report.quarter }}-{{ report.building }}
-                {% if report.apartment %}}-{{ report.apartment }}{% endif %}</p>
+                {% if report.apartment %}-{{ report.apartment }}{% endif %}</p>
                 <p>Работа: {{ report.work }}</p>
                 {{ form|bootstrap }}
                 <input type="submit" value="сохранить" class="btn btn-sm btn-success" style="width: 100%">
