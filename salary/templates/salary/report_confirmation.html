@@ -112,6 +112,12 @@
                             <td>{{ data.cost }}</td>
                         </tr>
                         {% endif %}
+                        {% if data.income > 0 %}
+                        <tr>
+                            <td>Принятые кредиты:</td>
+                            <td style="font-weight: bold">{{ data.income|intcomma }}</td>
+                        </tr>
+                        {% endif %}
                         {% if data.comment %}
                         <tr>
                             <td>Коммент:</td>
