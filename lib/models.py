@@ -32,7 +32,7 @@ class Pouch(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=20, unique=True)
-    color = ColorField(default='#F0F0F0')
+    color = ColorField(default=None, null=True, blank=True)
 
     def __str__(self):
         return self.name

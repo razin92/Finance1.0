@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
-from calc.models import Transaction
+from calc.models import Transaction, Category
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 
@@ -254,6 +254,7 @@ class Total(models.Model):
 
 class Work(models.Model):
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
+    category = models.ForeignKey(Category, null=True, default=None, verbose_name="Категория")
 
     def __str__(self):
         return self.name

@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from lib.models import Category, Person, Staff
 from calc.models import Transaction
+from salary.models import Worker
 from bootstrap3_datetime.widgets import DateTimePicker
 import datetime
 
@@ -93,3 +94,59 @@ class MonthForm(forms.Form):
     )
     select_month = forms.ChoiceField(choices=month, label="Выбрать другой месяц")
     #select_year = forms.ChoiceField(choices=year)
+
+
+class WorkReportTransactionForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        report = kwargs.pop('report', None)
+        user_id = kwargs.pop('user_id', None)
+        last_transaction = Transaction.objects.filter(
+            creator_id=user_id).order_by('create_date').last()
+        super(WorkReportTransactionForm, self).__init__(*args, **kwargs)
+        self.fields['sum_val'].initial = report.income
+        self.fields['money'].queryset = Staff.objects.get(
+            name__id=user_id).pouches.all().order_by('name')
+        self.fields['date'] = forms.DateTimeField(
+            label="Дата", widget=DateTimePicker(options={"format": "YYYY-MM-DD HH:mm"}))
+        self.fields['comment'].widget = forms.Textarea(attrs={'rows': '3', })
+        self.fields['date'].initial = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.fields['category'].initial = report.work.category
+        self.fields['who_is'].initial = Worker.objects.get(user=report.user).name
+        if last_transaction:
+            self.fields['money'].initial = last_transaction.money
+
+    error = {'required': 'Необходимо заполнить'}
+    date = forms.DateTimeField(
+        label="Дата",
+        widget=DateTimePicker(
+            options={"format": "YYYY-MM-DD HH:mm"}
+        ),
+        error_messages=error)
+    sum_val = forms.IntegerField(
+        label="Сумма",
+        max_value=999999999,
+        min_value=1
+    )
+    category = forms.ModelChoiceField(
+        label="Категория",
+        queryset=Category.objects.all().order_by('name'),
+        error_messages=error
+    )
+    who_is = forms.ModelChoiceField(
+        label="Персона",
+        queryset=Person.objects.all().order_by('firstname'),
+        error_messages=error
+    )
+    money = forms.ModelChoiceField(
+        label="Счет",
+        queryset=Staff.objects.none(),
+        error_messages=error
+    )
+    comment = forms.CharField(
+        label="Комментарий",
+        max_length=50,
+        required=False,
+        widget=forms.Textarea(
+            attrs={'rows': '3', })
+    )
