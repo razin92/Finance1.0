@@ -504,6 +504,10 @@ class MyWorkList(View):
                                deleted=False,
                                stored=False).values('cost').aggregate(Sum('cost'))['cost__sum']
         income_sum = data.filter(deleted=False).values('income').aggregate(Sum('income'))['income__sum']
+        gave = data.filter(deleted=False, transaction__isnull=False)\
+            .values('income').aggregate(Sum('income'))['income__sum']
+        not_gave = data.filter(deleted=False, transaction__isnull=True)\
+            .values('income').aggregate(Sum('income'))['income__sum']
         exclude_list = ['filling_date', 'user', 'stored', 'tagged_coworker', 'transaction', 'coworkers_qt_ty']
         header = [x for x in WorkReport._meta.get_fields() if x.name not in exclude_list]
         splitter = Paginator(data, 25)
@@ -513,8 +517,10 @@ class MyWorkList(View):
             'data': split_data.object_list,
             'pages': split_data,
             'form': form,
-            'cost_sum': cost_sum,
-            'income': income_sum
+            'cost_sum': cost_sum or 0,
+            'income': income_sum or 0,
+            'gave': gave or 0,
+            'not_gave': not_gave or 0
         }
         return render(request, self.template, context)
 
