@@ -34,7 +34,7 @@ function ShowHideContent(spoiler)
     </div>
     <div class="panel-body">
         <div class="panel panel-default scroll">
-            <p style="margin: 1%;">Итого заработано за период: {{ cost_sum|intcomma }} Принято кредитов: {{ income|intcomma }}</p>
+            <p style="margin: 1%;">Итого заработано за период: {{ cost_sum|intcomma }} Принято кредитов: {{ income|intcomma }} Сдал: {{ gave|intcomma }} Должен сдать: {{ not_gave|intcomma }}</p>
         </div>
     </div>
     {% if dupes %}
@@ -78,6 +78,7 @@ function ShowHideContent(spoiler)
                 {% for each in header %}
                     <th>{{ each.verbose_name }}</th>
                 {% endfor %}
+                <th>Сданы</th>
             </tr>
         </thead>
         <tbody>
@@ -92,6 +93,15 @@ function ShowHideContent(spoiler)
                     {% for element in header %}
                         <td>{{ each|value:element.name|intcomma }}</td>
                     {% endfor %}
+                    <td>
+                        {% if each.income > 0 %}
+                            {% if each.transaction %}
+                                <strong style="color: green">✔</strong>
+                            {% else %}
+                                <strong style="font-size: large; color: red">+</strong>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
