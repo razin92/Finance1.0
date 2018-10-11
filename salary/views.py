@@ -331,10 +331,10 @@ class WorkerReportUser(View):
         form = None
         tagged_work = None
         if self.can_make_report(request.user):
-            tagged_work = self.tagged_work(user)
+            tagged_work = self.tagged_work(user) # Проверка на участие в других работах
             form = WorkReportUserForm(None, user_id=user)
-            if tagged_work and tagged_work.check_report(user):
-                form = self.make_form(tagged_work, user)
+            if tagged_work:
+                form = self.make_form(tagged_work, user) # Формирование новой формы со скрытыми полями
                 self.message = '%s отметил вас в работе' % Worker.objects.get(user=tagged_work.user)
         else:
             self.message = 'Недостаточно прав'
@@ -359,7 +359,8 @@ class WorkerReportUser(View):
                 for x in coworkers:
                     new_object.coworker.add(x)
                 if 'new' in request.POST:
-                    self.tagged_work(user).untag_coworker()
+                    # добавить счетчик отмеченных, если была принята совместная работа
+                    WorkReport.objects.get(id=request.POST['tagged_id']).untag_coworker()
                     new_object.coworkers_qt_ty = 0
                     new_object.save()
                 if coworkers != '' and new_object.coworkers_qt_ty == 1:
@@ -388,7 +389,8 @@ class WorkerReportUser(View):
             if result[1]:
                 logging.debug('*success* %s' % data)
                 return result[0]
-            self.tagged_work(user.id).untag_coworker()
+            # если отчет уже имеется, но выходит в отмеченных, добавить к счетчику отмеченных
+            WorkReport.objects.get(id=data['tagged_id']).untag_coworker()
             return None
         except IntegrityError:
             logging.debug('*error* %s' % data)
@@ -414,10 +416,14 @@ class WorkerReportUser(View):
             return None
         return data
 
-    def tagged_work(self, user_id):
+    def tagged_work(self, user_id, last_work=None):
         worker = Worker.objects.get(user_id=user_id)
         work = WorkReport.objects.filter(tagged_coworker=True, coworker__id=worker.id)
-        return work.last()
+        for each in work:
+            if each.check_report(user_id):
+                last_work = each
+                break
+        return last_work
 
     def make_form(self, work_object, user_id):
         return WorkReportTaggedForm(None, work=work_object, user_id=user_id)

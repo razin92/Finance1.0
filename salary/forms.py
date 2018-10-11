@@ -225,6 +225,10 @@ class WorkReportTaggedForm(forms.Form):
             initial=True,
             widget=HiddenInput
         )
+        self.fields['tagged_id'] = forms.IntegerField(
+            initial=work.id,
+            widget=HiddenInput
+        )
 
     def get_worker(self, work, user):
         result = [x.id for x in Worker.objects.filter(
