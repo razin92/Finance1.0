@@ -8,6 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 import json
 
+logging = logging.getLogger(__name__)
+
+
 # Create your views here.
 @method_decorator(basic_auth_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
@@ -17,21 +20,21 @@ class RequestReceiver(View):
         pass
 
     def post(self, request):
-        logging.DEBUG(request.body.decode('utf-8', 'ignore'))
+        logging.debug(request.body.decode('utf-8', 'ignore'))
         try:
             json_data = json.loads(request.body.decode('utf-8', 'ignore'))
             result = {
                 'result': 'ok',
                 'data': json_data
             }
-            logging.DEBUG(result)
+            logging.debug(result)
             return JsonResponse(result)
         except:
             result = {
                 'error': 'bad_request',
                 'data': 'wrong_data'
             }
-            logging.DEBUG(result)
+            logging.debug(result)
             return JsonResponse(result)
 
 
