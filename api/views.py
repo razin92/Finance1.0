@@ -5,6 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from basicauth.decorators import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db import DatabaseError
+from .models import SubscriberRequest
+import datetime
 import logging
 import json
 
@@ -20,22 +23,21 @@ class RequestReceiver(View):
         pass
 
     def post(self, request):
-        logging.debug(request.body.decode('utf-8', 'ignore'))
+        body = json.loads(request.body.decode('utf-8', 'ignore'))
+        logging.debug(body)
+        created = self.create_request(body)
+        return JsonResponse(created)
+
+    def create_request(self, body):
         try:
-            json_data = json.loads(request.body.decode('utf-8', 'ignore'))
-            result = {
-                'result': 'ok',
-                'data': json_data
-            }
-            logging.debug(result)
-            return JsonResponse(result)
-        except:
-            result = {
-                'error': 'bad_request',
-                'data': 'wrong_data'
-            }
-            logging.debug(result)
-            return JsonResponse(result)
-
-
-
+            new_request = SubscriberRequest.objects.create(
+                request_id=body['rqst_id'],
+                ref_key=body['ref_key'],
+                ops_date=datetime.datetime.strptime(body['ops_date'], '%d.%m.%Y %H:%M:%S'),
+                request_work=body['rqsted_work'],
+                request_address=body['rqst_address']
+            )
+            logging.debug('%s %s' % (new_request, 'created'))
+            return {'result': 'ok'}
+        except DatabaseError:
+            return {'result': 'already exists'}
