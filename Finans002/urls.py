@@ -31,4 +31,5 @@ urlpatterns = [
     url(r'^login-redirect/$', views.login_view, name="login-redirect"),
     url(r'^logout/$', views.logout_view, name='logout'),
     url(r'^bot/', include('telebot.urls')),
+    url(r'^api/', include('api.urls'), name='api'),
 ]
