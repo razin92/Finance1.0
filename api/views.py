@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from basicauth.decorators import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
+from salary.models import Worker
 from django.db import DatabaseError
 from .models import SubscriberRequest
 from .forms import StatusChangingForm
@@ -63,6 +64,9 @@ class StatusChanger(View):
                 ref_key=data['ref_key']
             )
             request.request_status = data['rqst_status']
+            request.request_comment = request.request_comment + ' %s' % data['rqst_comment']
+            if data['master_ref_key']:
+                request.worker = Worker.objects.get(one_c_worker_name=data['master_ref_key'])
             request.save()
             return {'result': 'ok'}
         except DatabaseError:
@@ -83,19 +87,24 @@ class StatusChangeTest(View):
         form = StatusChangingForm(post)
         result = None
         if form.is_valid():
-            url = 'http://127.0.0.1:8000/api/update_request/'
+            url = post['target']
             login = 'testuser'
             password = 'Password156324'
             JSON = {
                 'ops_date': datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
                 'ref_key': SubscriberRequest.objects.get(id=post['request']).ref_key,
                 'rqst_status': post['status'],
+                'rqst_comment': post['comment'],
+                'master_ref_key': post['master']
             }
             r = requests.post(
                 url, json=JSON, auth=(login, password)
             )
-            result = {'status': r.status_code}
+            result = {'status': r.status_code, 'json': JSON}
             if result['status'] == 200:
-                result['status'] = r.json()
+                try:
+                    result['status'] = r.json()
+                except:
+                    pass
 
         return render(request, self.template, context={'form': form, 'result': result})

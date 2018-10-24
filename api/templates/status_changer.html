@@ -1,3 +1,8 @@
+{% load staticfiles %}
+<script src="/media/static/static_jquery/js/jquery.js"></script>
+<script src="/media/static/bootstrap/js/bootstrap.js"></script>
+{% load bootstrap_themes %}
+{% bootstrap_styles theme='yeti' type='css' %}
 {% load bootstrap %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,11 +11,15 @@
     <title>TEST</title>
 </head>
 <body>
-    {{ result }}
+
+    <div align="center" style="max-width: 500px; margin: auto">
+        {{ result }}
+        <br>
     <form method="post">
         {% csrf_token %}
-        {{ form }}
+        {{ form|bootstrap }}
         <input type="submit" value="сохранить">
     </form>
+    </div>
 </body>
 </html>
