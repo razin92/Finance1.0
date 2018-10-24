@@ -4,6 +4,7 @@ from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
 from calc.models import Transaction, Category
 from django.core.exceptions import ObjectDoesNotExist
+from .auth import AuthData
 import datetime
 
 
@@ -21,10 +22,22 @@ class WorkCalc(models.Model):
     cost = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name
+        string = '%s (%s/%s)' % (
+            self.name, self.cost, self.time_range)
+        return string
+
 
 
 class Worker(models.Model):
+
+    def get_one_c_list(self):
+        doc_type = 'Catalog'
+        doc = 'Сотрудники2'
+        select = '$select=Ref_Key,Description'
+        result = AuthData().odata(doc_type, doc, select)
+        name_list = {(x['Ref_Key'], x['Description']) for x in result.json()['value']}
+        return name_list
+
     name = models.OneToOneField(Person)
     account = models.IntegerField(default=0)
     position = models.ManyToManyField(WorkCalc)
@@ -33,12 +46,22 @@ class Worker(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
     can_make_report = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)
+    one_c_worker_name = models.CharField(default=None, null=True, blank=True, max_length=100)
+
+    def __init__(self, *args, **kwargs):
+        super(Worker, self).__init__(*args, **kwargs)
+        try:
+            choices = self.get_one_c_list()
+        except KeyError:
+            choices = (('error', 'нет соединения с 1С'), )
+        self._meta.get_field('one_c_worker_name').choices = choices
 
     def __str__(self):
         return str(self.name)
 
     def get_salary(self):
-        date_today = timezone.now().replace(day=1, hour=15, minute=00, second=00, microsecond=000000)
+        date_today = timezone.now().replace(
+            day=1, hour=15, minute=00, second=00, microsecond=000000)
         account, created = Pouch.objects.get_or_create(
             name='System',
             defaults={'balance': 0},
@@ -253,8 +276,27 @@ class Total(models.Model):
 
 
 class Work(models.Model):
+
+
+    def get_one_c_list(self):
+        doc_type = 'Catalog'
+        doc = 'Вопросы'
+        select = '$select=Ref_Key,Description'
+        result = AuthData().odata(doc_type, doc, select)
+        name_list = {(x['Ref_Key'],x['Description']) for x in result.json()['value']}
+        return name_list
+
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
     category = models.ForeignKey(Category, null=True, default=None, verbose_name="Категория")
+    one_c_work_name = models.CharField(default=None, null=True, blank=True, max_length=100)
+
+    def __init__(self, *args, **kwargs):
+        super(Work, self).__init__(*args, **kwargs)
+        try:
+            choices = self.get_one_c_list()
+        except KeyError:
+            choices = (('error', 'нет соединения с 1С'), )
+        self._meta.get_field('one_c_work_name').choices = choices
 
     def __str__(self):
         return self.name
