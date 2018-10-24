@@ -7,12 +7,34 @@ import calendar
 import datetime
 
 class BonusWorkForm(forms.Form):
-    date = forms.DateField(label="Дата", initial=datetime.date.today(), widget=DateTimePicker(options={"format": "YYYY-MM-DD"}))
-    model = forms.ModelChoiceField(label="Работа", queryset=WorkCalc.objects.all().order_by('name'))
-    worker = forms.ModelChoiceField(label="Работник", queryset=Worker.objects.all().order_by('name__firstname'))
-    quantity = forms.IntegerField(label="Кол-во", min_value=1, max_value=100, initial=1)
-    comment = forms.CharField(label="Комментарий", max_length=100, required=False)
-    withholding = forms.BooleanField(label="Удержание", required=False)
+    date = forms.DateField(
+        label="Дата",
+        initial=datetime.date.today(),
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD"})
+    )
+    model = forms.ModelChoiceField(
+        label="Работа",
+        queryset=WorkCalc.objects.all().order_by('name')
+    )
+    worker = forms.ModelChoiceField(
+        label="Работник",
+        queryset=Worker.objects.all().order_by('name__firstname')
+    )
+    quantity = forms.IntegerField(
+        label="Кол-во",
+        min_value=1,
+        max_value=100,
+        initial=1
+    )
+    comment = forms.CharField(
+        label="Комментарий",
+        max_length=100,
+        required=False
+    )
+    withholding = forms.BooleanField(
+        label="Удержание",
+        required=False
+    )
 
 class MassBonusForm(forms.Form):
 
@@ -252,11 +274,13 @@ class WorkReportForm(forms.ModelForm):
             can_make_report=True).exclude(user__id=kwargs['instance'].user.id)
         self.fields['income'].initial = None
 
+
 class WorkForm(forms.ModelForm):
 
     class Meta:
         model = Work
-        fields = ['name']
+        fields = ['name', 'category', 'one_c_work_name']
+
 
 class MyWorkFilterForm(forms.Form):
 
