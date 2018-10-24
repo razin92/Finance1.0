@@ -32,7 +32,7 @@ class Worker(models.Model):
 
     def get_one_c_list(self):
         doc_type = 'Catalog'
-        doc = 'Сотрудники2'
+        doc = 'Сотрудники'
         select = '$select=Ref_Key,Description'
         result = AuthData().odata(doc_type, doc, select)
         name_list = None
