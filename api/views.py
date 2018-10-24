@@ -38,7 +38,8 @@ class RequestReceiver(View):
                 ref_key=body['ref_key'],
                 ops_date=datetime.datetime.strptime(body['ops_date'], '%d.%m.%Y %H:%M:%S'),
                 request_work=body['rqsted_work'],
-                request_address=body['rqst_address']
+                request_address=body['rqst_address'],
+                request_comment=body['rqst_comment']
             )
             logging.debug('%s %s' % (new_request, 'created'))
             return {'result': 'ok'}
