@@ -35,7 +35,9 @@ class Worker(models.Model):
         doc = 'Сотрудники2'
         select = '$select=Ref_Key,Description'
         result = AuthData().odata(doc_type, doc, select)
-        name_list = {(x['Ref_Key'], x['Description']) for x in result.json()['value']}
+        name_list = None
+        if result.status_code == 200:
+            name_list = {(x['Ref_Key'], x['Description']) for x in result.json()['value']}
         return name_list
 
     name = models.OneToOneField(Person)
@@ -283,7 +285,9 @@ class Work(models.Model):
         doc = 'Вопросы'
         select = '$select=Ref_Key,Description'
         result = AuthData().odata(doc_type, doc, select)
-        name_list = {(x['Ref_Key'],x['Description']) for x in result.json()['value']}
+        name_list = None
+        if result.status_code == 200:
+            name_list = {(x['Ref_Key'],x['Description']) for x in result.json()['value']}
         return name_list
 
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
