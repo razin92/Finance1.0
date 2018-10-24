@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, reverse
+from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views import View
 from django.contrib.auth.decorators import login_required
@@ -7,6 +8,8 @@ from basicauth.decorators import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
 from django.db import DatabaseError
 from .models import SubscriberRequest
+from .forms import StatusChangingForm
+import requests
 import datetime
 import logging
 import json
@@ -41,3 +44,57 @@ class RequestReceiver(View):
             return {'result': 'ok'}
         except DatabaseError:
             return {'result': 'already exists'}
+
+
+@method_decorator(basic_auth_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
+class StatusChanger(View):
+
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8', 'ignore'))
+        logging.debug(body)
+        result = self.change_status(body)
+        return JsonResponse(result)
+
+    def change_status(self, data):
+        try:
+            request = SubscriberRequest.objects.get(
+                ref_key=data['ref_key']
+            )
+            request.request_status = data['rqst_status']
+            request.save()
+            return {'result': 'ok'}
+        except DatabaseError:
+            logging.debug('%s not found' % data['ref_key'])
+            return {'result': 'not found'}
+
+
+class StatusChangeTest(View):
+
+    template = 'status_changer.html'
+
+    def get(self, request):
+        form = StatusChangingForm(None)
+        return render(request, self.template, context={'form': form})
+
+    def post(self, request):
+        post = request.POST
+        form = StatusChangingForm(post)
+        result = None
+        if form.is_valid():
+            url = 'http://127.0.0.1:8000/api/update_request/'
+            login = 'testuser'
+            password = 'Password156324'
+            JSON = {
+                'ops_date': datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+                'ref_key': SubscriberRequest.objects.get(id=post['request']).ref_key,
+                'rqst_status': post['status'],
+            }
+            r = requests.post(
+                url, json=JSON, auth=(login, password)
+            )
+            result = {'status': r.status_code}
+            if result['status'] == 200:
+                result['status'] = r.json()
+
+        return render(request, self.template, context={'form': form, 'result': result})
