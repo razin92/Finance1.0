@@ -5,7 +5,7 @@ from salary.models import Worker
 class StatusChangingForm(Form):
 
     targets = (
-        ('http://mng.pst.uz:88/api/update_request/', 'Django'),
+        ('https://mng.pst.uz:88/api/update_request/', 'Django'),
         ('http://192.168.220.30/TESTBASE/hs/apidjango/post/', '1C')
     )
 
