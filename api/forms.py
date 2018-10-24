@@ -8,6 +8,13 @@ class StatusChangingForm(Form):
         ('https://mng.pst.uz:88/api/update_request/', 'Django'),
         ('http://192.168.220.30/TESTBASE/hs/apidjango/post/', '1C')
     )
+    def __init__(self, *args, **kwargs):
+        super(StatusChangingForm, self).__init__(*args, **kwargs)
+        self.fields['request'].queryset = SubscriberRequest.objects.all()
+        self.fields['status'].choices = Lib().statuses()
+        self.fields['master'].choices = ((x.one_c_worker_name, x)
+                                         for x in Worker.objects.filter(one_c_worker_name__isnull=False))
+        self.fields['master'].initial = None
 
     target = ChoiceField(choices=targets, label='Цель запроса')
     request = ModelChoiceField(queryset=SubscriberRequest.objects.all(), label='Заявка ID-Работа-Статус в Django')
