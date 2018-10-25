@@ -27,18 +27,18 @@ class WorkCalc(models.Model):
         return string
 
 
+def get_one_c_list():
+    doc_type = 'Catalog'
+    doc = 'Сотрудники'
+    select = '$select=Ref_Key,Description'
+    result = AuthData().odata(doc_type, doc, select)
+    name_list = None
+    if result.status_code == 200:
+        name_list = {(x['Ref_Key'], x['Description']) for x in result.json()['value']}
+    return name_list
+
 
 class Worker(models.Model):
-
-    def get_one_c_list(self):
-        doc_type = 'Catalog'
-        doc = 'Сотрудники'
-        select = '$select=Ref_Key,Description'
-        result = AuthData().odata(doc_type, doc, select)
-        name_list = None
-        if result.status_code == 200:
-            name_list = {(x['Ref_Key'], x['Description']) for x in result.json()['value']}
-        return name_list
 
     name = models.OneToOneField(Person)
     account = models.IntegerField(default=0)
@@ -270,22 +270,22 @@ class Total(models.Model):
         self.balance_now_calc(date=date)
 
 
+def get_one_c_list():
+    doc_type = 'Catalog'
+    doc = 'Вопросы'
+    select = '$select=Ref_Key,Description'
+    result = AuthData().odata(doc_type, doc, select)
+    name_list = None
+    if result.status_code == 200:
+        name_list = {(x['Ref_Key'],x['Description']) for x in result.json()['value']}
+    return name_list
+
 class Work(models.Model):
-
-
-    def get_one_c_list(self):
-        doc_type = 'Catalog'
-        doc = 'Вопросы'
-        select = '$select=Ref_Key,Description'
-        result = AuthData().odata(doc_type, doc, select)
-        name_list = None
-        if result.status_code == 200:
-            name_list = {(x['Ref_Key'],x['Description']) for x in result.json()['value']}
-        return name_list
 
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
     category = models.ForeignKey(Category, null=True, default=None, verbose_name="Категория")
-    one_c_work_name = models.CharField(default=None, null=True, blank=True, max_length=100, choices=get_one_c_list())
+    one_c_work_name = models.CharField(
+        default=None, null=True, blank=True, max_length=100, choices=get_one_c_list())
 
     def __str__(self):
         return self.name
