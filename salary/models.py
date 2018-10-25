@@ -48,15 +48,8 @@ class Worker(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
     can_make_report = models.BooleanField(default=False)
     fired = models.BooleanField(default=False)
-    one_c_worker_name = models.CharField(default=None, null=True, blank=True, max_length=100)
-
-    def __init__(self, *args, **kwargs):
-        super(Worker, self).__init__(*args, **kwargs)
-        try:
-            choices = self.get_one_c_list()
-        except KeyError:
-            choices = (('error', 'нет соединения с 1С'), )
-        self._meta.get_field('one_c_worker_name').choices = choices
+    one_c_worker_name = models.CharField(
+        default=None, null=True, blank=True, max_length=100, choices=get_one_c_list())
 
     def __str__(self):
         return str(self.name)
@@ -292,15 +285,7 @@ class Work(models.Model):
 
     name = models.CharField(max_length=50, verbose_name="Вид работ", unique=True)
     category = models.ForeignKey(Category, null=True, default=None, verbose_name="Категория")
-    one_c_work_name = models.CharField(default=None, null=True, blank=True, max_length=100)
-
-    def __init__(self, *args, **kwargs):
-        super(Work, self).__init__(*args, **kwargs)
-        try:
-            choices = self.get_one_c_list()
-        except KeyError:
-            choices = (('error', 'нет соединения с 1С'), )
-        self._meta.get_field('one_c_work_name').choices = choices
+    one_c_work_name = models.CharField(default=None, null=True, blank=True, max_length=100, choices=get_one_c_list())
 
     def __str__(self):
         return self.name
