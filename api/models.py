@@ -40,6 +40,8 @@ class SubscriberRequest(models.Model):
     request_work = models.CharField(default='нет описания', max_length=100)
     request_address = models.CharField(default='q-b-a', max_length=50)
     request_comment = models.CharField(max_length=255, blank=True)
+    subs_telephone = models.CharField(max_length=50, blank=True)
+    subs_add_info = models.CharField(max_length=255, blank=True)
     worker = models.ForeignKey(Worker, null=True, blank=True)
 
     def __str__(self):
