@@ -1,0 +1,54 @@
+{% extends 'reports.html' %}
+{% load object_filter %}
+{% load humanize %}
+{% load bootstrap %}
+{% block body %}
+    <div class="panel-body">
+        <div class="panel panel-default scroll" style="max-width: 500px">
+            {% for each in jobs %}
+                <div class="panel" style="margin: 10px;">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Заявка:({{ each.request_id }}) </th>
+                                <th>{{ each.request_work }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Адрес:</strong></td>
+                                <td>{{ each.request_address }}</td>
+                            </tr>
+                            {% if each.subs_telephone %}
+                            <tr>
+                                <td><strong>Телефон:</strong></td>
+                                <td><a href="tel:{{ each.subs_telephone }}">{{ each.subs_telephone }}</a></td>
+                            </tr>
+                            {% endif %}
+                            {% if each.subs_add_info %}
+                            <tr>
+                                <td><strong>Доп. инф.:</strong></td>
+                                <td>{{ each.subs_add_info }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td><strong>Дата:</strong></td>
+                                <td>{{ each.ops_date|date:'Y-m-d H:i' }}</td>
+                            </tr>
+                            {% if each.request_comment %}
+                            <tr>
+                                <td><strong>Комментарий:</strong></td>
+                                <td>{{ each.request_comment }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td><strong>Действие:</strong></td>
+                                <td><button class="btn btn-sm btn-success" style="width: 98%">Принять</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

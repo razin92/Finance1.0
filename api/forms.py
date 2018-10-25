@@ -16,13 +16,27 @@ class StatusChangingForm(Form):
                                          for x in Worker.objects.filter(one_c_worker_name__isnull=False))
         self.fields['master'].initial = None
 
-    target = ChoiceField(choices=targets, label='Цель запроса')
-    request = ModelChoiceField(queryset=SubscriberRequest.objects.all(), label='Заявка ID-Работа-Статус в Django')
-    status = ChoiceField(choices=Lib().statuses(), label='Статус на изменение')
-    comment = CharField(max_length=255, required=False, label='Комментарий', widget=Textarea(
-        attrs={'rows': '4', 'maxlength': '255'}
-    ))
-    master = ChoiceField(label='Мастер из базы Django', choices=(
-        (x.one_c_worker_name, x) for x in Worker.objects.filter(one_c_worker_name__isnull=False)),
+    target = ChoiceField(
+        choices=targets,
+        label='Цель запроса'
+    )
+    request = ModelChoiceField(
+        queryset=SubscriberRequest.objects.all(),
+        label='Заявка ID-Работа-Статус в Django'
+    )
+    status = ChoiceField(
+        choices=Lib().statuses(),
+        label='Статус на изменение'
+    )
+    comment = CharField(
+        max_length=255,
+        required=False,
+        label='Комментарий',
+        widget=Textarea(attrs={'rows': '4', 'maxlength': '255'})
+    )
+    master = ChoiceField(
+        label='Мастер из базы Django',
+        choices=((x.one_c_worker_name, x) for x in
+                 Worker.objects.filter(one_c_worker_name__isnull=False)),
         required=False
     )

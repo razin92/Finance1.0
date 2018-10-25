@@ -40,7 +40,9 @@ class RequestReceiver(View):
                 ops_date=datetime.datetime.strptime(body['ops_date'], '%d.%m.%Y %H:%M:%S'),
                 request_work=body['rqsted_work'],
                 request_address=body['rqst_address'],
-                request_comment=body['rqst_comment']
+                request_comment=body['rqst_comment'],
+                subs_telephone=body['subs_telephone'],
+                subs_add_info=body['subs_add_info']
             )
             logging.debug('%s %s' % (new_request, 'created'))
             return {'result': 'ok'}
@@ -100,7 +102,7 @@ class StatusChangeTest(View):
             r = requests.post(
                 url, json=JSON, auth=(login, password)
             )
-            result = {'status': r.status_code, 'json': JSON}
+            result = {'status': r.status_code, 'json': JSON, 'detail': r.content.decode('utf8', 'ignore')}
             if result['status'] == 200:
                 try:
                     result['status'] = r.json()
@@ -108,3 +110,15 @@ class StatusChangeTest(View):
                     pass
 
         return render(request, self.template, context={'form': form, 'result': result})
+
+
+class NewJobsList(View):
+
+    def get(self, request):
+        template = '1C/1c_jobs.html'
+        jobs = SubscriberRequest.objects.filter(request_status='1').order_by('request_address')
+        context = {
+            'jobs': jobs
+        }
+        return render(request, template, context)
+
