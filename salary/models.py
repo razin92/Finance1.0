@@ -3,10 +3,12 @@ from django.utils import timezone
 from lib.models import Person, Category, Pouch
 from django.contrib.auth.models import User
 from calc.models import Transaction, Category
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from .auth import AuthData
 import datetime
+import logging
 
+logging = logging.getLogger(__name__)
 
 # Должность
 class WorkCalc(models.Model):
@@ -355,5 +357,9 @@ class WorkReport(models.Model):
             if work:
                 return False
         except ObjectDoesNotExist:
+            logging.debug('similar work %s not found, passed' % self.id)
+            return True
+        except MultipleObjectsReturned:
+            logging.debug('similar work %s gave multiple matches' % self.id)
             return True
 
