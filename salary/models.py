@@ -361,5 +361,5 @@ class WorkReport(models.Model):
             return True
         except MultipleObjectsReturned:
             logging.debug('similar work %s gave multiple matches' % self.id)
-            return True
+            return False
 
