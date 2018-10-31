@@ -68,7 +68,10 @@ class StatusChanger(View):
             request.request_status = data['rqst_status']
             request.request_comment = request.request_comment + ' %s' % data['rqst_comment']
             if data['master_ref_key']:
-                request.worker = Worker.objects.get(one_c_worker_name=data['master_ref_key'])
+                try:
+                    request.worker = Worker.objects.get(one_c_worker_name=data['master_ref_key'])
+                except DatabaseError:
+                    pass
             request.save()
             return {'result': 'ok'}
         except DatabaseError:
