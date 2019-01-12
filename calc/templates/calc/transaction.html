@@ -57,14 +57,14 @@ function ShowHideContent(spoiler)
     </div>
   </div>
 </div>
-    <h4>Внимание! Здесь отображаются все транзакции за месяц: <b>{{ month_name }}</b> </h4>
+    <h4>Внимание! Здесь отображаются все транзакции за месяц: <b>{{ month_name }}-{{ year }}</b> </h4>
 <form action="{% url 'calc:transaction' %}" method="post" class="form-group">
     {% csrf_token %}
     <div style="width: 190px; float: left">
-{{ form.select_month|bootstrap }}
+{{ form.select_month }}{{ form.select_year }}<input type="submit" value="Показать" class="btn-sm btn-default">
         </div>
     <div style="margin-top: 30px; margin-left: 4px; float: left">
-    <input type="submit" value="Показать" class="btn-sm btn-default">
+
     </div>
 </form>
 <div class="panel panel-default" style="margin-top: 90px; overflow: auto;">

@@ -28,9 +28,10 @@ def TransactionView(request):
 
     if 'select_month' in rqst and rqst['select_month']:
         month = rqst['select_month']
+        year = rqst['select_year']
     else:
         month = str(timezone.now().month)
-    year = datetime.datetime.now().year
+        year = datetime.datetime.now().year
     staff = get_object_or_404(Staff,
         name__id=user.pk)
     permitted_pouches = [x for x in staff.pouches.all()]
@@ -49,7 +50,8 @@ def TransactionView(request):
         'pouch': pouch,
         'user': user,
         'form': form,
-        'month_name': month_name
+        'month_name': month_name,
+        'year': year
     }
     return render(request, template, context)
 
