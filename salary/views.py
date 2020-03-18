@@ -598,7 +598,9 @@ class ReportsList(View):
 
     def salary_aggregator(self, user):
         reports_now_a_month = WorkReport.objects.filter(
-            working_date__month=datetime.datetime.now().month)
+            working_date__month=datetime.datetime.now().month,
+            working_date__year=datetime.datetime.now().year
+        )
         result = reports_now_a_month.filter(
             user=user).aggregate(Sum('cost'))['cost__sum']
         return result or 0
