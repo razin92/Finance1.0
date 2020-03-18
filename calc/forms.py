@@ -92,10 +92,11 @@ class MonthForm(forms.Form):
     year = (
         ('2017', '2017'),
         ('2018', '2018'),
-        ('2019', '2019')
+        ('2019', '2019'),
+	('2020', '2020')
     )
     select_month = forms.ChoiceField(choices=month, label="Выбрать другой месяц")
-    select_year = forms.ChoiceField(choices=year, initial='2019')
+    select_year = forms.ChoiceField(choices=year, initial='2020')
 
 
 class WorkReportTransactionForm(forms.Form):
