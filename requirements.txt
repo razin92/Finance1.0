@@ -29,5 +29,5 @@ South==1.0.2
 telepot==12.3
 times==0.7
 tzlocal==1.4
-urllib3==1.23
+urllib3==1.26.5
 yarl==0.12.0
